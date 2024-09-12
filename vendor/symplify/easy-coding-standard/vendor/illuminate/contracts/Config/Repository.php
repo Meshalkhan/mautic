@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Config;
+namespace ECSPrefix202408\Illuminate\Contracts\Config;
 
 interface Repository
 {

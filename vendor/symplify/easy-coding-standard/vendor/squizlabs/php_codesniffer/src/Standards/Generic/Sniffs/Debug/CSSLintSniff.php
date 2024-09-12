@@ -5,7 +5,9 @@
  *
  * @author    Roman Levishchenko <index.0h@gmail.com>
  * @copyright 2013-2014 Roman Levishchenko
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ *
+ * @deprecated 3.9.0
  */
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\Debug;
 
@@ -24,7 +26,7 @@ class CSSLintSniff implements Sniff
     /**
      * Returns the token types that this sniff is interested in.
      *
-     * @return int[]
+     * @return array<int|string>
      */
     public function register()
     {
@@ -38,19 +40,19 @@ class CSSLintSniff implements Sniff
      * @param int                         $stackPtr  The position in the stack where
      *                                               the token was found.
      *
-     * @return void
+     * @return int
      */
     public function process(File $phpcsFile, $stackPtr)
     {
         $csslintPath = Config::getExecutablePath('csslint');
         if ($csslintPath === null) {
-            return;
+            return $phpcsFile->numTokens;
         }
         $fileName = $phpcsFile->getFilename();
         $cmd = Common::escapeshellcmd($csslintPath) . ' ' . \escapeshellarg($fileName) . ' 2>&1';
         \exec($cmd, $output, $retval);
         if (\is_array($output) === \false) {
-            return;
+            return $phpcsFile->numTokens;
         }
         $count = \count($output);
         for ($i = 0; $i < $count; $i++) {
@@ -70,7 +72,7 @@ class CSSLintSniff implements Sniff
         }
         //end for
         // Ignore the rest of the file.
-        return $phpcsFile->numTokens + 1;
+        return $phpcsFile->numTokens;
     }
     //end process()
 }

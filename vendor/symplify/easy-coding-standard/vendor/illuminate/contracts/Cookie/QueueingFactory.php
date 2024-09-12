@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Cookie;
+namespace ECSPrefix202408\Illuminate\Contracts\Cookie;
 
 interface QueueingFactory extends Factory
 {

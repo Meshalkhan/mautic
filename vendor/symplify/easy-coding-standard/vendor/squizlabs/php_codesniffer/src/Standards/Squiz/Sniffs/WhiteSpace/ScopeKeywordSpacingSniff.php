@@ -5,7 +5,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\WhiteSpace;
 
@@ -17,7 +17,7 @@ class ScopeKeywordSpacingSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -95,10 +95,15 @@ class ScopeKeywordSpacingSniff implements Sniff
         if ($tokens[$stackPtr + 1]['code'] !== \T_WHITESPACE) {
             $spacing = 0;
         } else {
-            if ($tokens[$stackPtr + 2]['line'] !== $tokens[$stackPtr]['line']) {
-                $spacing = 'newline';
+            if (isset($tokens[$stackPtr + 2]) === \false) {
+                // Parse error/live coding. Bow out.
+                return;
             } else {
-                $spacing = $tokens[$stackPtr + 1]['length'];
+                if ($tokens[$stackPtr + 2]['line'] !== $tokens[$stackPtr]['line']) {
+                    $spacing = 'newline';
+                } else {
+                    $spacing = $tokens[$stackPtr + 1]['length'];
+                }
             }
         }
         if ($spacing !== 1) {

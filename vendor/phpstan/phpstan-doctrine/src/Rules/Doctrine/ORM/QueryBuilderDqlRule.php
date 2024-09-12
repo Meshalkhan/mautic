@@ -9,11 +9,13 @@ use PhpParser\Node;
 use PhpParser\Node\Expr\MethodCall;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
+use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\Doctrine\DoctrineTypeUtils;
 use PHPStan\Type\Doctrine\ObjectMetadataResolver;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\TypeUtils;
 use Throwable;
+use function array_values;
 use function count;
 use function sprintf;
 use function strpos;
@@ -62,7 +64,9 @@ class QueryBuilderDqlRule implements Rule
 				&& (new ObjectType('Doctrine\ORM\QueryBuilder'))->isSuperTypeOf($calledOnType)->yes()
 			) {
 				return [
-					'Could not analyse QueryBuilder with unknown beginning.',
+					RuleErrorBuilder::message('Could not analyse QueryBuilder with unknown beginning.')
+						->identifier('doctrine.queryBuilderDynamic')
+						->build(),
 				];
 			}
 			return [];
@@ -71,14 +75,21 @@ class QueryBuilderDqlRule implements Rule
 		try {
 			$dqlType = $scope->getType(new MethodCall($node, new Node\Identifier('getDQL'), []));
 		} catch (Throwable $e) {
-			return [sprintf('Internal error: %s', $e->getMessage())];
+			return [
+				RuleErrorBuilder::message(sprintf('Internal error: %s', $e->getMessage()))
+					->nonIgnorable()
+					->identifier('doctrine.internalError')
+					->build(),
+			];
 		}
 
 		$dqls = TypeUtils::getConstantStrings($dqlType);
 		if (count($dqls) === 0) {
 			if ($this->reportDynamicQueryBuilders) {
 				return [
-					'Could not analyse QueryBuilder with dynamic arguments.',
+					RuleErrorBuilder::message('Could not analyse QueryBuilder with dynamic arguments.')
+						->identifier('doctrine.queryBuilderDynamicArgument')
+						->build(),
 				];
 			}
 			return [];
@@ -107,13 +118,21 @@ class QueryBuilderDqlRule implements Rule
 					$message .= sprintf("\nDQL: %s", $dql->getValue());
 				}
 
-				$messages[] = $message;
+				$builder = RuleErrorBuilder::message($message)
+					->identifier('doctrine.dql');
+
+				if (count($dqls) > 1) {
+					$builder->addTip('Detected from DQL branch: ' . $dql->getValue());
+				}
+
+				// Use message as index to prevent duplicate
+				$messages[$message] = $builder->build();
 			} catch (AssertionError $e) {
 				continue;
 			}
 		}
 
-		return $messages;
+		return array_values($messages);
 	}
 
 }

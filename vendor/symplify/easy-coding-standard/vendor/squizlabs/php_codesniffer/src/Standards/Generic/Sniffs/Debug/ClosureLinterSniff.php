@@ -5,7 +5,9 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ *
+ * @deprecated 3.9.0
  */
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\Debug;
 
@@ -20,13 +22,13 @@ class ClosureLinterSniff implements Sniff
      *
      * All other error codes will show warnings.
      *
-     * @var integer
+     * @var array
      */
     public $errorCodes = [];
     /**
      * A list of error codes to ignore.
      *
-     * @var integer
+     * @var array
      */
     public $ignoreCodes = [];
     /**
@@ -38,7 +40,7 @@ class ClosureLinterSniff implements Sniff
     /**
      * Returns the token types that this sniff is interested in.
      *
-     * @return int[]
+     * @return array<int|string>
      */
     public function register()
     {
@@ -52,21 +54,21 @@ class ClosureLinterSniff implements Sniff
      * @param int                         $stackPtr  The position in the stack where
      *                                               the token was found.
      *
-     * @return void
-     * @throws \PHP_CodeSniffer\Exceptions\RuntimeException If jslint.js could not be run
+     * @return int
+     * @throws \PHP_CodeSniffer\Exceptions\RuntimeException If jslint.js could not be run.
      */
     public function process(File $phpcsFile, $stackPtr)
     {
         $lintPath = Config::getExecutablePath('gjslint');
         if ($lintPath === null) {
-            return;
+            return $phpcsFile->numTokens;
         }
         $fileName = $phpcsFile->getFilename();
         $lintPath = Common::escapeshellcmd($lintPath);
         $cmd = $lintPath . ' --nosummary --notime --unix_mode ' . \escapeshellarg($fileName);
         \exec($cmd, $output, $retval);
         if (\is_array($output) === \false) {
-            return;
+            return $phpcsFile->numTokens;
         }
         foreach ($output as $finding) {
             $matches = [];
@@ -91,7 +93,7 @@ class ClosureLinterSniff implements Sniff
         }
         //end foreach
         // Ignore the rest of the file.
-        return $phpcsFile->numTokens + 1;
+        return $phpcsFile->numTokens;
     }
     //end process()
 }

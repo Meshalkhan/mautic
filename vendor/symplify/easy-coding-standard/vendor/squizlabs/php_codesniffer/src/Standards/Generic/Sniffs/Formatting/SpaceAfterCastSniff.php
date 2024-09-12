@@ -5,7 +5,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\Formatting;
 
@@ -29,7 +29,7 @@ class SpaceAfterCastSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -49,6 +49,10 @@ class SpaceAfterCastSniff implements Sniff
     {
         $tokens = $phpcsFile->getTokens();
         $this->spacing = (int) $this->spacing;
+        $pluralizeSpace = 's';
+        if ($this->spacing === 1) {
+            $pluralizeSpace = '';
+        }
         if ($tokens[$stackPtr]['code'] === \T_BINARY_CAST && $tokens[$stackPtr]['content'] === 'b') {
             // You can't replace a space after this type of binary casting.
             return;
@@ -67,8 +71,8 @@ class SpaceAfterCastSniff implements Sniff
         }
         $nextNonWhitespace = $phpcsFile->findNext(\T_WHITESPACE, $stackPtr + 1, null, \true);
         if ($nextNonEmpty !== $nextNonWhitespace) {
-            $error = 'Expected %s space(s) after cast statement; comment found';
-            $data = [$this->spacing];
+            $error = 'Expected %s space%s after cast statement; comment found';
+            $data = [$this->spacing, $pluralizeSpace];
             $phpcsFile->addError($error, $stackPtr, 'CommentFound', $data);
             if ($tokens[$stackPtr + 1]['code'] === \T_WHITESPACE) {
                 $phpcsFile->recordMetric($stackPtr, 'Spacing after cast statement', $tokens[$stackPtr + 1]['length']);
@@ -89,8 +93,8 @@ class SpaceAfterCastSniff implements Sniff
         if ($found === $this->spacing) {
             return;
         }
-        $error = 'Expected %s space(s) after cast statement; %s found';
-        $data = [$this->spacing, $found];
+        $error = 'Expected %s space%s after cast statement; %s found';
+        $data = [$this->spacing, $pluralizeSpace, $found];
         $errorCode = 'TooMuchSpace';
         if ($this->spacing !== 0) {
             if ($found === 0) {

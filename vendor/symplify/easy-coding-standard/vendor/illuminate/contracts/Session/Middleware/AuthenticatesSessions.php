@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Session\Middleware;
+namespace ECSPrefix202408\Illuminate\Contracts\Session\Middleware;
 
 interface AuthenticatesSessions
 {

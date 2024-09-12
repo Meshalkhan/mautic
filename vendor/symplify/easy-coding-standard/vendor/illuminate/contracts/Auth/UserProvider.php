@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Auth;
+namespace ECSPrefix202408\Illuminate\Contracts\Auth;
 
 interface UserProvider
 {

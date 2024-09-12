@@ -14,9 +14,9 @@ namespace PhpCsFixer\Linter;
 
 use PhpCsFixer\FileReader;
 use PhpCsFixer\FileRemoval;
-use ECSPrefix202312\Symfony\Component\Filesystem\Exception\IOException;
-use ECSPrefix202312\Symfony\Component\Process\PhpExecutableFinder;
-use ECSPrefix202312\Symfony\Component\Process\Process;
+use ECSPrefix202408\Symfony\Component\Filesystem\Exception\IOException;
+use ECSPrefix202408\Symfony\Component\Process\PhpExecutableFinder;
+use ECSPrefix202408\Symfony\Component\Process\Process;
 /**
  * Handle PHP code linting using separated process of `php -l _file_`.
  *
@@ -77,7 +77,7 @@ final class ProcessLinter implements \PhpCsFixer\Linter\LinterInterface
      */
     public function __sleep() : array
     {
-        throw new \BadMethodCallException('Cannot serialize ' . __CLASS__);
+        throw new \BadMethodCallException('Cannot serialize ' . self::class);
     }
     /**
      * Disable the deserialization of the class to prevent attacker executing
@@ -87,7 +87,7 @@ final class ProcessLinter implements \PhpCsFixer\Linter\LinterInterface
      */
     public function __wakeup() : void
     {
-        throw new \BadMethodCallException('Cannot unserialize ' . __CLASS__);
+        throw new \BadMethodCallException('Cannot unserialize ' . self::class);
     }
     public function isAsync() : bool
     {

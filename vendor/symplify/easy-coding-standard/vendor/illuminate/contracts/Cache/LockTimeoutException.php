@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Cache;
+namespace ECSPrefix202408\Illuminate\Contracts\Cache;
 
 use Exception;
 class LockTimeoutException extends Exception

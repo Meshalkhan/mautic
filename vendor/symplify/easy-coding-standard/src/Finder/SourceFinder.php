@@ -3,10 +3,10 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Finder;
 
-use ECSPrefix202312\Symfony\Component\Finder\Finder;
+use ECSPrefix202408\Symfony\Component\Finder\Finder;
 use Symplify\EasyCodingStandard\DependencyInjection\SimpleParameterProvider;
 use Symplify\EasyCodingStandard\ValueObject\Option;
-use ECSPrefix202312\Webmozart\Assert\Assert;
+use ECSPrefix202408\Webmozart\Assert\Assert;
 /**
  * @see \Symplify\EasyCodingStandard\Tests\Finder\SourceFinderTest
  */
@@ -44,7 +44,7 @@ final class SourceFinder
     private function processDirectory(string $directory) : array
     {
         $normalizedFileExtensions = $this->normalizeFileExtensions($this->fileExtensions);
-        $finder = Finder::create()->files()->name($normalizedFileExtensions)->in($directory)->exclude('vendor')->size('> 0')->sortByName();
+        $finder = Finder::create()->files()->ignoreDotFiles(\false)->name($normalizedFileExtensions)->in($directory)->exclude('vendor')->size('> 0')->sortByName();
         $filePaths = \array_keys(\iterator_to_array($finder));
         Assert::allString($filePaths);
         return $filePaths;
@@ -58,6 +58,7 @@ final class SourceFinder
         $normalizedFileExtensions = [];
         foreach ($fileExtensions as $fileExtension) {
             $normalizedFileExtensions[] = '*.' . $fileExtension;
+            $normalizedFileExtensions[] = '.*.' . $fileExtension;
         }
         return $normalizedFileExtensions;
     }

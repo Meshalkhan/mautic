@@ -5,12 +5,17 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Squiz\Tests\Commenting;
 
 use PHP_CodeSniffer\Tests\Standards\AbstractSniffUnitTest;
-class DocCommentAlignmentUnitTest extends AbstractSniffUnitTest
+/**
+ * Unit test class for the DocCommentAlignment sniff.
+ *
+ * @covers \PHP_CodeSniffer\Standards\Squiz\Sniffs\Commenting\DocCommentAlignmentSniff
+ */
+final class DocCommentAlignmentUnitTest extends AbstractSniffUnitTest
 {
     /**
      * Returns the lines where errors should occur.
@@ -22,7 +27,7 @@ class DocCommentAlignmentUnitTest extends AbstractSniffUnitTest
      *
      * @return array<int, int>
      */
-    public function getErrorList($testFile = 'DocCommentAlignmentUnitTest.inc')
+    public function getErrorList($testFile = '')
     {
         $errors = [3 => 1, 11 => 1, 17 => 1, 18 => 1, 19 => 1, 23 => 2, 24 => 1, 25 => 2, 26 => 1, 32 => 1, 33 => 1, 38 => 1, 39 => 1];
         if ($testFile === 'DocCommentAlignmentUnitTest.inc') {

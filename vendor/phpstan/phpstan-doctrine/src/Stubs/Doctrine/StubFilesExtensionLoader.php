@@ -2,10 +2,14 @@
 
 namespace PHPStan\Stubs\Doctrine;
 
+use Composer\InstalledVersions;
+use OutOfBoundsException;
 use PHPStan\BetterReflection\Reflector\Exception\IdentifierNotFound;
 use PHPStan\BetterReflection\Reflector\Reflector;
 use PHPStan\PhpDoc\StubFilesExtension;
+use function class_exists;
 use function dirname;
+use function strpos;
 
 class StubFilesExtensionLoader implements StubFilesExtension
 {
@@ -13,31 +17,25 @@ class StubFilesExtensionLoader implements StubFilesExtension
 	/** @var Reflector */
 	private $reflector;
 
-	/** @var bool */
-	private $bleedingEdge;
-
 	public function __construct(
-		Reflector $reflector,
-		bool $bleedingEdge
+		Reflector $reflector
 	)
 	{
 		$this->reflector = $reflector;
-		$this->bleedingEdge = $bleedingEdge;
 	}
 
 	public function getFiles(): array
 	{
 		$stubsDir = dirname(dirname(dirname(__DIR__))) . '/stubs';
-		$path = $stubsDir;
+		$files = [];
 
-		if ($this->bleedingEdge === true) {
-			$path .= '/bleedingEdge';
+		if ($this->isInstalledVersion('doctrine/dbal', 4)) {
+			$files[] = $stubsDir . '/DBAL/Connection4.stub';
+			$files[] = $stubsDir . '/DBAL/ArrayParameterType.stub';
+			$files[] = $stubsDir . '/DBAL/ParameterType.stub';
+		} else {
+			$files[] = $stubsDir . '/DBAL/Connection.stub';
 		}
-
-		$files = [
-			$path . '/ORM/QueryBuilder.stub',
-			$path . '/EntityRepository.stub',
-		];
 
 		$hasLazyServiceEntityRepositoryAsParent = false;
 
@@ -58,7 +56,35 @@ class StubFilesExtensionLoader implements StubFilesExtension
 			$files[] = $stubsDir . '/ServiceEntityRepository.stub';
 		}
 
+		try {
+			$collectionVersion = class_exists(InstalledVersions::class)
+				? InstalledVersions::getVersion('doctrine/collections')
+				: null;
+		} catch (OutOfBoundsException $e) {
+			$collectionVersion = null;
+		}
+		if ($collectionVersion !== null && strpos($collectionVersion, '1.') === 0) {
+			$files[] = $stubsDir . '/Collections/Collection1.stub';
+		} else {
+			$files[] = $stubsDir . '/Collections/Collection.stub';
+		}
+
 		return $files;
+	}
+
+	private function isInstalledVersion(string $package, int $majorVersion): bool
+	{
+		if (!class_exists(InstalledVersions::class)) {
+			return false;
+		}
+
+		try {
+			$installedVersion = InstalledVersions::getVersion($package);
+		} catch (OutOfBoundsException $e) {
+			return false;
+		}
+
+		return $installedVersion !== null && strpos($installedVersion, $majorVersion . '.') === 0;
 	}
 
 }

@@ -5,7 +5,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\Formatting;
 
@@ -35,7 +35,7 @@ class SpaceAfterNotSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -55,6 +55,10 @@ class SpaceAfterNotSniff implements Sniff
     {
         $tokens = $phpcsFile->getTokens();
         $this->spacing = (int) $this->spacing;
+        $pluralizeSpace = 's';
+        if ($this->spacing === 1) {
+            $pluralizeSpace = '';
+        }
         $nextNonEmpty = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, \true);
         if ($nextNonEmpty === \false) {
             return;
@@ -67,8 +71,8 @@ class SpaceAfterNotSniff implements Sniff
         }
         $nextNonWhitespace = $phpcsFile->findNext(\T_WHITESPACE, $stackPtr + 1, null, \true);
         if ($nextNonEmpty !== $nextNonWhitespace) {
-            $error = 'Expected %s space(s) after NOT operator; comment found';
-            $data = [$this->spacing];
+            $error = 'Expected %s space%s after NOT operator; comment found';
+            $data = [$this->spacing, $pluralizeSpace];
             $phpcsFile->addError($error, $stackPtr, 'CommentFound', $data);
             return;
         }
@@ -83,8 +87,8 @@ class SpaceAfterNotSniff implements Sniff
         if ($found === $this->spacing) {
             return;
         }
-        $error = 'Expected %s space(s) after NOT operator; %s found';
-        $data = [$this->spacing, $found];
+        $error = 'Expected %s space%s after NOT operator; %s found';
+        $data = [$this->spacing, $pluralizeSpace, $found];
         $fix = $phpcsFile->addFixableError($error, $stackPtr, 'Incorrect', $data);
         if ($fix === \true) {
             $padding = \str_repeat(' ', $this->spacing);

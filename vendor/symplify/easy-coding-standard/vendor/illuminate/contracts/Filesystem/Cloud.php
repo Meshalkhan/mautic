@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Filesystem;
+namespace ECSPrefix202408\Illuminate\Contracts\Filesystem;
 
 interface Cloud extends Filesystem
 {

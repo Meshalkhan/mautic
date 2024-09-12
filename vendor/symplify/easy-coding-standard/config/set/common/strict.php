@@ -1,13 +1,10 @@
 <?php
 
 declare (strict_types=1);
-namespace ECSPrefix202312;
+namespace ECSPrefix202408;
 
-use PhpCsFixer\Fixer\LanguageConstruct\IsNullFixer;
 use PhpCsFixer\Fixer\Strict\DeclareStrictTypesFixer;
 use PhpCsFixer\Fixer\Strict\StrictComparisonFixer;
 use PhpCsFixer\Fixer\Strict\StrictParamFixer;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
-return static function (ECSConfig $ecsConfig) : void {
-    $ecsConfig->rules([StrictComparisonFixer::class, IsNullFixer::class, StrictParamFixer::class, DeclareStrictTypesFixer::class]);
-};
+return ECSConfig::configure()->withRules([StrictComparisonFixer::class, StrictParamFixer::class, DeclareStrictTypesFixer::class]);

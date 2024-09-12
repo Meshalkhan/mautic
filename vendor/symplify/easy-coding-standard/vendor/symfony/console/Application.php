@@ -8,51 +8,51 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202312\Symfony\Component\Console;
+namespace ECSPrefix202408\Symfony\Component\Console;
 
-use ECSPrefix202312\Symfony\Component\Console\Command\Command;
-use ECSPrefix202312\Symfony\Component\Console\Command\CompleteCommand;
-use ECSPrefix202312\Symfony\Component\Console\Command\DumpCompletionCommand;
-use ECSPrefix202312\Symfony\Component\Console\Command\HelpCommand;
-use ECSPrefix202312\Symfony\Component\Console\Command\LazyCommand;
-use ECSPrefix202312\Symfony\Component\Console\Command\ListCommand;
-use ECSPrefix202312\Symfony\Component\Console\Command\SignalableCommandInterface;
-use ECSPrefix202312\Symfony\Component\Console\CommandLoader\CommandLoaderInterface;
-use ECSPrefix202312\Symfony\Component\Console\Completion\CompletionInput;
-use ECSPrefix202312\Symfony\Component\Console\Completion\CompletionSuggestions;
-use ECSPrefix202312\Symfony\Component\Console\Completion\Suggestion;
-use ECSPrefix202312\Symfony\Component\Console\Event\ConsoleCommandEvent;
-use ECSPrefix202312\Symfony\Component\Console\Event\ConsoleErrorEvent;
-use ECSPrefix202312\Symfony\Component\Console\Event\ConsoleSignalEvent;
-use ECSPrefix202312\Symfony\Component\Console\Event\ConsoleTerminateEvent;
-use ECSPrefix202312\Symfony\Component\Console\Exception\CommandNotFoundException;
-use ECSPrefix202312\Symfony\Component\Console\Exception\ExceptionInterface;
-use ECSPrefix202312\Symfony\Component\Console\Exception\LogicException;
-use ECSPrefix202312\Symfony\Component\Console\Exception\NamespaceNotFoundException;
-use ECSPrefix202312\Symfony\Component\Console\Exception\RuntimeException;
-use ECSPrefix202312\Symfony\Component\Console\Formatter\OutputFormatter;
-use ECSPrefix202312\Symfony\Component\Console\Helper\DebugFormatterHelper;
-use ECSPrefix202312\Symfony\Component\Console\Helper\DescriptorHelper;
-use ECSPrefix202312\Symfony\Component\Console\Helper\FormatterHelper;
-use ECSPrefix202312\Symfony\Component\Console\Helper\Helper;
-use ECSPrefix202312\Symfony\Component\Console\Helper\HelperSet;
-use ECSPrefix202312\Symfony\Component\Console\Helper\ProcessHelper;
-use ECSPrefix202312\Symfony\Component\Console\Helper\QuestionHelper;
-use ECSPrefix202312\Symfony\Component\Console\Input\ArgvInput;
-use ECSPrefix202312\Symfony\Component\Console\Input\ArrayInput;
-use ECSPrefix202312\Symfony\Component\Console\Input\InputArgument;
-use ECSPrefix202312\Symfony\Component\Console\Input\InputAwareInterface;
-use ECSPrefix202312\Symfony\Component\Console\Input\InputDefinition;
-use ECSPrefix202312\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202312\Symfony\Component\Console\Input\InputOption;
-use ECSPrefix202312\Symfony\Component\Console\Output\ConsoleOutput;
-use ECSPrefix202312\Symfony\Component\Console\Output\ConsoleOutputInterface;
-use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
-use ECSPrefix202312\Symfony\Component\Console\SignalRegistry\SignalRegistry;
-use ECSPrefix202312\Symfony\Component\Console\Style\SymfonyStyle;
-use ECSPrefix202312\Symfony\Component\ErrorHandler\ErrorHandler;
-use ECSPrefix202312\Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use ECSPrefix202312\Symfony\Contracts\Service\ResetInterface;
+use ECSPrefix202408\Symfony\Component\Console\Command\Command;
+use ECSPrefix202408\Symfony\Component\Console\Command\CompleteCommand;
+use ECSPrefix202408\Symfony\Component\Console\Command\DumpCompletionCommand;
+use ECSPrefix202408\Symfony\Component\Console\Command\HelpCommand;
+use ECSPrefix202408\Symfony\Component\Console\Command\LazyCommand;
+use ECSPrefix202408\Symfony\Component\Console\Command\ListCommand;
+use ECSPrefix202408\Symfony\Component\Console\Command\SignalableCommandInterface;
+use ECSPrefix202408\Symfony\Component\Console\CommandLoader\CommandLoaderInterface;
+use ECSPrefix202408\Symfony\Component\Console\Completion\CompletionInput;
+use ECSPrefix202408\Symfony\Component\Console\Completion\CompletionSuggestions;
+use ECSPrefix202408\Symfony\Component\Console\Completion\Suggestion;
+use ECSPrefix202408\Symfony\Component\Console\Event\ConsoleCommandEvent;
+use ECSPrefix202408\Symfony\Component\Console\Event\ConsoleErrorEvent;
+use ECSPrefix202408\Symfony\Component\Console\Event\ConsoleSignalEvent;
+use ECSPrefix202408\Symfony\Component\Console\Event\ConsoleTerminateEvent;
+use ECSPrefix202408\Symfony\Component\Console\Exception\CommandNotFoundException;
+use ECSPrefix202408\Symfony\Component\Console\Exception\ExceptionInterface;
+use ECSPrefix202408\Symfony\Component\Console\Exception\LogicException;
+use ECSPrefix202408\Symfony\Component\Console\Exception\NamespaceNotFoundException;
+use ECSPrefix202408\Symfony\Component\Console\Exception\RuntimeException;
+use ECSPrefix202408\Symfony\Component\Console\Formatter\OutputFormatter;
+use ECSPrefix202408\Symfony\Component\Console\Helper\DebugFormatterHelper;
+use ECSPrefix202408\Symfony\Component\Console\Helper\DescriptorHelper;
+use ECSPrefix202408\Symfony\Component\Console\Helper\FormatterHelper;
+use ECSPrefix202408\Symfony\Component\Console\Helper\Helper;
+use ECSPrefix202408\Symfony\Component\Console\Helper\HelperSet;
+use ECSPrefix202408\Symfony\Component\Console\Helper\ProcessHelper;
+use ECSPrefix202408\Symfony\Component\Console\Helper\QuestionHelper;
+use ECSPrefix202408\Symfony\Component\Console\Input\ArgvInput;
+use ECSPrefix202408\Symfony\Component\Console\Input\ArrayInput;
+use ECSPrefix202408\Symfony\Component\Console\Input\InputArgument;
+use ECSPrefix202408\Symfony\Component\Console\Input\InputAwareInterface;
+use ECSPrefix202408\Symfony\Component\Console\Input\InputDefinition;
+use ECSPrefix202408\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202408\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202408\Symfony\Component\Console\Output\ConsoleOutput;
+use ECSPrefix202408\Symfony\Component\Console\Output\ConsoleOutputInterface;
+use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202408\Symfony\Component\Console\SignalRegistry\SignalRegistry;
+use ECSPrefix202408\Symfony\Component\Console\Style\SymfonyStyle;
+use ECSPrefix202408\Symfony\Component\ErrorHandler\ErrorHandler;
+use ECSPrefix202408\Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use ECSPrefix202408\Symfony\Contracts\Service\ResetInterface;
 /**
  * An Application is the container for a collection of commands.
  *
@@ -188,7 +188,7 @@ class Application implements ResetInterface
      *
      * @throws \Exception When running fails. Bypass this when {@link setCatchExceptions()}.
      */
-    public function run(InputInterface $input = null, OutputInterface $output = null) : int
+    public function run(?InputInterface $input = null, ?OutputInterface $output = null) : int
     {
         if (\function_exists('putenv')) {
             @\putenv('LINES=' . $this->terminal->getHeight());
@@ -720,7 +720,7 @@ class Application implements ResetInterface
      *
      * @return Command[]
      */
-    public function all(string $namespace = null)
+    public function all(?string $namespace = null)
     {
         $this->init();
         if (null === $namespace) {
@@ -928,7 +928,7 @@ class Application implements ResetInterface
                             $exitCode = $command->handleSignal($signal, $exitCode);
                             // BC layer for Symfony <= 5
                             if (null === $exitCode) {
-                                \ECSPrefix202312\trigger_deprecation('symfony/console', '6.3', 'Not returning an exit code from "%s::handleSignal()" is deprecated, return "false" to keep the command running or "0" to exit successfully.', \get_debug_type($command));
+                                trigger_deprecation('symfony/console', '6.3', 'Not returning an exit code from "%s::handleSignal()" is deprecated, return "false" to keep the command running or "0" to exit successfully.', \get_debug_type($command));
                                 $exitCode = 0;
                             }
                         }
@@ -947,7 +947,7 @@ class Application implements ResetInterface
                     $exitCode = $command->handleSignal($signal);
                     // BC layer for Symfony <= 5
                     if (null === $exitCode) {
-                        \ECSPrefix202312\trigger_deprecation('symfony/console', '6.3', 'Not returning an exit code from "%s::handleSignal()" is deprecated, return "false" to keep the command running or "0" to exit successfully.', \get_debug_type($command));
+                        trigger_deprecation('symfony/console', '6.3', 'Not returning an exit code from "%s::handleSignal()" is deprecated, return "false" to keep the command running or "0" to exit successfully.', \get_debug_type($command));
                         $exitCode = 0;
                     }
                     if (\false !== $exitCode) {
@@ -1032,7 +1032,7 @@ class Application implements ResetInterface
      *
      * This method is not part of public API and should not be used directly.
      */
-    public function extractNamespace(string $name, int $limit = null) : string
+    public function extractNamespace(string $name, ?int $limit = null) : string
     {
         $parts = \explode(':', $name, -1);
         return \implode(':', null === $limit ? $parts : \array_slice($parts, 0, $limit));

@@ -22,7 +22,7 @@
  *
  * @author    Manuel Pichler <mapi@manuel-pichler.de>
  * @copyright 2007-2014 Manuel Pichler. All rights reserved.
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\CodeAnalysis;
 
@@ -34,7 +34,7 @@ class UnconditionalIfStatementSniff implements Sniff
     /**
      * Registers the tokens that this sniff wants to listen for.
      *
-     * @return int[]
+     * @return array<int|string>
      */
     public function register()
     {
@@ -55,7 +55,7 @@ class UnconditionalIfStatementSniff implements Sniff
         $tokens = $phpcsFile->getTokens();
         $token = $tokens[$stackPtr];
         // Skip if statement without body.
-        if (isset($token['parenthesis_opener']) === \false) {
+        if (isset($token['parenthesis_opener'], $token['parenthesis_closer']) === \false) {
             return;
         }
         $next = ++$token['parenthesis_opener'];

@@ -10,10 +10,11 @@ use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 use Symplify\CodingStandard\DocBlock\UselessDocBlockCleaner;
 use Symplify\CodingStandard\Fixer\AbstractSymplifyFixer;
+use Symplify\CodingStandard\Fixer\Naming\ClassNameResolver;
 use Symplify\CodingStandard\TokenRunner\Traverser\TokenReverser;
-use ECSPrefix202312\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
-use ECSPrefix202312\Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
-use ECSPrefix202312\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
+use ECSPrefix202408\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
+use ECSPrefix202408\Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
+use ECSPrefix202408\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
  * @see \Symplify\CodingStandard\Tests\Fixer\Commenting\RemoveUselessDefaultCommentFixer\RemoveUselessDefaultCommentFixerTest
  */
@@ -30,13 +31,19 @@ final class RemoveUselessDefaultCommentFixer extends AbstractSymplifyFixer imple
      */
     private $tokenReverser;
     /**
+     * @readonly
+     * @var \Symplify\CodingStandard\Fixer\Naming\ClassNameResolver
+     */
+    private $classNameResolver;
+    /**
      * @var string
      */
     private const ERROR_MESSAGE = 'Remove useless PHPStorm-generated @todo comments, redundant "Class XY" or "gets service" comments etc.';
-    public function __construct(UselessDocBlockCleaner $uselessDocBlockCleaner, TokenReverser $tokenReverser)
+    public function __construct(UselessDocBlockCleaner $uselessDocBlockCleaner, TokenReverser $tokenReverser, ClassNameResolver $classNameResolver)
     {
         $this->uselessDocBlockCleaner = $uselessDocBlockCleaner;
         $this->tokenReverser = $tokenReverser;
+        $this->classNameResolver = $classNameResolver;
     }
     public function getDefinition() : FixerDefinitionInterface
     {
@@ -49,6 +56,11 @@ final class RemoveUselessDefaultCommentFixer extends AbstractSymplifyFixer imple
     {
         return $tokens->isAnyTokenKindsFound([\T_DOC_COMMENT, \T_COMMENT]);
     }
+    public function getPriority() : int
+    {
+        /** must run before @see \PhpCsFixer\Fixer\Basic\BracesFixer to cleanup spaces */
+        return 40;
+    }
     /**
      * @param Tokens<Token> $tokens
      */
@@ -59,12 +71,16 @@ final class RemoveUselessDefaultCommentFixer extends AbstractSymplifyFixer imple
             if (!$token->isGivenKind([\T_DOC_COMMENT, \T_COMMENT])) {
                 continue;
             }
-            $cleanedDocContent = $this->uselessDocBlockCleaner->clearDocTokenContent($reversedTokens, $index, $token);
-            if ($cleanedDocContent !== '') {
-                continue;
+            $classLikeName = $this->classNameResolver->resolveClassName($fileInfo, $tokens);
+            $originalContent = $token->getContent();
+            $cleanedDocContent = $this->uselessDocBlockCleaner->clearDocTokenContent($token, $classLikeName);
+            if ($cleanedDocContent === '') {
+                // remove token
+                $tokens->clearTokenAndMergeSurroundingWhitespace($index);
+            } elseif ($cleanedDocContent !== $originalContent) {
+                // update in case of other contents
+                $tokens[$index] = new Token([\T_DOC_COMMENT, $cleanedDocContent]);
             }
-            // remove token
-            $tokens->clearAt($index);
         }
     }
     public function getRuleDefinition() : RuleDefinition

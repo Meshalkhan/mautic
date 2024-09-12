@@ -3,8 +3,6 @@
 namespace PHPStan\Type\Doctrine\QueryBuilder;
 
 use PhpParser\Node;
-use PhpParser\Node\Expr\MethodCall;
-use PhpParser\Node\Identifier;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
@@ -17,10 +15,15 @@ use PHPStan\Analyser\ScopeContext;
 use PHPStan\Analyser\ScopeFactory;
 use PHPStan\DependencyInjection\Container;
 use PHPStan\Parser\Parser;
-use PHPStan\Reflection\ReflectionProvider;
+use PHPStan\Reflection\MethodReflection;
 use PHPStan\Type\Generic\TemplateTypeMap;
-use function count;
+use PHPStan\Type\IntersectionType;
+use PHPStan\Type\Type;
+use PHPStan\Type\TypeTraverser;
+use PHPStan\Type\UnionType;
+use function array_key_exists;
 use function is_array;
+use function sprintf;
 
 class OtherMethodQueryBuilderParser
 {
@@ -28,73 +31,61 @@ class OtherMethodQueryBuilderParser
 	/** @var bool */
 	private $descendIntoOtherMethods;
 
-	/** @var ReflectionProvider */
-	private $reflectionProvider;
-
 	/** @var Parser */
 	private $parser;
 
 	/** @var Container */
 	private $container;
 
-	public function __construct(bool $descendIntoOtherMethods, ReflectionProvider $reflectionProvider, Parser $parser, Container $container)
+	/**
+	 * Null if the method is currently being processed
+	 *
+	 * @var array<string, list<QueryBuilderType>|null>
+	 */
+	private $cache = [];
+
+	public function __construct(bool $descendIntoOtherMethods, Parser $parser, Container $container)
 	{
 		$this->descendIntoOtherMethods = $descendIntoOtherMethods;
-		$this->reflectionProvider = $reflectionProvider;
 		$this->parser = $parser;
 		$this->container = $container;
 	}
 
 	/**
-	 * @return QueryBuilderType[]
+	 * @return list<QueryBuilderType>
 	 */
-	public function getQueryBuilderTypes(Scope $scope, MethodCall $methodCall): array
+	public function findQueryBuilderTypesInCalledMethod(Scope $scope, MethodReflection $methodReflection): array
 	{
-		if (!$this->descendIntoOtherMethods || !$methodCall->var instanceof MethodCall) {
+		if (!$this->descendIntoOtherMethods) {
 			return [];
 		}
 
-		return $this->findQueryBuilderTypesInCalledMethod($scope, $methodCall->var);
-	}
-	/**
-	 * @return QueryBuilderType[]
-	 */
-	private function findQueryBuilderTypesInCalledMethod(Scope $scope, MethodCall $methodCall): array
-	{
-		$methodCalledOnType = $scope->getType($methodCall->var);
-		if (!$methodCall->name instanceof Identifier) {
-			return [];
-		}
-
-		$methodCalledOnTypeClassNames = $methodCalledOnType->getObjectClassNames();
-
-		if (count($methodCalledOnTypeClassNames) !== 1) {
-			return [];
-		}
-
-		if (!$this->reflectionProvider->hasClass($methodCalledOnTypeClassNames[0])) {
-			return [];
-		}
-
-		$classReflection = $this->reflectionProvider->getClass($methodCalledOnTypeClassNames[0]);
-		$methodName = $methodCall->name->toString();
-		if (!$classReflection->hasNativeMethod($methodName)) {
-			return [];
-		}
-
-		$methodReflection = $classReflection->getNativeMethod($methodName);
+		$methodName = $methodReflection->getName();
+		$className = $methodReflection->getDeclaringClass()->getName();
 		$fileName = $methodReflection->getDeclaringClass()->getFileName();
 		if ($fileName === null) {
 			return [];
 		}
 
+		$cacheKey = $this->buildCacheKey($fileName, $className, $methodName);
+
+		if (array_key_exists($cacheKey, $this->cache)) {
+			if ($this->cache[$cacheKey] === null) {
+				return []; // recursion
+			}
+
+			return $this->cache[$cacheKey];
+		}
+
+		$this->cache[$cacheKey] = null;
+
 		$nodes = $this->parser->parseFile($fileName);
-		$classNode = $this->findClassNode($methodReflection->getDeclaringClass()->getName(), $nodes);
+		$classNode = $this->findClassNode($className, $nodes);
 		if ($classNode === null) {
 			return [];
 		}
 
-		$methodNode = $this->findMethodNode($methodReflection->getName(), $classNode->stmts);
+		$methodNode = $this->findMethodNode($methodName, $classNode->stmts);
 		if ($methodNode === null || $methodNode->stmts === null) {
 			return [];
 		}
@@ -118,12 +109,21 @@ class OtherMethodQueryBuilderParser
 			}
 
 			$exprType = $scope->getType($node->expr);
-			if (!$exprType instanceof QueryBuilderType) {
-				return;
-			}
 
-			$queryBuilderTypes[] = $exprType;
+			TypeTraverser::map($exprType, static function (Type $type, callable $traverse) use (&$queryBuilderTypes): Type {
+				if ($type instanceof UnionType || $type instanceof IntersectionType) {
+					return $traverse($type);
+				}
+
+				if ($type instanceof QueryBuilderType) {
+					$queryBuilderTypes[] = $type;
+				}
+
+				return $type;
+			});
 		});
+
+		$this->cache[$cacheKey] = $queryBuilderTypes;
 
 		return $queryBuilderTypes;
 	}
@@ -182,6 +182,11 @@ class OtherMethodQueryBuilderParser
 		}
 
 		return null;
+	}
+
+	private function buildCacheKey(string $fileName, string $declaringClassName, string $methodName): string
+	{
+		return sprintf('%s-%s-%s', $fileName, $declaringClassName, $methodName);
 	}
 
 }

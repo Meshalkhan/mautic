@@ -28,7 +28,7 @@ final class NoSpacesAfterFunctionNameFixer extends AbstractFixer
 {
     public function getDefinition() : FixerDefinitionInterface
     {
-        return new FixerDefinition('When making a method or function call, there MUST NOT be a space between the method or function name and the opening parenthesis.', [new CodeSample("<?php\nrequire ('sample.php');\necho (test (3));\nexit  (1);\n\$func ();\n")]);
+        return new FixerDefinition('When making a method or function call, there MUST NOT be a space between the method or function name and the opening parenthesis.', [new CodeSample("<?php\nstrlen ('Hello World!');\nfoo (test (3));\nexit  (1);\n\$func ();\n")]);
     }
     /**
      * {@inheritdoc}
@@ -93,17 +93,16 @@ final class NoSpacesAfterFunctionNameFixer extends AbstractFixer
         }
     }
     /**
-     * @return array<list<int>|string>
+     * @return list<array{int}|string>
      */
     private function getBraceAfterVariableKinds() : array
     {
-        static $tokens = [')', ']', [CT::T_DYNAMIC_VAR_BRACE_CLOSE], [CT::T_ARRAY_INDEX_CURLY_BRACE_CLOSE]];
-        return $tokens;
+        return [')', ']', [CT::T_DYNAMIC_VAR_BRACE_CLOSE], [CT::T_ARRAY_INDEX_CURLY_BRACE_CLOSE]];
     }
     /**
      * Gets the token kinds which can work as function calls.
      *
-     * @return int[] Token names
+     * @return list<int> Token names
      */
     private function getFunctionyTokenKinds() : array
     {
@@ -113,7 +112,7 @@ final class NoSpacesAfterFunctionNameFixer extends AbstractFixer
     /**
      * Gets the token kinds of actually language construction.
      *
-     * @return int[]
+     * @return list<int>
      */
     private function getLanguageConstructionTokenKinds() : array
     {

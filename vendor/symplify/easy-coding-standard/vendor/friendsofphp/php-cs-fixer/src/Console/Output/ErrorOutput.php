@@ -15,8 +15,9 @@ namespace PhpCsFixer\Console\Output;
 use PhpCsFixer\Differ\DiffConsoleFormatter;
 use PhpCsFixer\Error\Error;
 use PhpCsFixer\Linter\LintingException;
-use ECSPrefix202312\Symfony\Component\Console\Formatter\OutputFormatter;
-use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202408\Symfony\Component\Console\Command\Command;
+use ECSPrefix202408\Symfony\Component\Console\Formatter\OutputFormatter;
+use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
 /**
  * @internal
  */
@@ -36,7 +37,7 @@ final class ErrorOutput
         $this->isDecorated = $output->isDecorated();
     }
     /**
-     * @param Error[] $errors
+     * @param list<Error> $errors
      */
     public function listErrors(string $process, array $errors) : void
     {
@@ -69,7 +70,7 @@ final class ErrorOutput
                 $this->output->writeln('');
                 $stackTrace = $e->getTrace();
                 foreach ($stackTrace as $trace) {
-                    if (isset($trace['class']) && \ECSPrefix202312\Symfony\Component\Console\Command\Command::class === $trace['class'] && 'run' === $trace['function']) {
+                    if (isset($trace['class']) && Command::class === $trace['class'] && 'run' === $trace['function']) {
                         $this->output->writeln('      [ ... ]');
                         break;
                     }

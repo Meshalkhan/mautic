@@ -60,17 +60,7 @@ final class CommentsAnalyzer
         if (!$token->isGivenKind([\T_COMMENT, \T_DOC_COMMENT])) {
             throw new \InvalidArgumentException('Given index must point to a comment.');
         }
-        $nextIndex = $index;
-        do {
-            $nextIndex = $tokens->getNextMeaningfulToken($nextIndex);
-            // @TODO: drop condition when PHP 8.0+ is required
-            if (\defined('T_ATTRIBUTE')) {
-                while (null !== $nextIndex && $tokens[$nextIndex]->isGivenKind(\T_ATTRIBUTE)) {
-                    $nextIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_ATTRIBUTE, $nextIndex);
-                    $nextIndex = $tokens->getNextMeaningfulToken($nextIndex);
-                }
-            }
-        } while (null !== $nextIndex && $tokens[$nextIndex]->equals('('));
+        $nextIndex = $this->getNextTokenIndex($tokens, $index);
         if (null === $nextIndex || $tokens[$nextIndex]->equals('}')) {
             return \false;
         }
@@ -83,7 +73,7 @@ final class CommentsAnalyzer
         if ($this->isValidVariable($tokens, $nextIndex)) {
             return \true;
         }
-        if ($this->isValidLanguageConstruct($tokens, $token, $nextIndex)) {
+        if ($this->isValidVariableAssignment($tokens, $token, $nextIndex)) {
             return \true;
         }
         if ($tokens[$nextIndex]->isGivenKind(CT::T_USE_TRAIT)) {
@@ -92,11 +82,25 @@ final class CommentsAnalyzer
         return \false;
     }
     /**
+     * Check if comment at given index precedes return statement.
+     */
+    public function isBeforeReturn(Tokens $tokens, int $index) : bool
+    {
+        if (!$tokens[$index]->isGivenKind([\T_COMMENT, \T_DOC_COMMENT])) {
+            throw new \InvalidArgumentException('Given index must point to a comment.');
+        }
+        $nextIndex = $this->getNextTokenIndex($tokens, $index);
+        if (null === $nextIndex || $tokens[$nextIndex]->equals('}')) {
+            return \false;
+        }
+        return $tokens[$nextIndex]->isGivenKind(\T_RETURN);
+    }
+    /**
      * Return array of indices that are part of a comment started at given index.
      *
      * @param int $index T_COMMENT index
      *
-     * @return list<int>
+     * @return non-empty-list<int>
      */
     public function getCommentBlockIndices(Tokens $tokens, int $index) : array
     {
@@ -179,7 +183,7 @@ final class CommentsAnalyzer
      * @param Token $docsToken              docs Token
      * @param int   $languageConstructIndex index of variable Token
      */
-    private function isValidLanguageConstruct(Tokens $tokens, Token $docsToken, int $languageConstructIndex) : bool
+    private function isValidVariableAssignment(Tokens $tokens, Token $docsToken, int $languageConstructIndex) : bool
     {
         static $languageStructures = [\T_LIST, \T_PRINT, \T_ECHO, CT::T_DESTRUCTURING_SQUARE_BRACE_OPEN];
         if (!$tokens[$languageConstructIndex]->isGivenKind($languageStructures)) {
@@ -226,5 +230,20 @@ final class CommentsAnalyzer
             $lineCount += Preg::matchAll('/\\R/u', $tokens[$i]->getContent());
         }
         return $lineCount;
+    }
+    private function getNextTokenIndex(Tokens $tokens, int $startIndex) : ?int
+    {
+        $nextIndex = $startIndex;
+        do {
+            $nextIndex = $tokens->getNextMeaningfulToken($nextIndex);
+            // @TODO: drop condition when PHP 8.0+ is required
+            if (\defined('T_ATTRIBUTE')) {
+                while (null !== $nextIndex && $tokens[$nextIndex]->isGivenKind(\T_ATTRIBUTE)) {
+                    $nextIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_ATTRIBUTE, $nextIndex);
+                    $nextIndex = $tokens->getNextMeaningfulToken($nextIndex);
+                }
+            }
+        } while (null !== $nextIndex && $tokens[$nextIndex]->equals('('));
+        return $nextIndex;
     }
 }

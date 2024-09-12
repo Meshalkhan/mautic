@@ -19,73 +19,62 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class ExceptionListener extends ErrorListener
 {
-    /**
-     * @param LoggerInterface $controller
-     */
-    public function __construct(
-        protected Router $router,
-        $controller,
-        LoggerInterface $logger = null
-    ) {
+    protected $logger; // Ensure it's protected, not private
+
+    public function __construct(Router $router, $controller, LoggerInterface $logger = null)
+    {
         parent::__construct($controller, $logger);
+        $this->logger = $logger;  // Optional, you can remove this if unnecessary
     }
 
     public function onKernelException(ExceptionEvent $event, string $eventName = null, EventDispatcherInterface $eventDispatcher = null): void
+{
+    $exception = $event->getThrowable();
+
+    if ($exception instanceof LightSamlException) {
+        // Convert the LightSamlException to an AuthenticationException so it can be passed in the session.
+        $exception = new AuthenticationException($exception->getMessage());
+        // Redirect to the login page with message
+        $event->getRequest()->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
+        $event->setResponse(new RedirectResponse($this->router->generate('login')));
+
+        return;
+    }
+
+    // Check for exceptions we don't want to handle
+    if ($exception instanceof AuthenticationException || $exception instanceof AccessDeniedException || $exception instanceof LogoutException) {
+        return;
+    }
+
+    if (!$exception instanceof AccessDeniedHttpException && !$exception instanceof NotFoundHttpException) {
+        // Log the exception with the message
+        $this->logException($exception, sprintf('Uncaught PHP Exception %s: "%s" at %s line %s', $exception::class, $exception->getMessage(), $exception->getFile(), $exception->getLine()));
+    }
+
+    $request = $this->duplicateRequest($exception, $event->getRequest());
+    try {
+        $response = $event->getKernel()->handle($request, HttpKernelInterface::SUB_REQUEST, false);
+        $event->setResponse($response);
+    } catch (\Exception $e) {
+        // Log the exception when handling another exception
+        $this->logException(
+            $e,
+            sprintf('Exception thrown when handling an exception (%s: %s at %s line %s)', $e::class, $e->getMessage(), $e->getFile(), $e->getLine())
+        );
+
+        throw $e;
+    }
+}
+
+
+    /**
+     * Log exceptions and their previous exceptions (if any)
+     */
+    protected function logException(\Throwable $exception, string $message, ?string $logLevel = null): void
     {
-        $exception = $event->getThrowable();
-
-        if ($exception instanceof LightSamlException) {
-            // Convert the LightSamlException to a AuthenticationException so it can be passed in the session.
-            $exception = new AuthenticationException($exception->getMessage());
-            // Redirect to login page with message
-            $event->getRequest()->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
-            $event->setResponse(new RedirectResponse($this->router->generate('login')));
-
-            return;
-        }
-
-        // Check for exceptions we don't want to handle
-        if ($exception instanceof AuthenticationException || $exception instanceof AccessDeniedException || $exception instanceof LogoutException
-        ) {
-            return;
-        }
-
-        if (!$exception instanceof AccessDeniedHttpException && !$exception instanceof NotFoundHttpException) {
-            $this->logException($exception, sprintf('Uncaught PHP Exception %s: "%s" at %s line %s', $exception::class, $exception->getMessage(), $exception->getFile(), $exception->getLine()));
-        }
-
-        $exception = $event->getThrowable();
-        $request   = $event->getRequest();
-        $request   = $this->duplicateRequest($exception, $request);
-        try {
-            $response = $event->getKernel()->handle($request, HttpKernelInterface::SUB_REQUEST, false);
-
-            $event->setResponse($response);
-        } catch (\Exception $e) {
-            $this->logException(
-                $e,
-                sprintf(
-                    'Exception thrown when handling an exception (%s: %s at %s line %s)',
-                    $e::class,
-                    $e->getMessage(),
-                    $e->getFile(),
-                    $e->getLine()
-                )
-            );
-
-            $wrapper = $e;
-
-            while ($prev = $wrapper->getPrevious()) {
-                if ($exception === $wrapper = $prev) {
-                    throw $e;
-                }
-            }
-
-            $prev = new \ReflectionProperty('Exception', 'previous');
-            $prev->setAccessible(true);
-            $prev->setValue($wrapper, $exception);
-
-            throw $e;
+        // Your logging implementation
+        if (null !== $this->logger) {
+            $this->logger->log($logLevel ?? 'critical', $message, ['exception' => $exception]);
         }
     }
 }

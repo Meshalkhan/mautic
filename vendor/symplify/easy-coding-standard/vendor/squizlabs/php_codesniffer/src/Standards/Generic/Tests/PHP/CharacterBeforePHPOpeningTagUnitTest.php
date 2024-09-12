@@ -5,12 +5,17 @@
  *
  * @author    Andy Grunwald <andygrunwald@gmail.com>
  * @copyright 2010-2014 Andy Grunwald
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Tests\PHP;
 
 use PHP_CodeSniffer\Tests\Standards\AbstractSniffUnitTest;
-class CharacterBeforePHPOpeningTagUnitTest extends AbstractSniffUnitTest
+/**
+ * Unit test class for the CharacterBeforePHPOpeningTag sniff.
+ *
+ * @covers \PHP_CodeSniffer\Standards\Generic\Sniffs\PHP\CharacterBeforePHPOpeningTagSniff
+ */
+final class CharacterBeforePHPOpeningTagUnitTest extends AbstractSniffUnitTest
 {
     /**
      * Returns the lines where errors should occur.
@@ -27,10 +32,8 @@ class CharacterBeforePHPOpeningTagUnitTest extends AbstractSniffUnitTest
         switch ($testFile) {
             case 'CharacterBeforePHPOpeningTagUnitTest.1.inc':
                 return [2 => 1];
-                break;
             default:
                 return [];
-                break;
         }
         //end switch
     }

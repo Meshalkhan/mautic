@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Routing;
+namespace ECSPrefix202408\Illuminate\Contracts\Routing;
 
 interface BindingRegistrar
 {

@@ -8,11 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202312\Symfony\Component\OptionsResolver\Debug;
+namespace ECSPrefix202408\Symfony\Component\OptionsResolver\Debug;
 
-use ECSPrefix202312\Symfony\Component\OptionsResolver\Exception\NoConfigurationException;
-use ECSPrefix202312\Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
-use ECSPrefix202312\Symfony\Component\OptionsResolver\OptionsResolver;
+use ECSPrefix202408\Symfony\Component\OptionsResolver\Exception\NoConfigurationException;
+use ECSPrefix202408\Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
+use ECSPrefix202408\Symfony\Component\OptionsResolver\OptionsResolver;
 /**
  * @author Maxime Steinhausser <maxime.steinhausser@gmail.com>
  *

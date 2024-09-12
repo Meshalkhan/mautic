@@ -5,7 +5,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2017 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\WhiteSpace;
 
@@ -18,7 +18,7 @@ class LanguageConstructSpacingSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -56,7 +56,7 @@ class LanguageConstructSpacingSniff implements Sniff
         }
         if ($tokens[$stackPtr]['code'] === \T_YIELD_FROM && \strtolower($content) !== 'yield from') {
             if ($tokens[$stackPtr - 1]['code'] === \T_YIELD_FROM) {
-                // A multi-line statements that has already been processed.
+                // A multi-line statement that has already been processed.
                 return;
             }
             $found = $content;

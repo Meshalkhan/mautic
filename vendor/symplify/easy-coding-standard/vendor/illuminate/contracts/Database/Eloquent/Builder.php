@@ -1,8 +1,8 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Database\Eloquent;
+namespace ECSPrefix202408\Illuminate\Contracts\Database\Eloquent;
 
-use ECSPrefix202312\Illuminate\Contracts\Database\Query\Builder as BaseContract;
+use ECSPrefix202408\Illuminate\Contracts\Database\Query\Builder as BaseContract;
 /**
  * This interface is intentionally empty and exists to improve IDE support.
  *

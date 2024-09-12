@@ -12,7 +12,8 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Console\Report\FixReport;
 
-use ECSPrefix202312\Symfony\Component\Console\Formatter\OutputFormatter;
+use PhpCsFixer\Console\Application;
+use ECSPrefix202408\Symfony\Component\Console\Formatter\OutputFormatter;
 /**
  * @author Kévin Gomez <contact@kevingomez.fr>
  *
@@ -30,7 +31,9 @@ final class CheckstyleReporter implements \PhpCsFixer\Console\Report\FixReport\R
             throw new \RuntimeException('Cannot generate report! `ext-dom` is not available!');
         }
         $dom = new \DOMDocument('1.0', 'UTF-8');
+        /** @var \DOMElement $checkstyles */
         $checkstyles = $dom->appendChild($dom->createElement('checkstyle'));
+        $checkstyles->setAttribute('version', Application::getAbout());
         foreach ($reportSummary->getChanged() as $filePath => $fixResult) {
             /** @var \DOMElement $file */
             $file = $checkstyles->appendChild($dom->createElement('file'));

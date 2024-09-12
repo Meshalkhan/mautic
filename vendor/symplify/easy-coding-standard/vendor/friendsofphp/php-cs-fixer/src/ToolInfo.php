@@ -79,6 +79,14 @@ final class ToolInfo implements \PhpCsFixer\ToolInfoInterface
         }
         return $this->isInstalledByComposer;
     }
+    /**
+     * Determines if the tool is run inside our pre-built Docker image.
+     * The `/fixer/` path comes from our Dockerfile, tool is installed there and added to global PATH via symlinked binary.
+     */
+    public function isRunInsideDocker() : bool
+    {
+        return \is_file('/.dockerenv') && \strncmp(__FILE__, '/fixer/', \strlen('/fixer/')) === 0;
+    }
     public function getPharDownloadUri(string $version) : string
     {
         return \sprintf('https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/download/%s/php-cs-fixer.phar', $version);

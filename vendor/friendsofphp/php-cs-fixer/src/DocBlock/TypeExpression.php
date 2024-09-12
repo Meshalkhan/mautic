@@ -147,8 +147,8 @@ final class TypeExpression
                           (?:\.(?&constant_digits)|(?<=\d)\.)?+
                           (?:e[+-]?(?&constant_digits))?+
                     )
-                    | \'(?:[^\'\\\\]|\\\\.)*+\'
-                    | "(?:[^"\\\\]|\\\\.)*+"
+                    | \'(?:[^\'\\\]|\\\.)*+\'
+                    | "(?:[^"\\\]|\\\.)*+"
                     (?-i)
                 )
                 |
@@ -159,7 +159,7 @@ final class TypeExpression
                 )
                 |
                 (?<name> # full name, e.g.: `int`, `\DateTime`, `\Foo\Bar`, `positive-int`
-                    \\\\?+
+                    \\\?+
                     (?<identifier>'.self::REGEX_IDENTIFIER.')
                     (?:[\\\\\-](?&identifier))*+
                 )
@@ -220,12 +220,12 @@ final class TypeExpression
     private ?NamespaceAnalysis $namespace;
 
     /**
-     * @var NamespaceUseAnalysis[]
+     * @var list<NamespaceUseAnalysis>
      */
     private array $namespaceUses;
 
     /**
-     * @param NamespaceUseAnalysis[] $namespaceUses
+     * @param list<NamespaceUseAnalysis> $namespaceUses
      */
     public function __construct(string $value, ?NamespaceAnalysis $namespace, array $namespaceUses)
     {
@@ -271,23 +271,37 @@ final class TypeExpression
      */
     public function walkTypes(\Closure $callback): void
     {
-        foreach (array_reverse($this->innerTypeExpressions) as [
-            'start_index' => $startIndex,
+        $innerValueOrig = $this->value;
+
+        $startIndexOffset = 0;
+
+        foreach ($this->innerTypeExpressions as [
+            'start_index' => $startIndexOrig,
             'expression' => $inner,
         ]) {
-            $initialValueLength = \strlen($inner->toString());
+            $innerLengthOrig = \strlen($inner->toString());
 
             $inner->walkTypes($callback);
 
             $this->value = substr_replace(
                 $this->value,
                 $inner->toString(),
-                $startIndex,
-                $initialValueLength
+                $startIndexOrig + $startIndexOffset,
+                $innerLengthOrig
             );
+
+            $startIndexOffset += \strlen($inner->toString()) - $innerLengthOrig;
         }
 
         $callback($this);
+
+        if ($this->value !== $innerValueOrig) {
+            $this->isUnionType = false;
+            $this->typesGlue = '|';
+            $this->innerTypeExpressions = [];
+
+            $this->parse();
+        }
     }
 
     /**
@@ -393,7 +407,9 @@ final class TypeExpression
             $consumedValueLength = \strlen($matches[0][0]);
             $index += $consumedValueLength;
 
-            if (\strlen($this->value) === $index) {
+            if (\strlen($this->value) <= $index) {
+                \assert(\strlen($this->value) === $index);
+
                 return;
             }
         }

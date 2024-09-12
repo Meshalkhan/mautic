@@ -1,12 +1,12 @@
 <?php
 
 declare (strict_types=1);
-namespace ECSPrefix202312\Symplify\EasyParallel\CommandLine;
+namespace ECSPrefix202408\Symplify\EasyParallel\CommandLine;
 
-use ECSPrefix202312\Symfony\Component\Console\Command\Command;
-use ECSPrefix202312\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202312\Symplify\EasyParallel\Exception\ParallelShouldNotHappenException;
-use ECSPrefix202312\Symplify\EasyParallel\Reflection\CommandFromReflectionFactory;
+use ECSPrefix202408\Symfony\Component\Console\Command\Command;
+use ECSPrefix202408\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202408\Symplify\EasyParallel\Exception\ParallelShouldNotHappenException;
+use ECSPrefix202408\Symplify\EasyParallel\Reflection\CommandFromReflectionFactory;
 /**
  * @api
  * @see \Symplify\EasyParallel\Tests\CommandLine\WorkerCommandLineFactoryTest

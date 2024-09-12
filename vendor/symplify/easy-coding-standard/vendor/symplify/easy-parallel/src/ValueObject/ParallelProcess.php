@@ -1,19 +1,19 @@
 <?php
 
 declare (strict_types=1);
-namespace ECSPrefix202312\Symplify\EasyParallel\ValueObject;
+namespace ECSPrefix202408\Symplify\EasyParallel\ValueObject;
 
-use ECSPrefix202312\Clue\React\NDJson\Decoder;
-use ECSPrefix202312\Clue\React\NDJson\Encoder;
+use ECSPrefix202408\Clue\React\NDJson\Decoder;
+use ECSPrefix202408\Clue\React\NDJson\Encoder;
 use Exception;
-use ECSPrefix202312\React\ChildProcess\Process;
-use ECSPrefix202312\React\EventLoop\LoopInterface;
-use ECSPrefix202312\React\EventLoop\TimerInterface;
-use ECSPrefix202312\Symplify\EasyParallel\Enum\Action;
-use ECSPrefix202312\Symplify\EasyParallel\Enum\Content;
-use ECSPrefix202312\Symplify\EasyParallel\Enum\ReactCommand;
-use ECSPrefix202312\Symplify\EasyParallel\Enum\ReactEvent;
-use ECSPrefix202312\Symplify\EasyParallel\Exception\ParallelShouldNotHappenException;
+use ECSPrefix202408\React\ChildProcess\Process;
+use ECSPrefix202408\React\EventLoop\LoopInterface;
+use ECSPrefix202408\React\EventLoop\TimerInterface;
+use ECSPrefix202408\Symplify\EasyParallel\Enum\Action;
+use ECSPrefix202408\Symplify\EasyParallel\Enum\Content;
+use ECSPrefix202408\Symplify\EasyParallel\Enum\ReactCommand;
+use ECSPrefix202408\Symplify\EasyParallel\Enum\ReactEvent;
+use ECSPrefix202408\Symplify\EasyParallel\Exception\ParallelShouldNotHappenException;
 use Throwable;
 /**
  * Inspired at @see https://raw.githubusercontent.com/phpstan/phpstan-src/master/src/Parallel/Process.php
@@ -141,7 +141,7 @@ final class ParallelProcess
     }
     private function cancelTimer() : void
     {
-        if ($this->timer === null) {
+        if (!$this->timer instanceof TimerInterface) {
             return;
         }
         $this->loop->cancelTimer($this->timer);

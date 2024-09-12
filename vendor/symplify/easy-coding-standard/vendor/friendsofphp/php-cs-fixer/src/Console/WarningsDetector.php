@@ -26,7 +26,7 @@ final class WarningsDetector
      */
     private $toolInfo;
     /**
-     * @var string[]
+     * @var list<string>
      */
     private $warnings = [];
     public function __construct(ToolInfoInterface $toolInfo)
@@ -51,13 +51,13 @@ final class WarningsDetector
         }
     }
     /**
-     * @return string[]
+     * @return list<string>
      */
     public function getWarnings() : array
     {
         if (0 === \count($this->warnings)) {
             return [];
         }
-        return \array_unique(\array_merge($this->warnings, ['If you need help while solving warnings, ask at https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/discussions/, we will help you!']));
+        return \array_values(\array_unique(\array_merge($this->warnings, ['If you need help while solving warnings, ask at https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/discussions/, we will help you!'])));
     }
 }

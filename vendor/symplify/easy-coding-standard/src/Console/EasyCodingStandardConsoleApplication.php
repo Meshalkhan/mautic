@@ -3,33 +3,42 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Console;
 
-use ECSPrefix202312\Composer\XdebugHandler\XdebugHandler;
-use ECSPrefix202312\Symfony\Component\Console\Application;
-use ECSPrefix202312\Symfony\Component\Console\Input\InputDefinition;
-use ECSPrefix202312\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202312\Symfony\Component\Console\Input\InputOption;
-use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202408\Composer\XdebugHandler\XdebugHandler;
+use PHP_CodeSniffer\Config as PHP_CodeSniffer;
+use PhpCsFixer\Console\Application as PhpCsFixer;
+use ECSPrefix202408\Symfony\Component\Console\Application;
+use ECSPrefix202408\Symfony\Component\Console\Input\InputDefinition;
+use ECSPrefix202408\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202408\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
 use Symplify\EasyCodingStandard\Application\Version\StaticVersionResolver;
 use Symplify\EasyCodingStandard\Console\Command\CheckCommand;
 use Symplify\EasyCodingStandard\Console\Command\ListCheckersCommand;
+use Symplify\EasyCodingStandard\Console\Command\ScriptsCommand;
 use Symplify\EasyCodingStandard\Console\Command\WorkerCommand;
 use Symplify\EasyCodingStandard\Console\Output\ConsoleOutputFormatter;
 use Symplify\EasyCodingStandard\ValueObject\Option;
 final class EasyCodingStandardConsoleApplication extends Application
 {
-    public function __construct(CheckCommand $checkCommand, WorkerCommand $workerCommand, ListCheckersCommand $listCheckersCommand)
+    public function __construct(CheckCommand $checkCommand, WorkerCommand $workerCommand, ScriptsCommand $scriptsCommand, ListCheckersCommand $listCheckersCommand)
     {
         parent::__construct('EasyCodingStandard', StaticVersionResolver::PACKAGE_VERSION);
+        // used only internally, not needed to be public
+        $workerCommand->setHidden();
         $this->add($checkCommand);
         $this->add($workerCommand);
+        $this->add($scriptsCommand);
         $this->add($listCheckersCommand);
+        $this->get('completion')->setHidden();
+        $this->get('help')->setHidden();
+        $this->get('list')->setHidden();
         $this->setDefaultCommand('check');
     }
     public function doRun(InputInterface $input, OutputInterface $output) : int
     {
         // @fixes https://github.com/rectorphp/rector/issues/2205
         $isXdebugAllowed = $input->hasParameterOption('--xdebug');
-        if (!$isXdebugAllowed && !\defined('ECSPrefix202312\\PHPUNIT_COMPOSER_INSTALL')) {
+        if (!$isXdebugAllowed && !\defined('PHPUNIT_COMPOSER_INSTALL')) {
             $xdebugHandler = new XdebugHandler('ecs');
             $xdebugHandler->check();
             unset($xdebugHandler);
@@ -38,7 +47,13 @@ final class EasyCodingStandardConsoleApplication extends Application
         if ($this->shouldPrintMetaInformation($input)) {
             $output->writeln($this->getLongVersion());
         }
-        return parent::doRun($input, $output);
+        $exitCode = parent::doRun($input, $output);
+        // Append to the output of --version
+        if ($exitCode === 0 && $input->hasParameterOption(['--version', '-V'], \true)) {
+            $output->writeln(\sprintf('+ %s <info>%s</info>', 'PHP_CodeSniffer', PHP_CodeSniffer::VERSION));
+            $output->writeln(\sprintf('+ %s <info>%s</info>', 'PHP-CS-Fixer', PhpCsFixer::VERSION));
+        }
+        return $exitCode;
     }
     protected function getDefaultInputDefinition() : InputDefinition
     {
@@ -49,15 +64,11 @@ final class EasyCodingStandardConsoleApplication extends Application
     private function shouldPrintMetaInformation(InputInterface $input) : bool
     {
         $hasNoArguments = $input->getFirstArgument() === null;
-        $hasVersionOption = $input->hasParameterOption('--version');
-        if ($hasVersionOption) {
-            return \false;
-        }
         if ($hasNoArguments) {
             return \false;
         }
         $outputFormat = $input->getParameterOption('--' . Option::OUTPUT_FORMAT);
-        return $outputFormat === ConsoleOutputFormatter::NAME;
+        return $outputFormat === ConsoleOutputFormatter::getName();
     }
     private function addExtraOptions(InputDefinition $inputDefinition) : void
     {

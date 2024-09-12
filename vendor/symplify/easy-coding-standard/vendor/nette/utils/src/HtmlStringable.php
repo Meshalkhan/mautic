@@ -5,7 +5,7 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 declare (strict_types=1);
-namespace ECSPrefix202312\Nette;
+namespace ECSPrefix202408\Nette;
 
 interface HtmlStringable
 {

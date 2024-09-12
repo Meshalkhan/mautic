@@ -5,12 +5,17 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Tests\Files;
 
 use PHP_CodeSniffer\Tests\Standards\AbstractSniffUnitTest;
-class LineLengthUnitTest extends AbstractSniffUnitTest
+/**
+ * Unit test class for the LineLength sniff.
+ *
+ * @covers \PHP_CodeSniffer\Standards\Generic\Sniffs\Files\LineLengthSniff
+ */
+final class LineLengthUnitTest extends AbstractSniffUnitTest
 {
     /**
      * Get a list of CLI values to set before the file is tested.
@@ -40,14 +45,11 @@ class LineLengthUnitTest extends AbstractSniffUnitTest
         switch ($testFile) {
             case 'LineLengthUnitTest.1.inc':
                 return [31 => 1, 34 => 1, 45 => 1, 82 => 1];
-                break;
             case 'LineLengthUnitTest.2.inc':
             case 'LineLengthUnitTest.3.inc':
                 return [7 => 1];
-                break;
             default:
                 return [];
-                break;
         }
         //end switch
     }
@@ -67,17 +69,13 @@ class LineLengthUnitTest extends AbstractSniffUnitTest
         switch ($testFile) {
             case 'LineLengthUnitTest.1.inc':
                 return [9 => 1, 15 => 1, 21 => 1, 24 => 1, 29 => 1, 37 => 1, 63 => 1, 73 => 1, 75 => 1, 84 => 1];
-                break;
             case 'LineLengthUnitTest.2.inc':
             case 'LineLengthUnitTest.3.inc':
                 return [6 => 1];
-                break;
             case 'LineLengthUnitTest.4.inc':
                 return [10 => 1, 14 => 1];
-                break;
             default:
                 return [];
-                break;
         }
         //end switch
     }

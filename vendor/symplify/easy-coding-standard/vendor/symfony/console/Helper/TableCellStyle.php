@@ -8,9 +8,9 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202312\Symfony\Component\Console\Helper;
+namespace ECSPrefix202408\Symfony\Component\Console\Helper;
 
-use ECSPrefix202312\Symfony\Component\Console\Exception\InvalidArgumentException;
+use ECSPrefix202408\Symfony\Component\Console\Exception\InvalidArgumentException;
 /**
  * @author Yewhen Khoptynskyi <khoptynskyi@gmail.com>
  */

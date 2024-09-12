@@ -8,13 +8,13 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202312\Symfony\Component\Console\Command;
+namespace ECSPrefix202408\Symfony\Component\Console\Command;
 
-use ECSPrefix202312\Symfony\Component\Console\Exception\LogicException;
-use ECSPrefix202312\Symfony\Component\Lock\LockFactory;
-use ECSPrefix202312\Symfony\Component\Lock\LockInterface;
-use ECSPrefix202312\Symfony\Component\Lock\Store\FlockStore;
-use ECSPrefix202312\Symfony\Component\Lock\Store\SemaphoreStore;
+use ECSPrefix202408\Symfony\Component\Console\Exception\LogicException;
+use ECSPrefix202408\Symfony\Component\Lock\LockFactory;
+use ECSPrefix202408\Symfony\Component\Lock\LockInterface;
+use ECSPrefix202408\Symfony\Component\Lock\Store\FlockStore;
+use ECSPrefix202408\Symfony\Component\Lock\Store\SemaphoreStore;
 /**
  * Basic lock feature for commands.
  *
@@ -29,7 +29,7 @@ trait LockableTrait
     /**
      * Locks a command.
      */
-    private function lock(string $name = null, bool $blocking = \false) : bool
+    private function lock(?string $name = null, bool $blocking = \false) : bool
     {
         if (!\class_exists(SemaphoreStore::class)) {
             throw new LogicException('To enable the locking feature you must install the symfony/lock component. Try running "composer require symfony/lock".');

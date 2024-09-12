@@ -8,11 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202312\Symfony\Component\Filesystem;
+namespace ECSPrefix202408\Symfony\Component\Filesystem;
 
-use ECSPrefix202312\Symfony\Component\Filesystem\Exception\FileNotFoundException;
-use ECSPrefix202312\Symfony\Component\Filesystem\Exception\InvalidArgumentException;
-use ECSPrefix202312\Symfony\Component\Filesystem\Exception\IOException;
+use ECSPrefix202408\Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use ECSPrefix202408\Symfony\Component\Filesystem\Exception\InvalidArgumentException;
+use ECSPrefix202408\Symfony\Component\Filesystem\Exception\IOException;
 /**
  * Provides basic utility to manipulate the file system.
  *
@@ -31,12 +31,10 @@ class Filesystem
      * If the target file is newer, it is overwritten only when the
      * $overwriteNewerFiles option is set to true.
      *
-     * @return void
-     *
      * @throws FileNotFoundException When originFile doesn't exist
      * @throws IOException           When copy fails
      */
-    public function copy(string $originFile, string $targetFile, bool $overwriteNewerFiles = \false)
+    public function copy(string $originFile, string $targetFile, bool $overwriteNewerFiles = \false) : void
     {
         $originIsLocal = \stream_is_local($originFile) || 0 === \stripos($originFile, 'file://');
         if ($originIsLocal && !\is_file($originFile)) {
@@ -66,6 +64,8 @@ class Filesystem
             if ($originIsLocal) {
                 // Like `cp`, preserve executable permission bits
                 self::box('chmod', $targetFile, \fileperms($targetFile) | \fileperms($originFile) & 0111);
+                // Like `cp`, preserve the file modification time
+                self::box('touch', $targetFile, \filemtime($originFile));
                 if ($bytesCopied !== ($bytesOrigin = \filesize($originFile))) {
                     throw new IOException(\sprintf('Failed to copy the whole content of "%s" to "%s" (%g of %g bytes copied).', $originFile, $targetFile, $bytesCopied, $bytesOrigin), 0, null, $originFile);
                 }
@@ -75,12 +75,10 @@ class Filesystem
     /**
      * Creates a directory recursively.
      *
-     * @return void
-     *
      * @throws IOException On any directory creation failure
      * @param string|iterable $dirs
      */
-    public function mkdir($dirs, int $mode = 0777)
+    public function mkdir($dirs, int $mode = 0777) : void
     {
         foreach ($this->toIterable($dirs) as $dir) {
             if (\is_dir($dir)) {
@@ -114,12 +112,10 @@ class Filesystem
      * @param int|null $time  The touch time as a Unix timestamp, if not supplied the current system time is used
      * @param int|null $atime The access time as a Unix timestamp, if not supplied the current system time is used
      *
-     * @return void
-     *
      * @throws IOException When touch fails
      * @param string|iterable $files
      */
-    public function touch($files, int $time = null, int $atime = null)
+    public function touch($files, ?int $time = null, ?int $atime = null) : void
     {
         foreach ($this->toIterable($files) as $file) {
             if (!($time ? self::box('touch', $file, $time, $atime) : self::box('touch', $file))) {
@@ -130,12 +126,10 @@ class Filesystem
     /**
      * Removes files or directories.
      *
-     * @return void
-     *
      * @throws IOException When removal fails
      * @param string|iterable $files
      */
-    public function remove($files)
+    public function remove($files) : void
     {
         if ($files instanceof \Traversable) {
             $files = \iterator_to_array($files, \false);
@@ -155,7 +149,7 @@ class Filesystem
                 }
             } elseif (\is_dir($file)) {
                 if (!$isRecursive) {
-                    $tmpName = \dirname(\realpath($file)) . '/.' . \strrev(\strtr(\base64_encode(\random_bytes(2)), '/=', '-_'));
+                    $tmpName = \dirname(\realpath($file)) . '/.!' . \strrev(\strtr(\base64_encode(\random_bytes(2)), '/=', '-!'));
                     if (\file_exists($tmpName)) {
                         try {
                             self::doRemove([$tmpName], \true);
@@ -178,7 +172,7 @@ class Filesystem
                     }
                     throw new IOException(\sprintf('Failed to remove directory "%s": ', $file) . $lastError);
                 }
-            } elseif (!self::box('unlink', $file) && (\strpos(self::$lastError, 'Permission denied') !== \false || \file_exists($file))) {
+            } elseif (!self::box('unlink', $file) && (self::$lastError && \strpos(self::$lastError, 'Permission denied') !== \false || \file_exists($file))) {
                 throw new IOException(\sprintf('Failed to remove file "%s": ', $file) . self::$lastError);
             }
         }
@@ -190,12 +184,10 @@ class Filesystem
      * @param int  $umask     The mode mask (octal)
      * @param bool $recursive Whether change the mod recursively or not
      *
-     * @return void
-     *
      * @throws IOException When the change fails
      * @param string|iterable $files
      */
-    public function chmod($files, int $mode, int $umask = 00, bool $recursive = \false)
+    public function chmod($files, int $mode, int $umask = 00, bool $recursive = \false) : void
     {
         foreach ($this->toIterable($files) as $file) {
             if (!self::box('chmod', $file, $mode & ~$umask)) {
@@ -212,12 +204,10 @@ class Filesystem
      * @param string|int $user      A user name or number
      * @param bool       $recursive Whether change the owner recursively or not
      *
-     * @return void
-     *
      * @throws IOException When the change fails
      * @param string|iterable $files
      */
-    public function chown($files, $user, bool $recursive = \false)
+    public function chown($files, $user, bool $recursive = \false) : void
     {
         foreach ($this->toIterable($files) as $file) {
             if ($recursive && \is_dir($file) && !\is_link($file)) {
@@ -240,12 +230,10 @@ class Filesystem
      * @param string|int $group     A group name or number
      * @param bool       $recursive Whether change the group recursively or not
      *
-     * @return void
-     *
      * @throws IOException When the change fails
      * @param string|iterable $files
      */
-    public function chgrp($files, $group, bool $recursive = \false)
+    public function chgrp($files, $group, bool $recursive = \false) : void
     {
         foreach ($this->toIterable($files) as $file) {
             if ($recursive && \is_dir($file) && !\is_link($file)) {
@@ -265,12 +253,10 @@ class Filesystem
     /**
      * Renames a file or a directory.
      *
-     * @return void
-     *
      * @throws IOException When target file or directory already exists
      * @throws IOException When origin cannot be renamed
      */
-    public function rename(string $origin, string $target, bool $overwrite = \false)
+    public function rename(string $origin, string $target, bool $overwrite = \false) : void
     {
         // we check that target does not exist
         if (!$overwrite && $this->isReadable($target)) {
@@ -302,11 +288,9 @@ class Filesystem
     /**
      * Creates a symbolic link or copy a directory.
      *
-     * @return void
-     *
      * @throws IOException When symlink fails
      */
-    public function symlink(string $originDir, string $targetDir, bool $copyOnWindows = \false)
+    public function symlink(string $originDir, string $targetDir, bool $copyOnWindows = \false) : void
     {
         self::assertFunctionExists('symlink');
         if ('\\' === \DIRECTORY_SEPARATOR) {
@@ -333,12 +317,10 @@ class Filesystem
      *
      * @param string|string[] $targetFiles The target file(s)
      *
-     * @return void
-     *
      * @throws FileNotFoundException When original file is missing or not a file
      * @throws IOException           When link fails, including if link already exists
      */
-    public function hardlink(string $originFile, $targetFiles)
+    public function hardlink(string $originFile, $targetFiles) : void
     {
         self::assertFunctionExists('link');
         if (!$this->exists($originFile)) {
@@ -467,11 +449,9 @@ class Filesystem
      *                                    - $options['copy_on_windows'] Whether to copy files instead of links on Windows (see symlink(), defaults to false)
      *                                    - $options['delete'] Whether to delete files that are not in the source directory (defaults to false)
      *
-     * @return void
-     *
      * @throws IOException When file type is unknown
      */
-    public function mirror(string $originDir, string $targetDir, \Traversable $iterator = null, array $options = [])
+    public function mirror(string $originDir, string $targetDir, ?\Traversable $iterator = null, array $options = []) : void
     {
         $targetDir = \rtrim($targetDir, '/\\');
         $originDir = \rtrim($originDir, '/\\');
@@ -568,11 +548,9 @@ class Filesystem
      *
      * @param string|resource $content The data to write into the file
      *
-     * @return void
-     *
      * @throws IOException if the file cannot be written to
      */
-    public function dumpFile(string $filename, $content)
+    public function dumpFile(string $filename, $content) : void
     {
         if (\is_array($content)) {
             throw new \TypeError(\sprintf('Argument 2 passed to "%s()" must be string or resource, array given.', __METHOD__));
@@ -592,7 +570,7 @@ class Filesystem
             if (\false === self::box('file_put_contents', $tmpFile, $content)) {
                 throw new IOException(\sprintf('Failed to write file "%s": ', $filename) . self::$lastError, 0, null, $filename);
             }
-            self::box('chmod', $tmpFile, \file_exists($filename) ? \fileperms($filename) : 0666 & ~\umask());
+            self::box('chmod', $tmpFile, self::box('fileperms', $filename) ?: 0666 & ~\umask());
             $this->rename($tmpFile, $filename, \true);
         } finally {
             if (\file_exists($tmpFile)) {
@@ -606,11 +584,9 @@ class Filesystem
      * @param string|resource $content The content to append
      * @param bool            $lock    Whether the file should be locked when writing to it
      *
-     * @return void
-     *
      * @throws IOException If the file is not writable
      */
-    public function appendToFile(string $filename, $content)
+    public function appendToFile(string $filename, $content, bool $lock = \false) : void
     {
         if (\is_array($content)) {
             throw new \TypeError(\sprintf('Argument 2 passed to "%s()" must be string or resource, array given.', __METHOD__));
@@ -619,10 +595,25 @@ class Filesystem
         if (!\is_dir($dir)) {
             $this->mkdir($dir);
         }
-        $lock = \func_num_args() > 2 && \func_get_arg(2);
         if (\false === self::box('file_put_contents', $filename, $content, \FILE_APPEND | ($lock ? \LOCK_EX : 0))) {
             throw new IOException(\sprintf('Failed to write file "%s": ', $filename) . self::$lastError, 0, null, $filename);
         }
+    }
+    /**
+     * Returns the content of a file as a string.
+     *
+     * @throws IOException If the file cannot be read
+     */
+    public function readFile(string $filename) : string
+    {
+        if (\is_dir($filename)) {
+            throw new IOException(\sprintf('Failed to read file "%s": File is a directory.', $filename));
+        }
+        $content = self::box('file_get_contents', $filename);
+        if (\false === $content) {
+            throw new IOException(\sprintf('Failed to read file "%s": ', $filename) . self::$lastError, 0, null, $filename);
+        }
+        return $content;
     }
     /**
      * @param string|iterable $files

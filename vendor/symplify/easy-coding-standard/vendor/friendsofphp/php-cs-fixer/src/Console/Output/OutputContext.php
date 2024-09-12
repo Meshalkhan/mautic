@@ -12,7 +12,7 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Console\Output;
 
-use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
 /**
  * @internal
  */

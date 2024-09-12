@@ -5,7 +5,9 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ *
+ * @deprecated 3.9.0
  */
 namespace PHP_CodeSniffer\Standards\MySource\Sniffs\Channels;
 
@@ -17,7 +19,7 @@ class IncludeSystemSniff extends AbstractScopeSniff
     /**
      * A list of classes that don't need to be included.
      *
-     * @var string[]
+     * @var array<string, bool>
      */
     private $ignore = ['self' => \true, 'static' => \true, 'parent' => \true, 'channels' => \true, 'basesystem' => \true, 'dal' => \true, 'init' => \true, 'pdo' => \true, 'util' => \true, 'ziparchive' => \true, 'phpunit_framework_assert' => \true, 'abstractmysourceunittest' => \true, 'abstractdatacleanunittest' => \true, 'exception' => \true, 'abstractwidgetwidgettype' => \true, 'domdocument' => \true];
     /**
@@ -236,7 +238,7 @@ class IncludeSystemSniff extends AbstractScopeSniff
      * @param int                         $stackPtr  The position in the tokens array of the
      *                                               potentially included class.
      *
-     * @return string
+     * @return string|false
      */
     protected function getIncludedClassFromToken(File $phpcsFile, array $tokens, $stackPtr)
     {

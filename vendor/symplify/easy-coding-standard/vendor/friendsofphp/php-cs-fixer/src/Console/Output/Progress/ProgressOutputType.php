@@ -19,5 +19,12 @@ final class ProgressOutputType
 {
     public const NONE = 'none';
     public const DOTS = 'dots';
-    public const AVAILABLE = [self::NONE, self::DOTS];
+    public const BAR = 'bar';
+    /**
+     * @return list<ProgressOutputType::*>
+     */
+    public static function all() : array
+    {
+        return [self::BAR, self::DOTS, self::NONE];
+    }
 }

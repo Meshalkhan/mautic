@@ -5,12 +5,17 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Squiz\Tests\Classes;
 
 use PHP_CodeSniffer\Tests\Standards\AbstractSniffUnitTest;
-class LowercaseClassKeywordsUnitTest extends AbstractSniffUnitTest
+/**
+ * Unit test class for the LowercaseClassKeywords sniff.
+ *
+ * @covers \PHP_CodeSniffer\Standards\Squiz\Sniffs\Classes\LowercaseClassKeywordsSniff
+ */
+final class LowercaseClassKeywordsUnitTest extends AbstractSniffUnitTest
 {
     /**
      * Returns the lines where errors should occur.
@@ -22,7 +27,7 @@ class LowercaseClassKeywordsUnitTest extends AbstractSniffUnitTest
      */
     public function getErrorList()
     {
-        $errors = [2 => 3, 3 => 3, 4 => 1, 5 => 1, 6 => 2, 10 => 1, 11 => 1, 14 => 1];
+        $errors = [2 => 3, 3 => 3, 4 => 1, 5 => 1, 6 => 2, 8 => 1, 10 => 1, 11 => 1, 14 => 1, 16 => 1];
         return $errors;
     }
     //end getErrorList()

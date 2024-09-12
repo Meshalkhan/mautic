@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Container;
+namespace ECSPrefix202408\Illuminate\Container;
 
 use Closure;
 use ReflectionNamedType;

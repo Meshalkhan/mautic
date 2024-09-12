@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Database;
+namespace ECSPrefix202408\Illuminate\Contracts\Database;
 
 class ModelIdentifier
 {

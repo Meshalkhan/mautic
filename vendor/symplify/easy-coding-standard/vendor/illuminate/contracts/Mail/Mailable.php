@@ -1,8 +1,8 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Mail;
+namespace ECSPrefix202408\Illuminate\Contracts\Mail;
 
-use ECSPrefix202312\Illuminate\Contracts\Queue\Factory as Queue;
+use ECSPrefix202408\Illuminate\Contracts\Queue\Factory as Queue;
 interface Mailable
 {
     /**

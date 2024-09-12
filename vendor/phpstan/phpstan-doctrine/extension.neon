@@ -1,5 +1,8 @@
 parameters:
 	doctrine:
+		reportDynamicQueryBuilders: false
+		reportUnknownTypes: false
+		allowNullablePropertyForRequiredField: false
 		repositoryClass: null
 		ormRepositoryClass: null
 		odmRepositoryClass: null
@@ -8,6 +11,7 @@ parameters:
 		objectManagerLoader: null
 		searchOtherMethodsForQueryBuilderBeginning: true
 		queryBuilderFastAlgorithm: false
+		literalString: false
 	featureToggles:
 		skipCheckGenericClasses:
 			- Doctrine\ODM\MongoDB\Mapping\ClassMetadata
@@ -16,14 +20,21 @@ parameters:
 			- Doctrine\Persistence\Mapping\ClassMetadata
 			- Doctrine\ORM\AbstractQuery
 			- Doctrine\ORM\Query
+			- Doctrine\ORM\Tools\Pagination\Paginator
 	stubFiles:
 		- stubs/Criteria.stub
+		- stubs/DBAL/Cache/CacheException.stub
+		- stubs/DBAL/Cache/QueryCacheProfile.stub
 		- stubs/DBAL/Exception/UniqueConstraintViolationException.stub
+		- stubs/DBAL/Types/Type.stub
+		- stubs/DBAL/Exception.stub
+		- stubs/DBAL/Result.stub
 		- stubs/DocumentManager.stub
 		- stubs/DocumentRepository.stub
 		- stubs/EntityManager.stub
 		- stubs/EntityManagerDecorator.stub
 		- stubs/EntityManagerInterface.stub
+		- stubs/EntityRepository.stub
 		- stubs/MongoClassMetadataInfo.stub
 
 		- stubs/Persistence/ManagerRegistry.stub
@@ -32,19 +43,31 @@ parameters:
 		- stubs/Persistence/ObjectRepository.stub
 		- stubs/RepositoryFactory.stub
 		- stubs/Collections/ArrayCollection.stub
-		- stubs/Collections/Collection.stub
 		- stubs/Collections/ReadableCollection.stub
 		- stubs/Collections/Selectable.stub
 		- stubs/ORM/AbstractQuery.stub
+		- stubs/ORM/Exception/ORMException.stub
 		- stubs/ORM/Id/AbstractIdGenerator.stub
 		- stubs/ORM/Mapping/ClassMetadata.stub
 		- stubs/ORM/Mapping/ClassMetadataInfo.stub
+		- stubs/ORM/Mapping/ManyToManyInverseSideMapping.stub
+		- stubs/ORM/Mapping/ManyToManyOwningSideMapping.stub
+		- stubs/ORM/Mapping/ManyToOneAssociationMapping.stub
+		- stubs/ORM/Mapping/OneToManyAssociationMapping.stub
+		- stubs/ORM/Mapping/OneToOneInverseSideMapping.stub
+		- stubs/ORM/Mapping/OneToOneOwningSideMapping.stub
+		- stubs/ORM/NonUniqueResultException.stub
+		- stubs/ORM/NoResultException.stub
 		- stubs/ORM/ORMException.stub
+		- stubs/ORM/UnexpectedResultException.stub
 		- stubs/ORM/Query/Expr.stub
 		- stubs/ORM/Query.stub
+		- stubs/ORM/QueryBuilder.stub
 		- stubs/ORM/Query/Expr/Comparison.stub
 		- stubs/ORM/Query/Expr/Composite.stub
+		- stubs/ORM/Query/Expr/Func.stub
 		- stubs/ORM/Query/Expr/Join.stub
+		- stubs/ORM/Tools/Pagination/Paginator.stub
 		- stubs/Persistence/Mapping/ClassMetadata.stub
 		- stubs/ServiceDocumentRepository.stub
 
@@ -58,6 +81,10 @@ parametersSchema:
 		objectManagerLoader: schema(string(), nullable())
 		searchOtherMethodsForQueryBuilderBeginning: bool()
 		queryBuilderFastAlgorithm: bool()
+		reportDynamicQueryBuilders: bool()
+		reportUnknownTypes: bool()
+		allowNullablePropertyForRequiredField: bool()
+		literalString: bool()
 	])
 
 conditionalTags:
@@ -67,10 +94,19 @@ conditionalTags:
 services:
 	-
 		class: PHPStan\Type\Doctrine\DescriptorRegistryFactory
-	-
-		class: PHPStan\Type\Doctrine\DescriptorRegistry
+
+	doctrineTypeDescriptorRegistry:
+		class: PHPStan\Type\Doctrine\DefaultDescriptorRegistry
 		factory: @PHPStan\Type\Doctrine\DescriptorRegistryFactory::createRegistry
 
+	-
+		class: PHPStan\Doctrine\Driver\DriverDetector
+	-
+		class: PHPStan\Doctrine\DoctrineDiagnoseExtension
+		tags:
+			- phpstan.diagnoseExtension
+	-
+		class: PHPStan\Type\Doctrine\HydrationModeReturnTypeResolver
 	-
 		class: PHPStan\Reflection\Doctrine\DoctrineSelectableClassReflectionExtension
 	-
@@ -96,6 +132,7 @@ services:
 		class: PHPStan\Type\Doctrine\ObjectMetadataResolver
 		arguments:
 			objectManagerLoader: %doctrine.objectManagerLoader%
+			tmpDir: %tmpDir%
 	-
 		class: PHPStan\Type\Doctrine\QueryBuilder\QueryBuilderGetDqlDynamicReturnTypeExtension
 		arguments:
@@ -107,6 +144,7 @@ services:
 		arguments:
 			queryBuilderClass: %doctrine.queryBuilderClass%
 			argumentsProcessor: @doctrineQueryBuilderArgumentsProcessor
+			descriptorRegistry: @doctrineTypeDescriptorRegistry
 		tags:
 			- phpstan.broker.dynamicMethodReturnTypeExtension
 	-
@@ -130,6 +168,7 @@ services:
 		class: PHPStan\Type\Doctrine\CreateQueryDynamicReturnTypeExtension
 		arguments:
 			objectMetadataResolver: @PHPStan\Type\Doctrine\ObjectMetadataResolver
+			descriptorRegistry: @doctrineTypeDescriptorRegistry
 		tags:
 			- phpstan.broker.dynamicMethodReturnTypeExtension
 	-
@@ -142,7 +181,12 @@ services:
 			argumentsProcessor: @doctrineQueryBuilderArgumentsProcessor
 		tags:
 			- phpstan.broker.dynamicMethodReturnTypeExtension
-
+	-
+		class: PHPStan\Type\Doctrine\QueryBuilder\Expr\BaseExpressionDynamicReturnTypeExtension
+		arguments:
+			argumentsProcessor: @doctrineQueryBuilderArgumentsProcessor
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
 	-
 		class: PHPStan\Rules\Doctrine\ORM\PropertiesExtension
 		tags:
@@ -154,11 +198,14 @@ services:
 			parser: @defaultAnalysisParser
 
 	-
+		class: PHPStan\Type\Doctrine\QueryBuilder\ReturnQueryBuilderExpressionTypeResolverExtension
+		tags:
+			- phpstan.broker.expressionTypeResolverExtension
+
+	-
 		class: PHPStan\Stubs\Doctrine\StubFilesExtensionLoader
 		tags:
 			- phpstan.stubFilesExtension
-		arguments:
-			bleedingEdge: %featureToggles.bleedingEdge%
 
 	doctrineQueryBuilderArgumentsProcessor:
 		class: PHPStan\Type\Doctrine\ArgumentsProcessor
@@ -266,10 +313,25 @@ services:
 		class: PHPStan\Type\Doctrine\DBAL\QueryBuilder\QueryBuilderExecuteMethodExtension
 		tags:
 			- phpstan.broker.dynamicMethodReturnTypeExtension
+	-
+		class: PHPStan\Type\Doctrine\DBAL\RowCountMethodDynamicReturnTypeExtension
+		arguments:
+			class: Doctrine\DBAL\Result
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
+	-
+		class: PHPStan\Type\Doctrine\DBAL\RowCountMethodDynamicReturnTypeExtension
+		arguments:
+			class: Doctrine\DBAL\Driver\Result
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
 
 	# Type descriptors
 	-
 		class: PHPStan\Type\Doctrine\Descriptors\ArrayType
+		tags: [phpstan.doctrine.typeDescriptor]
+	-
+		class: PHPStan\Type\Doctrine\Descriptors\AsciiStringType
 		tags: [phpstan.doctrine.typeDescriptor]
 	-
 		class: PHPStan\Type\Doctrine\Descriptors\BigIntType
@@ -391,3 +453,21 @@ services:
 		class: PHPStan\PhpDoc\Doctrine\QueryTypeNodeResolverExtension
 		tags:
 			- phpstan.phpDoc.typeNodeResolverExtension
+
+	-
+		class: PHPStan\PhpDoc\Doctrine\DoctrineLiteralStringTypeNodeResolverExtension
+		arguments:
+			enabled: %doctrine.literalString%
+		tags:
+			- phpstan.phpDoc.typeNodeResolverExtension
+
+	-
+		class: PHPStan\Type\Doctrine\EntityManagerInterfaceThrowTypeExtension
+		tags:
+			- phpstan.dynamicMethodThrowTypeExtension
+
+	# Forbidden class names extension
+	-
+		class: PHPStan\Classes\DoctrineProxyForbiddenClassNamesExtension
+		tags:
+			- phpstan.forbiddenClassNamesExtension

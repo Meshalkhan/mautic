@@ -13,16 +13,25 @@ final class Version20230311195347 extends AbstractMauticMigration
 
     public function up(Schema $schema): void
     {
-        $tableName  = MAUTIC_TABLE_PREFIX.'integration_entity';
-        $columnName = 'integration';
-        $value      = 'Pipedrive';
+        try
+        {
+            $tableName  = MAUTIC_TABLE_PREFIX.'integration_entity';
+            $columnName = 'integration';
+            $value      = 'Pipedrive';
 
-        $connection = $this->connection;
-        $rowCount   = self::BATCH_SIZE;
+            $connection = $this->connection;
+            $rowCount   = self::BATCH_SIZE;
 
-        while ($rowCount) {
-            $sql      = "DELETE FROM $tableName WHERE $columnName = :value LIMIT ".self::BATCH_SIZE;
-            $rowCount = $connection->executeStatement($sql, ['value' => $value]);
+            while ($rowCount) {
+                $sql      = "DELETE FROM $tableName WHERE $columnName = :value LIMIT ".self::BATCH_SIZE;
+                $rowCount = $connection->executeStatement($sql, ['value' => $value]);
+            }
+        } catch (TableNotFoundException $e) {
+            // Log the exception or handle it as needed.
+            $this->write("Table not found: " . $e->getMessage());
+        } catch (\Exception $e) {
+            // Handle other possible exceptions.
+            $this->write("An error occurred: " . $e->getMessage());
         }
     }
 }

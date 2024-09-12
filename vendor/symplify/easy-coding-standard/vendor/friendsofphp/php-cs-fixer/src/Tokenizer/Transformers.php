@@ -12,8 +12,8 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Tokenizer;
 
-use ECSPrefix202312\Symfony\Component\Finder\Finder;
-use ECSPrefix202312\Symfony\Component\Finder\SplFileInfo;
+use ECSPrefix202408\Symfony\Component\Finder\Finder;
+use ECSPrefix202408\Symfony\Component\Finder\SplFileInfo;
 /**
  * Collection of Transformer classes.
  *

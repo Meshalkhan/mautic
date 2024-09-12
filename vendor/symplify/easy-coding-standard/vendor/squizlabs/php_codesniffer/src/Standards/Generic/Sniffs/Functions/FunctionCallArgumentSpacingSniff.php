@@ -5,7 +5,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\Functions;
 
@@ -17,7 +17,7 @@ class FunctionCallArgumentSpacingSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -80,17 +80,24 @@ class FunctionCallArgumentSpacingSniff implements Sniff
         $tokens = $phpcsFile->getTokens();
         $closeBracket = $tokens[$openBracket]['parenthesis_closer'];
         $nextSeparator = $openBracket;
-        $find = [\T_COMMA, \T_CLOSURE, \T_ANON_CLASS, \T_OPEN_SHORT_ARRAY];
+        $find = [\T_COMMA, \T_CLOSURE, \T_FN, \T_ANON_CLASS, \T_OPEN_SHORT_ARRAY, \T_MATCH];
         while (($nextSeparator = $phpcsFile->findNext($find, $nextSeparator + 1, $closeBracket)) !== \false) {
-            if ($tokens[$nextSeparator]['code'] === \T_CLOSURE || $tokens[$nextSeparator]['code'] === \T_ANON_CLASS) {
-                // Skip closures.
+            if ($tokens[$nextSeparator]['code'] === \T_CLOSURE || $tokens[$nextSeparator]['code'] === \T_ANON_CLASS || $tokens[$nextSeparator]['code'] === \T_MATCH) {
+                // Skip closures, anon class declarations and match control structures.
                 $nextSeparator = $tokens[$nextSeparator]['scope_closer'];
                 continue;
             } else {
-                if ($tokens[$nextSeparator]['code'] === \T_OPEN_SHORT_ARRAY) {
-                    // Skips arrays using short notation.
-                    $nextSeparator = $tokens[$nextSeparator]['bracket_closer'];
+                if ($tokens[$nextSeparator]['code'] === \T_FN) {
+                    // Skip arrow functions, but don't skip the arrow function closer as it is likely to
+                    // be the comma separating it from the next function call argument (or the parenthesis closer).
+                    $nextSeparator = $tokens[$nextSeparator]['scope_closer'] - 1;
                     continue;
+                } else {
+                    if ($tokens[$nextSeparator]['code'] === \T_OPEN_SHORT_ARRAY) {
+                        // Skips arrays using short notation.
+                        $nextSeparator = $tokens[$nextSeparator]['bracket_closer'];
+                        continue;
+                    }
                 }
             }
             // Make sure the comma or variable belongs directly to this function call,
@@ -121,10 +128,13 @@ class FunctionCallArgumentSpacingSniff implements Sniff
                 }
                 //end if
                 if ($tokens[$nextSeparator + 1]['code'] !== \T_WHITESPACE) {
-                    $error = 'No space found after comma in argument list';
-                    $fix = $phpcsFile->addFixableError($error, $nextSeparator, 'NoSpaceAfterComma');
-                    if ($fix === \true) {
-                        $phpcsFile->fixer->addContent($nextSeparator, ' ');
+                    // Ignore trailing comma's after last argument as that's outside the scope of this sniff.
+                    if ($nextSeparator + 1 !== $closeBracket) {
+                        $error = 'No space found after comma in argument list';
+                        $fix = $phpcsFile->addFixableError($error, $nextSeparator, 'NoSpaceAfterComma');
+                        if ($fix === \true) {
+                            $phpcsFile->fixer->addContent($nextSeparator, ' ');
+                        }
                     }
                 } else {
                     // If there is a newline in the space, then they must be formatting

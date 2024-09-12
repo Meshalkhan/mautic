@@ -8,9 +8,9 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202312\Symfony\Component\Console\Messenger;
+namespace ECSPrefix202408\Symfony\Component\Console\Messenger;
 
-use ECSPrefix202312\Symfony\Component\Console\Exception\RunCommandFailedException;
+use ECSPrefix202408\Symfony\Component\Console\Exception\RunCommandFailedException;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */

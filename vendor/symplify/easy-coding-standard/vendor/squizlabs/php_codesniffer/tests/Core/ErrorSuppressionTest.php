@@ -5,15 +5,21 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Tests\Core;
 
-use PHP_CodeSniffer\Config;
-use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Files\DummyFile;
-use ECSPrefix202312\PHPUnit\Framework\TestCase;
-class ErrorSuppressionTest extends TestCase
+use PHP_CodeSniffer\Ruleset;
+use PHP_CodeSniffer\Tests\ConfigDouble;
+use ECSPrefix202408\PHPUnit\Framework\TestCase;
+/**
+ * Tests for PHP_CodeSniffer error suppression tags.
+ *
+ * @covers PHP_CodeSniffer\Files\File::addMessage
+ * @covers PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
+ */
+final class ErrorSuppressionTest extends TestCase
 {
     /**
      * Test suppressing a single error.
@@ -24,7 +30,6 @@ class ErrorSuppressionTest extends TestCase
      *                               Defaults to 0.
      *
      * @dataProvider dataSuppressError
-     * @covers       PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
      *
      * @return void
      */
@@ -32,7 +37,7 @@ class ErrorSuppressionTest extends TestCase
     {
         static $config, $ruleset;
         if (isset($config, $ruleset) === \false) {
-            $config = new Config();
+            $config = new ConfigDouble();
             $config->standards = ['Generic'];
             $config->sniffs = ['Generic.PHP.LowerCaseConstant'];
             $ruleset = new Ruleset($config);
@@ -49,9 +54,9 @@ class ErrorSuppressionTest extends TestCase
      *
      * @see testSuppressError()
      *
-     * @return array
+     * @return array<string, array<string, string|int>>
      */
-    public function dataSuppressError()
+    public static function dataSuppressError()
     {
         return [
             'no suppression' => ['before' => '', 'after' => '', 'expectedErrors' => 1],
@@ -89,7 +94,6 @@ class ErrorSuppressionTest extends TestCase
      *                               Defaults to 1.
      *
      * @dataProvider dataSuppressSomeErrors
-     * @covers       PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
      *
      * @return void
      */
@@ -97,7 +101,7 @@ class ErrorSuppressionTest extends TestCase
     {
         static $config, $ruleset;
         if (isset($config, $ruleset) === \false) {
-            $config = new Config();
+            $config = new ConfigDouble();
             $config->standards = ['Generic'];
             $config->sniffs = ['Generic.PHP.LowerCaseConstant'];
             $ruleset = new Ruleset($config);
@@ -120,9 +124,9 @@ EOD;
      *
      * @see testSuppressSomeErrors()
      *
-     * @return array
+     * @return array<string, array<string, string|int>>
      */
-    public function dataSuppressSomeErrors()
+    public static function dataSuppressSomeErrors()
     {
         return [
             'no suppression' => ['before' => '', 'between' => '', 'expectedErrors' => 2],
@@ -147,7 +151,6 @@ EOD;
      *                                 Defaults to 0.
      *
      * @dataProvider dataSuppressWarning
-     * @covers       PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
      *
      * @return void
      */
@@ -155,7 +158,7 @@ EOD;
     {
         static $config, $ruleset;
         if (isset($config, $ruleset) === \false) {
-            $config = new Config();
+            $config = new ConfigDouble();
             $config->standards = ['Generic'];
             $config->sniffs = ['Generic.Commenting.Todo'];
             $ruleset = new Ruleset($config);
@@ -177,9 +180,9 @@ EOD;
      *
      * @see testSuppressWarning()
      *
-     * @return array
+     * @return array<string, array<string, string|int>>
      */
-    public function dataSuppressWarning()
+    public static function dataSuppressWarning()
     {
         return [
             'no suppression' => ['before' => '', 'after' => '', 'expectedWarnings' => 1],
@@ -203,7 +206,6 @@ EOD;
      *                               Defaults to 1.
      *
      * @dataProvider dataSuppressLine
-     * @covers       PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
      *
      * @return void
      */
@@ -211,7 +213,7 @@ EOD;
     {
         static $config, $ruleset;
         if (isset($config, $ruleset) === \false) {
-            $config = new Config();
+            $config = new ConfigDouble();
             $config->standards = ['Generic'];
             $config->sniffs = ['Generic.PHP.LowerCaseConstant'];
             $ruleset = new Ruleset($config);
@@ -233,9 +235,9 @@ EOD;
      *
      * @see testSuppressLine()
      *
-     * @return array
+     * @return array<string, array<string, string|int>>
      */
-    public function dataSuppressLine()
+    public static function dataSuppressLine()
     {
         return [
             'no suppression' => ['before' => '', 'after' => '', 'expectedErrors' => 2],
@@ -260,13 +262,11 @@ EOD;
     /**
      * Test suppressing a single error using a single line ignore in the middle of a line.
      *
-     * @covers PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
-     *
      * @return void
      */
     public function testSuppressLineMidLine()
     {
-        $config = new Config();
+        $config = new ConfigDouble();
         $config->standards = ['Generic'];
         $config->sniffs = ['Generic.PHP.LowerCaseConstant'];
         $ruleset = new Ruleset($config);
@@ -280,13 +280,11 @@ EOD;
     /**
      * Test suppressing a single error using a single line ignore within a docblock.
      *
-     * @covers PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
-     *
      * @return void
      */
     public function testSuppressLineWithinDocblock()
     {
-        $config = new Config();
+        $config = new ConfigDouble();
         $config->standards = ['Generic'];
         $config->sniffs = ['Generic.Files.LineLength'];
         $ruleset = new Ruleset($config);
@@ -313,7 +311,6 @@ EOD;
      * @param string $after  Annotation to place after the code.
      *
      * @dataProvider dataNestedSuppressLine
-     * @covers       PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
      *
      * @return void
      */
@@ -321,7 +318,7 @@ EOD;
     {
         static $config, $ruleset;
         if (isset($config, $ruleset) === \false) {
-            $config = new Config();
+            $config = new ConfigDouble();
             $config->standards = ['Generic'];
             $config->sniffs = ['Generic.PHP.LowerCaseConstant'];
             $ruleset = new Ruleset($config);
@@ -344,9 +341,9 @@ EOD;
      *
      * @see testNestedSuppressLine()
      *
-     * @return array
+     * @return array<string, array<string, string>>
      */
-    public function dataNestedSuppressLine()
+    public static function dataNestedSuppressLine()
     {
         return [
             // Process with disable/enable suppression and no single line suppression.
@@ -371,7 +368,6 @@ EOD;
      *                               Defaults to 0.
      *
      * @dataProvider dataSuppressScope
-     * @covers       PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
      *
      * @return void
      */
@@ -379,7 +375,7 @@ EOD;
     {
         static $config, $ruleset;
         if (isset($config, $ruleset) === \false) {
-            $config = new Config();
+            $config = new ConfigDouble();
             $config->standards = ['PEAR'];
             $config->sniffs = ['PEAR.Functions.FunctionDeclaration'];
             $ruleset = new Ruleset($config);
@@ -406,9 +402,9 @@ EOD;
      *
      * @see testSuppressScope()
      *
-     * @return array
+     * @return array<string, array<string, string|int>>
      */
-    public function dataSuppressScope()
+    public static function dataSuppressScope()
     {
         return [
             'no suppression' => ['before' => '', 'after' => '', 'expectedErrors' => 1],
@@ -434,7 +430,6 @@ EOD;
      *                                 Defaults to 0.
      *
      * @dataProvider dataSuppressFile
-     * @covers       PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
      *
      * @return void
      */
@@ -442,7 +437,7 @@ EOD;
     {
         static $config, $ruleset;
         if (isset($config, $ruleset) === \false) {
-            $config = new Config();
+            $config = new ConfigDouble();
             $config->standards = ['Generic'];
             $config->sniffs = ['Generic.Commenting.Todo'];
             $ruleset = new Ruleset($config);
@@ -466,12 +461,12 @@ EOD;
      *
      * @see testSuppressFile()
      *
-     * @return array
+     * @return array<string, array<string, string|int>>
      */
-    public function dataSuppressFile()
+    public static function dataSuppressFile()
     {
         return [
-            'no suppression' => ['before' => '', 'after' => '', 'expectedErrors' => 1],
+            'no suppression' => ['before' => '', 'after' => '', 'expectedWarnings' => 1],
             // Process with suppression.
             'ignoreFile: start of file, slash comment' => ['before' => '// phpcs:ignoreFile'],
             'ignoreFile: start of file, slash comment, with @' => ['before' => '// @phpcs:ignoreFile'],
@@ -503,7 +498,6 @@ EOD;
      *                                 Defaults to 0.
      *
      * @dataProvider dataDisableSelected
-     * @covers       PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
      *
      * @return void
      */
@@ -511,7 +505,7 @@ EOD;
     {
         static $config, $ruleset;
         if (isset($config, $ruleset) === \false) {
-            $config = new Config();
+            $config = new ConfigDouble();
             $config->standards = ['Generic'];
             $config->sniffs = ['Generic.PHP.LowerCaseConstant', 'Generic.Commenting.Todo'];
             $ruleset = new Ruleset($config);
@@ -535,9 +529,9 @@ EOD;
      *
      * @see testDisableSelected()
      *
-     * @return array
+     * @return array<string, array<string, string|int>>
      */
-    public function dataDisableSelected()
+    public static function dataDisableSelected()
     {
         return [
             // Single sniff.
@@ -568,7 +562,6 @@ EOD;
      * @param int    $expectedWarnings Number of warnings expected.
      *
      * @dataProvider dataEnableSelected
-     * @covers       PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
      *
      * @return void
      */
@@ -576,7 +569,7 @@ EOD;
     {
         static $config, $ruleset;
         if (isset($config, $ruleset) === \false) {
-            $config = new Config();
+            $config = new ConfigDouble();
             $config->standards = ['Generic'];
             $config->sniffs = ['Generic.PHP.LowerCaseConstant', 'Generic.Commenting.Todo'];
             $ruleset = new Ruleset($config);
@@ -595,9 +588,9 @@ EOD;
      *
      * @see testEnableSelected()
      *
-     * @return array
+     * @return array<string, array<string, string|int>>
      */
-    public function dataEnableSelected()
+    public static function dataEnableSelected()
     {
         return ['disable/enable: a single sniff' => ['code' => '
                     // phpcs:disable Generic.Commenting.Todo
@@ -675,7 +668,6 @@ EOD;
      * @param int    $expectedWarnings Number of warnings expected.
      *
      * @dataProvider dataIgnoreSelected
-     * @covers       PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
      *
      * @return void
      */
@@ -683,7 +675,7 @@ EOD;
     {
         static $config, $ruleset;
         if (isset($config, $ruleset) === \false) {
-            $config = new Config();
+            $config = new ConfigDouble();
             $config->standards = ['Generic'];
             $config->sniffs = ['Generic.PHP.LowerCaseConstant', 'Generic.Commenting.Todo'];
             $ruleset = new Ruleset($config);
@@ -707,9 +699,9 @@ EOD;
      *
      * @see testIgnoreSelected()
      *
-     * @return array
+     * @return array<string, array<string, string|int>>
      */
-    public function dataIgnoreSelected()
+    public static function dataIgnoreSelected()
     {
         return [
             'no suppression' => ['before' => '', 'expectedErrors' => 2, 'expectedWarnings' => 2],
@@ -730,7 +722,6 @@ EOD;
      * @param int    $expectedWarnings Number of warnings expected.
      *
      * @dataProvider dataCommenting
-     * @covers       PHP_CodeSniffer\Tokenizers\Tokenizer::createPositionMap
      *
      * @return void
      */
@@ -738,7 +729,7 @@ EOD;
     {
         static $config, $ruleset;
         if (isset($config, $ruleset) === \false) {
-            $config = new Config();
+            $config = new ConfigDouble();
             $config->standards = ['Generic'];
             $config->sniffs = ['Generic.PHP.LowerCaseConstant', 'Generic.Commenting.Todo'];
             $ruleset = new Ruleset($config);
@@ -757,9 +748,9 @@ EOD;
      *
      * @see testCommenting()
      *
-     * @return array
+     * @return array<string, array<string, string|int>>
      */
-    public function dataCommenting()
+    public static function dataCommenting()
     {
         return ['ignore: single sniff' => ['code' => '
                     // phpcs:ignore Generic.Commenting.Todo -- Because reasons

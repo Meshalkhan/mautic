@@ -14,6 +14,9 @@ parameters:
 	featureToggles:
 		skipCheckGenericClasses:
 			- Symfony\Component\Form\AbstractType
+			- Symfony\Component\Form\FormBuilderInterface
+			- Symfony\Component\Form\FormConfigBuilderInterface
+			- Symfony\Component\Form\FormConfigInterface
 			- Symfony\Component\Form\FormInterface
 			- Symfony\Component\Form\FormTypeExtensionInterface
 			- Symfony\Component\Form\FormTypeInterface
@@ -24,6 +27,7 @@ parameters:
 		- stubs/Psr/Cache/CacheException.stub
 		- stubs/Psr/Cache/CacheItemInterface.stub
 		- stubs/Psr/Cache/InvalidArgumentException.stub
+		- stubs/Symfony/Bundle/FrameworkBundle/Controller/AbstractController.stub
 		- stubs/Symfony/Bundle/FrameworkBundle/KernelBrowser.stub
 		- stubs/Symfony/Bundle/FrameworkBundle/Test/KernelTestCase.stub
 		- stubs/Symfony/Bundle/FrameworkBundle/Test/TestContainer.stub
@@ -47,6 +51,8 @@ parameters:
 		- stubs/Symfony/Component/Form/Exception/TransformationFailedException.stub
 		- stubs/Symfony/Component/Form/DataTransformerInterface.stub
 		- stubs/Symfony/Component/Form/FormBuilderInterface.stub
+		- stubs/Symfony/Component/Form/FormConfigBuilderInterface.stub
+		- stubs/Symfony/Component/Form/FormConfigInterface.stub
 		- stubs/Symfony/Component/Form/FormInterface.stub
 		- stubs/Symfony/Component/Form/FormFactoryInterface.stub
 		- stubs/Symfony/Component/Form/FormTypeExtensionInterface.stub
@@ -61,6 +67,12 @@ parameters:
 		- stubs/Symfony/Component/OptionsResolver/Exception/InvalidOptionsException.stub
 		- stubs/Symfony/Component/OptionsResolver/Options.stub
 		- stubs/Symfony/Component/Process/Process.stub
+		- stubs/Symfony/Component/PropertyAccess/Exception/AccessException.stub
+		- stubs/Symfony/Component/PropertyAccess/Exception/ExceptionInterface.stub
+		- stubs/Symfony/Component/PropertyAccess/Exception/InvalidArgumentException.stub
+		- stubs/Symfony/Component/PropertyAccess/Exception/RuntimeException.stub
+		- stubs/Symfony/Component/PropertyAccess/Exception/UnexpectedTypeException.stub
+		- stubs/Symfony/Component/PropertyAccess/PropertyAccessorInterface.stub
 		- stubs/Symfony/Component/PropertyAccess/PropertyPathInterface.stub
 		- stubs/Symfony/Component/Security/Acl/Model/AclInterface.stub
 		- stubs/Symfony/Component/Security/Acl/Model/EntryInterface.stub
@@ -85,11 +97,14 @@ parameters:
 		- stubs/Symfony/Component/Serializer/Normalizer/NormalizableInterface.stub
 		- stubs/Symfony/Component/Serializer/Normalizer/NormalizerInterface.stub
 		- stubs/Symfony/Component/Validator/Constraint.stub
+		- stubs/Symfony/Component/Validator/Constraints/Composite.stub
+		- stubs/Symfony/Component/Validator/Constraints/Compound.stub
 		- stubs/Symfony/Component/Validator/ConstraintViolationInterface.stub
 		- stubs/Symfony/Component/Validator/ConstraintViolationListInterface.stub
 		- stubs/Symfony/Contracts/Cache/CacheInterface.stub
 		- stubs/Symfony/Contracts/Cache/CallbackInterface.stub
 		- stubs/Symfony/Contracts/Cache/ItemInterface.stub
+		- stubs/Symfony/Contracts/Service/ServiceSubscriberInterface.stub
 		- stubs/Twig/Node/Node.stub
 
 parametersSchema:
@@ -309,6 +324,10 @@ services:
 		class: PHPStan\Symfony\PasswordAuthenticatedUserStubFilesExtension
 		tags:
 			- phpstan.stubFilesExtension
+	-
+		class: PHPStan\Symfony\SymfonyDiagnoseExtension
+		tags:
+			- phpstan.diagnoseExtension
 
 	# FormInterface::getErrors() return type
 	-
@@ -329,3 +348,20 @@ services:
 	-
 		factory: PHPStan\Type\Symfony\InputBagTypeSpecifyingExtension
 		tags: [phpstan.typeSpecifier.methodTypeSpecifyingExtension]
+
+	# Additional constructors and initialization checks for @required autowiring
+	-
+		class: PHPStan\Symfony\RequiredAutowiringExtension
+		tags:
+			- phpstan.properties.readWriteExtension
+			- phpstan.additionalConstructorsExtension
+
+	# CacheInterface::get() return type
+	-
+		factory: PHPStan\Type\Symfony\CacheInterfaceGetDynamicReturnTypeExtension
+		tags: [phpstan.broker.dynamicMethodReturnTypeExtension]
+
+	# Extension::getConfiguration() return type
+	-
+		factory: PHPStan\Type\Symfony\ExtensionGetConfigurationReturnTypeExtension
+		tags: [phpstan.broker.dynamicMethodReturnTypeExtension]

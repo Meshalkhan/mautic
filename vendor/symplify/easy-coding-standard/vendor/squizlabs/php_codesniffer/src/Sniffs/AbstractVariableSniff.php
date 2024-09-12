@@ -11,7 +11,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Sniffs;
 
@@ -47,7 +47,7 @@ abstract class AbstractVariableSniff extends \PHP_CodeSniffer\Sniffs\AbstractSco
      *
      * @return void|int Optionally returns a stack pointer. The sniff will not be
      *                  called again on the current file until the returned stack
-     *                  pointer is reached. Return ($phpcsFile->numTokens + 1) to skip
+     *                  pointer is reached. Return `$phpcsFile->numTokens` to skip
      *                  the rest of the file.
      */
     protected final function processTokenWithinScope(File $phpcsFile, $stackPtr, $currScope)
@@ -117,7 +117,7 @@ abstract class AbstractVariableSniff extends \PHP_CodeSniffer\Sniffs\AbstractSco
      *
      * @return void|int Optionally returns a stack pointer. The sniff will not be
      *                  called again on the current file until the returned stack
-     *                  pointer is reached. Return ($phpcsFile->numTokens + 1) to skip
+     *                  pointer is reached. Return `$phpcsFile->numTokens` to skip
      *                  the rest of the file.
      */
     protected final function processTokenOutsideScope(File $phpcsFile, $stackPtr)
@@ -146,7 +146,7 @@ abstract class AbstractVariableSniff extends \PHP_CodeSniffer\Sniffs\AbstractSco
      *
      * @return void|int Optionally returns a stack pointer. The sniff will not be
      *                  called again on the current file until the returned stack
-     *                  pointer is reached. Return ($phpcsFile->numTokens + 1) to skip
+     *                  pointer is reached. Return `$phpcsFile->numTokens` to skip
      *                  the rest of the file.
      */
     protected abstract function processMemberVar(File $phpcsFile, $stackPtr);
@@ -159,7 +159,7 @@ abstract class AbstractVariableSniff extends \PHP_CodeSniffer\Sniffs\AbstractSco
      *
      * @return void|int Optionally returns a stack pointer. The sniff will not be
      *                  called again on the current file until the returned stack
-     *                  pointer is reached. Return ($phpcsFile->numTokens + 1) to skip
+     *                  pointer is reached. Return `$phpcsFile->numTokens` to skip
      *                  the rest of the file.
      */
     protected abstract function processVariable(File $phpcsFile, $stackPtr);
@@ -176,7 +176,7 @@ abstract class AbstractVariableSniff extends \PHP_CodeSniffer\Sniffs\AbstractSco
      *
      * @return void|int Optionally returns a stack pointer. The sniff will not be
      *                  called again on the current file until the returned stack
-     *                  pointer is reached. Return ($phpcsFile->numTokens + 1) to skip
+     *                  pointer is reached. Return `$phpcsFile->numTokens` to skip
      *                  the rest of the file.
      */
     protected abstract function processVariableInString(File $phpcsFile, $stackPtr);

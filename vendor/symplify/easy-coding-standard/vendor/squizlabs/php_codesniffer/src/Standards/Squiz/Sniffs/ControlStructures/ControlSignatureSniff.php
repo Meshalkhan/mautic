@@ -5,7 +5,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\ControlStructures;
 
@@ -29,7 +29,7 @@ class ControlSignatureSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return int[]
+     * @return array<int|string>
      */
     public function register()
     {
@@ -77,8 +77,12 @@ class ControlSignatureSniff implements Sniff
             }
         }
         if ($found !== $expected) {
-            $error = 'Expected %s space(s) after %s keyword; %s found';
-            $data = [$expected, \strtoupper($tokens[$stackPtr]['content']), $found];
+            $pluralizeSpace = 's';
+            if ($expected === 1) {
+                $pluralizeSpace = '';
+            }
+            $error = 'Expected %s space%s after %s keyword; %s found';
+            $data = [$expected, $pluralizeSpace, \strtoupper($tokens[$stackPtr]['content']), $found];
             $fix = $phpcsFile->addFixableError($error, $stackPtr, 'SpaceAfterKeyword', $data);
             if ($fix === \true) {
                 if ($found === 0) {
@@ -88,6 +92,7 @@ class ControlSignatureSniff implements Sniff
                 }
             }
         }
+        //end if
         // Single space after closing parenthesis.
         if (isset($tokens[$stackPtr]['parenthesis_closer']) === \true && isset($tokens[$stackPtr]['scope_opener']) === \true) {
             $expected = 1;
@@ -107,8 +112,12 @@ class ControlSignatureSniff implements Sniff
                 $found = '"' . \str_replace($phpcsFile->eolChar, '\\n', $content) . '"';
             }
             if ($found !== $expected) {
-                $error = 'Expected %s space(s) after closing parenthesis; found %s';
-                $data = [$expected, $found];
+                $pluralizeSpace = 's';
+                if ($expected === 1) {
+                    $pluralizeSpace = '';
+                }
+                $error = 'Expected %s space%s after closing parenthesis; found %s';
+                $data = [$expected, $pluralizeSpace, $found];
                 $fix = $phpcsFile->addFixableError($error, $closer, 'SpaceAfterCloseParenthesis', $data);
                 if ($fix === \true) {
                     $padding = \str_repeat(' ', $expected);

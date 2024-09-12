@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Console\Reporter;
 
-use ECSPrefix202312\Symfony\Component\Console\Style\SymfonyStyle;
+use ECSPrefix202408\Symfony\Component\Console\Style\SymfonyStyle;
 final class CheckerListReporter
 {
     /**
@@ -23,7 +23,7 @@ final class CheckerListReporter
         if ($checkerClasses === []) {
             return;
         }
-        $sectionMessage = \sprintf('%d checker%s from %s:', \count($checkerClasses), \count($checkerClasses) === 1 ? '' : 's', $type);
+        $sectionMessage = \sprintf('%d checker%s %s:', \count($checkerClasses), \count($checkerClasses) === 1 ? '' : 's', $type);
         $this->symfonyStyle->section($sectionMessage);
         $this->symfonyStyle->listing($checkerClasses);
     }

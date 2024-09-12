@@ -8,18 +8,18 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202312\Symfony\Component\Console\DependencyInjection;
+namespace ECSPrefix202408\Symfony\Component\Console\DependencyInjection;
 
-use ECSPrefix202312\Symfony\Component\Console\Command\Command;
-use ECSPrefix202312\Symfony\Component\Console\Command\LazyCommand;
-use ECSPrefix202312\Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
-use ECSPrefix202312\Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
-use ECSPrefix202312\Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
-use ECSPrefix202312\Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
-use ECSPrefix202312\Symfony\Component\DependencyInjection\ContainerBuilder;
-use ECSPrefix202312\Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
-use ECSPrefix202312\Symfony\Component\DependencyInjection\Reference;
-use ECSPrefix202312\Symfony\Component\DependencyInjection\TypedReference;
+use ECSPrefix202408\Symfony\Component\Console\Command\Command;
+use ECSPrefix202408\Symfony\Component\Console\Command\LazyCommand;
+use ECSPrefix202408\Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
+use ECSPrefix202408\Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
+use ECSPrefix202408\Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use ECSPrefix202408\Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
+use ECSPrefix202408\Symfony\Component\DependencyInjection\ContainerBuilder;
+use ECSPrefix202408\Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use ECSPrefix202408\Symfony\Component\DependencyInjection\Reference;
+use ECSPrefix202408\Symfony\Component\DependencyInjection\TypedReference;
 /**
  * Registers console commands.
  *

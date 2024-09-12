@@ -18,6 +18,10 @@ use PhpCsFixer\Console\Output\OutputContext;
  */
 final class ProgressOutputFactory
 {
+    /**
+     * @var array<string, class-string<ProgressOutputInterface>>
+     */
+    private static $outputTypeMap = [\PhpCsFixer\Console\Output\Progress\ProgressOutputType::NONE => \PhpCsFixer\Console\Output\Progress\NullOutput::class, \PhpCsFixer\Console\Output\Progress\ProgressOutputType::DOTS => \PhpCsFixer\Console\Output\Progress\DotsOutput::class, \PhpCsFixer\Console\Output\Progress\ProgressOutputType::BAR => \PhpCsFixer\Console\Output\Progress\PercentageBarOutput::class];
     public function create(string $outputType, OutputContext $context) : \PhpCsFixer\Console\Output\Progress\ProgressOutputInterface
     {
         if (null === $context->getOutput()) {
@@ -26,10 +30,10 @@ final class ProgressOutputFactory
         if (!$this->isBuiltInType($outputType)) {
             throw new \InvalidArgumentException(\sprintf('Something went wrong, "%s" output type is not supported', $outputType));
         }
-        return \PhpCsFixer\Console\Output\Progress\ProgressOutputType::NONE === $outputType ? new \PhpCsFixer\Console\Output\Progress\NullOutput() : new \PhpCsFixer\Console\Output\Progress\DotsOutput($context);
+        return new self::$outputTypeMap[$outputType]($context);
     }
     private function isBuiltInType(string $outputType) : bool
     {
-        return \in_array($outputType, [\PhpCsFixer\Console\Output\Progress\ProgressOutputType::NONE, \PhpCsFixer\Console\Output\Progress\ProgressOutputType::DOTS], \true);
+        return \in_array($outputType, \PhpCsFixer\Console\Output\Progress\ProgressOutputType::all(), \true);
     }
 }

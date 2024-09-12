@@ -12,9 +12,11 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Console\Report\FixReport;
 
-use ECSPrefix202312\SebastianBergmann\Diff\Chunk;
-use ECSPrefix202312\SebastianBergmann\Diff\Parser;
-use ECSPrefix202312\Symfony\Component\Console\Formatter\OutputFormatter;
+use PhpCsFixer\Console\Application;
+use ECSPrefix202408\SebastianBergmann\Diff\Chunk;
+use ECSPrefix202408\SebastianBergmann\Diff\Diff;
+use ECSPrefix202408\SebastianBergmann\Diff\Parser;
+use ECSPrefix202408\Symfony\Component\Console\Formatter\OutputFormatter;
 /**
  * Generates a report according to gitlabs subset of codeclimate json files.
  *
@@ -43,13 +45,11 @@ final class GitlabReporter implements \PhpCsFixer\Console\Report\FixReport\Repor
      */
     public function generate(\PhpCsFixer\Console\Report\FixReport\ReportSummary $reportSummary) : string
     {
+        $about = Application::getAbout();
         $report = [];
         foreach ($reportSummary->getChanged() as $fileName => $change) {
-            $diffs = $this->diffParser->parse($change['diff']);
-            $firstChunk = isset($diffs[0]) ? $diffs[0]->getChunks() : [];
-            $firstChunk = \array_shift($firstChunk);
             foreach ($change['appliedFixers'] as $fixerName) {
-                $report[] = ['check_name' => $fixerName, 'description' => $fixerName, 'categories' => ['Style'], 'fingerprint' => \md5($fileName . $fixerName), 'severity' => 'minor', 'location' => ['path' => $fileName, 'lines' => ['begin' => $firstChunk instanceof Chunk ? $firstChunk->getStart() : 0, 'end' => $firstChunk instanceof Chunk ? $firstChunk->getStartRange() : 0]]];
+                $report[] = ['check_name' => 'PHP-CS-Fixer.' . $fixerName, 'description' => 'PHP-CS-Fixer.' . $fixerName . ' by ' . $about, 'categories' => ['Style'], 'fingerprint' => \md5($fileName . $fixerName), 'severity' => 'minor', 'location' => ['path' => $fileName, 'lines' => self::getLines($this->diffParser->parse($change['diff']))]];
             }
         }
         $jsonString = \json_encode($report, 0);
@@ -57,5 +57,25 @@ final class GitlabReporter implements \PhpCsFixer\Console\Report\FixReport\Repor
             throw new \Exception(\json_last_error_msg());
         }
         return $reportSummary->isDecoratedOutput() ? OutputFormatter::escape($jsonString) : $jsonString;
+    }
+    /**
+     * @param list<Diff> $diffs
+     *
+     * @return array{begin: int, end: int}
+     */
+    private static function getLines(array $diffs) : array
+    {
+        if (isset($diffs[0])) {
+            $firstDiff = $diffs[0];
+            $firstChunk = \Closure::bind(static function (Diff $diff) {
+                return \array_shift($diff->chunks);
+            }, null, $firstDiff)($firstDiff);
+            if ($firstChunk instanceof Chunk) {
+                return \Closure::bind(static function (Chunk $chunk) : array {
+                    return ['begin' => $chunk->start, 'end' => $chunk->startRange];
+                }, null, $firstChunk)($firstChunk);
+            }
+        }
+        return ['begin' => 0, 'end' => 0];
     }
 }

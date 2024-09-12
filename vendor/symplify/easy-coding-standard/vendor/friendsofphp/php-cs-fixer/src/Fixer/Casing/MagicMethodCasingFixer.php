@@ -21,7 +21,7 @@ use PhpCsFixer\Tokenizer\Tokens;
 final class MagicMethodCasingFixer extends AbstractFixer
 {
     /**
-     * @var array<string,string>
+     * @var array<string, string>
      */
     private static $magicNames = ['__call' => '__call', '__callstatic' => '__callStatic', '__clone' => '__clone', '__construct' => '__construct', '__debuginfo' => '__debugInfo', '__destruct' => '__destruct', '__get' => '__get', '__invoke' => '__invoke', '__isset' => '__isset', '__serialize' => '__serialize', '__set' => '__set', '__set_state' => '__set_state', '__sleep' => '__sleep', '__tostring' => '__toString', '__unserialize' => '__unserialize', '__unset' => '__unset', '__wakeup' => '__wakeup'];
     public function getDefinition() : FixerDefinitionInterface

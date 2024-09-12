@@ -8,10 +8,10 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202312\Symfony\Component\Console\Formatter;
+namespace ECSPrefix202408\Symfony\Component\Console\Formatter;
 
-use ECSPrefix202312\Symfony\Component\Console\Exception\InvalidArgumentException;
-use function ECSPrefix202312\Symfony\Component\String\b;
+use ECSPrefix202408\Symfony\Component\Console\Exception\InvalidArgumentException;
+use function ECSPrefix202408\Symfony\Component\String\b;
 /**
  * Formatter class for console output.
  *

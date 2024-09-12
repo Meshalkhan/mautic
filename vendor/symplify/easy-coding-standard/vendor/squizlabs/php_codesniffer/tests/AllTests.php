@@ -5,25 +5,19 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Tests;
 
-if ($GLOBALS['PHP_CODESNIFFER_PEAR'] === \false) {
-    include_once 'Core/AllTests.php';
-    include_once 'Standards/AllSniffs.php';
-} else {
-    include_once 'CodeSniffer/Core/AllTests.php';
-    include_once 'CodeSniffer/Standards/AllSniffs.php';
-    include_once 'FileList.php';
-}
+require_once 'Core/AllTests.php';
+require_once 'Standards/AllSniffs.php';
 // PHPUnit 7 made the TestSuite run() method incompatible with
 // older PHPUnit versions due to return type hints, so maintain
 // two different suite objects.
 $phpunit7 = \false;
-if (\class_exists('ECSPrefix202312\\PHPUnit\\Runner\\Version') === \true) {
-    $version = \ECSPrefix202312\PHPUnit\Runner\Version::id();
-    if ($version[0] === '7') {
+if (\class_exists('ECSPrefix202408\\PHPUnit\\Runner\\Version') === \true) {
+    $version = \ECSPrefix202408\PHPUnit\Runner\Version::id();
+    if (\version_compare($version, '7.0', '>=') === \true) {
         $phpunit7 = \true;
     }
 }

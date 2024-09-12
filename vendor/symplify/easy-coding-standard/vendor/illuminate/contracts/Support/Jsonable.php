@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Support;
+namespace ECSPrefix202408\Illuminate\Contracts\Support;
 
 interface Jsonable
 {

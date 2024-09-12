@@ -12,7 +12,8 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Console\Report\FixReport;
 
-use ECSPrefix202312\Symfony\Component\Console\Formatter\OutputFormatter;
+use PhpCsFixer\Console\Application;
+use ECSPrefix202408\Symfony\Component\Console\Formatter\OutputFormatter;
 /**
  * @author Boris Gorbylev <ekho@ekho.name>
  *
@@ -37,7 +38,7 @@ final class JsonReporter implements \PhpCsFixer\Console\Report\FixReport\Reporte
             }
             $jsonFiles[] = $jsonFile;
         }
-        $json = ['files' => $jsonFiles, 'time' => ['total' => \round($reportSummary->getTime() / 1000, 3)], 'memory' => \round($reportSummary->getMemory() / 1024 / 1024, 3)];
+        $json = ['about' => Application::getAbout(), 'files' => $jsonFiles, 'time' => ['total' => \round($reportSummary->getTime() / 1000, 3)], 'memory' => \round($reportSummary->getMemory() / 1024 / 1024, 3)];
         $json = \json_encode($json, 0);
         if (\json_last_error() !== \JSON_ERROR_NONE) {
             throw new \Exception(\json_last_error_msg());

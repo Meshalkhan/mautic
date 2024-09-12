@@ -8,15 +8,15 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202312\Symfony\Component\OptionsResolver;
+namespace ECSPrefix202408\Symfony\Component\OptionsResolver;
 
-use ECSPrefix202312\Symfony\Component\OptionsResolver\Exception\AccessException;
-use ECSPrefix202312\Symfony\Component\OptionsResolver\Exception\InvalidArgumentException;
-use ECSPrefix202312\Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
-use ECSPrefix202312\Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
-use ECSPrefix202312\Symfony\Component\OptionsResolver\Exception\NoSuchOptionException;
-use ECSPrefix202312\Symfony\Component\OptionsResolver\Exception\OptionDefinitionException;
-use ECSPrefix202312\Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
+use ECSPrefix202408\Symfony\Component\OptionsResolver\Exception\AccessException;
+use ECSPrefix202408\Symfony\Component\OptionsResolver\Exception\InvalidArgumentException;
+use ECSPrefix202408\Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
+use ECSPrefix202408\Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
+use ECSPrefix202408\Symfony\Component\OptionsResolver\Exception\NoSuchOptionException;
+use ECSPrefix202408\Symfony\Component\OptionsResolver\Exception\OptionDefinitionException;
+use ECSPrefix202408\Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
 /**
  * Validates options and merges them with default values.
  *
@@ -807,7 +807,7 @@ class OptionsResolver implements Options
         // Shortcut for resolved options
         if (isset($this->resolved[$option]) || \array_key_exists($option, $this->resolved)) {
             if ($triggerDeprecation && isset($this->deprecated[$option]) && (isset($this->given[$option]) || $this->calling) && \is_string($this->deprecated[$option]['message'])) {
-                \ECSPrefix202312\trigger_deprecation($this->deprecated[$option]['package'], $this->deprecated[$option]['version'], \strtr($this->deprecated[$option]['message'], ['%name%' => $option]));
+                trigger_deprecation($this->deprecated[$option]['package'], $this->deprecated[$option]['version'], \strtr($this->deprecated[$option]['message'], ['%name%' => $option]));
             }
             return $this->resolved[$option];
         }
@@ -949,7 +949,7 @@ class OptionsResolver implements Options
                 }
             }
             if ('' !== $message) {
-                \ECSPrefix202312\trigger_deprecation($deprecation['package'], $deprecation['version'], \strtr($message, ['%name%' => $option]));
+                trigger_deprecation($deprecation['package'], $deprecation['version'], \strtr($message, ['%name%' => $option]));
             }
         }
         // Normalize the validated option

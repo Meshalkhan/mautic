@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Broadcasting;
+namespace ECSPrefix202408\Illuminate\Contracts\Broadcasting;
 
 interface HasBroadcastChannel
 {

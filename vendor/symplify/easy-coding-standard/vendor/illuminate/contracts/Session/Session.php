@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Session;
+namespace ECSPrefix202408\Illuminate\Contracts\Session;
 
 interface Session
 {

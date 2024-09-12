@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202312\Illuminate\Contracts\Validation;
+namespace ECSPrefix202408\Illuminate\Contracts\Validation;
 
 interface ValidatesWhenResolved
 {
