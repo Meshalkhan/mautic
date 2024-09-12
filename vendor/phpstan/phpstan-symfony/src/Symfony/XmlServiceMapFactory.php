@@ -48,11 +48,11 @@ final class XmlServiceMapFactory implements ServiceMapFactory
 			}
 
 			$service = new Service(
-				$this->cleanServiceId((string) $attrs->id),
+				strpos((string) $attrs->id, '.') === 0 ? substr((string) $attrs->id, 1) : (string) $attrs->id,
 				isset($attrs->class) ? (string) $attrs->class : null,
 				isset($attrs->public) && (string) $attrs->public === 'true',
 				isset($attrs->synthetic) && (string) $attrs->synthetic === 'true',
-				isset($attrs->alias) ? $this->cleanServiceId((string) $attrs->alias) : null
+				isset($attrs->alias) ? (string) $attrs->alias : null
 			);
 
 			if ($service->getAlias() !== null) {
@@ -77,11 +77,6 @@ final class XmlServiceMapFactory implements ServiceMapFactory
 		}
 
 		return new DefaultServiceMap($services);
-	}
-
-	private function cleanServiceId(string $id): string
-	{
-		return strpos($id, '.') === 0 ? substr($id, 1) : $id;
 	}
 
 }

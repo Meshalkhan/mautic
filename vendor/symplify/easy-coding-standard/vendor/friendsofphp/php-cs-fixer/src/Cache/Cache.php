@@ -58,7 +58,7 @@ final class Cache implements \PhpCsFixer\Cache\CacheInterface
     public function toJson() : string
     {
         $json = \json_encode(['php' => $this->getSignature()->getPhpVersion(), 'version' => $this->getSignature()->getFixerVersion(), 'indent' => $this->getSignature()->getIndent(), 'lineEnding' => $this->getSignature()->getLineEnding(), 'rules' => $this->getSignature()->getRules(), 'hashes' => $this->hashes]);
-        if (\JSON_ERROR_NONE !== \json_last_error() || \false === $json) {
+        if (\JSON_ERROR_NONE !== \json_last_error()) {
             throw new \UnexpectedValueException(\sprintf('Cannot encode cache signature to JSON, error: "%s". If you have non-UTF8 chars in your signature, like in license for `header_comment`, consider enabling `ext-mbstring` or install `symfony/polyfill-mbstring`.', \json_last_error_msg()));
         }
         return $json;

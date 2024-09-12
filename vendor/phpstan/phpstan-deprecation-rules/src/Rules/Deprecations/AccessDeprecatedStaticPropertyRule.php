@@ -11,12 +11,10 @@ use PHPStan\Broker\ClassNotFoundException;
 use PHPStan\Reflection\MissingPropertyFromReflectionException;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Rules\RuleLevelHelper;
 use PHPStan\Type\ErrorType;
 use PHPStan\Type\Type;
 use function sprintf;
-use function strtolower;
 
 /**
  * @implements Rule<StaticPropertyFetch>
@@ -30,14 +28,10 @@ class AccessDeprecatedStaticPropertyRule implements Rule
 	/** @var RuleLevelHelper */
 	private $ruleLevelHelper;
 
-	/** @var DeprecatedScopeHelper */
-	private $deprecatedScopeHelper;
-
-	public function __construct(ReflectionProvider $reflectionProvider, RuleLevelHelper $ruleLevelHelper, DeprecatedScopeHelper $deprecatedScopeHelper)
+	public function __construct(ReflectionProvider $reflectionProvider, RuleLevelHelper $ruleLevelHelper)
 	{
 		$this->reflectionProvider = $reflectionProvider;
 		$this->ruleLevelHelper = $ruleLevelHelper;
-		$this->deprecatedScopeHelper = $deprecatedScopeHelper;
 	}
 
 	public function getNodeType(): string
@@ -47,7 +41,7 @@ class AccessDeprecatedStaticPropertyRule implements Rule
 
 	public function processNode(Node $node, Scope $scope): array
 	{
-		if ($this->deprecatedScopeHelper->isScopeDeprecated($scope)) {
+		if (DeprecatedScopeHelper::isScopeDeprecated($scope)) {
 			return [];
 		}
 
@@ -90,25 +84,19 @@ class AccessDeprecatedStaticPropertyRule implements Rule
 			if ($property->isDeprecated()->yes()) {
 				$description = $property->getDeprecatedDescription();
 				if ($description === null) {
-					return [
-						RuleErrorBuilder::message(sprintf(
-							'Access to deprecated static property $%s of %s %s.',
-							$propertyName,
-							strtolower($property->getDeclaringClass()->getClassTypeDescription()),
-							$property->getDeclaringClass()->getName()
-						))->identifier('staticProperty.deprecated')->build(),
-					];
+					return [sprintf(
+						'Access to deprecated static property $%s of class %s.',
+						$propertyName,
+						$property->getDeclaringClass()->getName()
+					)];
 				}
 
-				return [
-					RuleErrorBuilder::message(sprintf(
-						"Access to deprecated static property $%s of %s %s:\n%s",
-						$propertyName,
-						strtolower($property->getDeclaringClass()->getClassTypeDescription()),
-						$property->getDeclaringClass()->getName(),
-						$description
-					))->identifier('staticProperty.deprecated')->build(),
-				];
+				return [sprintf(
+					"Access to deprecated static property $%s of class %s:\n%s",
+					$propertyName,
+					$property->getDeclaringClass()->getName(),
+					$description
+				)];
 			}
 		}
 

@@ -1558,6 +1558,7 @@ class AMQPChannel extends AbstractChannel
 
     /**
      * @throws AMQPChannelClosedException
+     * @throws AMQPConnectionClosedException
      * @throws AMQPConnectionBlockedException
      */
     private function checkConnection()

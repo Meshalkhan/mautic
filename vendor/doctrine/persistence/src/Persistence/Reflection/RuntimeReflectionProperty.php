@@ -23,7 +23,6 @@ class RuntimeReflectionProperty extends ReflectionProperty
     /** @var string */
     private $key;
 
-    /** @param class-string $class */
     public function __construct(string $class, string $name)
     {
         parent::__construct($class, $name);

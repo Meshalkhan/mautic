@@ -6,7 +6,6 @@ use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Node\ClassPropertyNode;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\Doctrine\ObjectMetadataResolver;
 use PHPStan\Type\ErrorType;
 use PHPStan\Type\IterableType;
@@ -87,7 +86,7 @@ class EntityRelationRule implements Rule
 
 		$columnType = null;
 		$toMany = false;
-		if ((bool) ($associationMapping['type'] & 3)) { // ClassMetadata::TO_ONE
+		if ((bool) ($associationMapping['type'] & 3)) { // ClassMetadataInfo::TO_ONE
 			$columnType = new ObjectType($associationMapping['targetEntity']);
 			if (in_array($propertyName, $identifiers, true)) {
 				$nullable = false;
@@ -98,7 +97,7 @@ class EntityRelationRule implements Rule
 			if ($nullable) {
 				$columnType = TypeCombinator::addNull($columnType);
 			}
-		} elseif ((bool) ($associationMapping['type'] & 12)) { // ClassMetadata::TO_MANY
+		} elseif ((bool) ($associationMapping['type'] & 12)) { // ClassMetadataInfo::TO_MANY
 			$toMany = true;
 			$columnType = TypeCombinator::intersect(
 				new ObjectType('Doctrine\Common\Collections\Collection'),
@@ -129,13 +128,13 @@ class EntityRelationRule implements Rule
 				);
 			}
 			if (!$propertyTypeToCheckAgainst->isSuperTypeOf($columnType)->yes()) {
-				$errors[] = RuleErrorBuilder::message(sprintf(
+				$errors[] = sprintf(
 					'Property %s::$%s type mapping mismatch: database can contain %s but property expects %s.',
 					$className,
 					$propertyName,
 					$columnType->describe(VerbosityLevel::typeOnly()),
 					$propertyType->describe(VerbosityLevel::typeOnly())
-				))->identifier('doctrine.associationType')->build();
+				);
 			}
 			if (
 				!$columnType->isSuperTypeOf(
@@ -144,13 +143,13 @@ class EntityRelationRule implements Rule
 						: $propertyType
 				)->yes()
 			) {
-				$errors[] = RuleErrorBuilder::message(sprintf(
+				$errors[] = sprintf(
 					'Property %s::$%s type mapping mismatch: property can contain %s but database expects %s.',
 					$className,
 					$propertyName,
 					$propertyType->describe(VerbosityLevel::typeOnly()),
 					$columnType->describe(VerbosityLevel::typeOnly())
-				))->identifier('doctrine.associationType')->build();
+				);
 			}
 		}
 

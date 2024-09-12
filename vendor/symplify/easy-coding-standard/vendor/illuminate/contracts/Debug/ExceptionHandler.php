@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202408\Illuminate\Contracts\Debug;
+namespace ECSPrefix202312\Illuminate\Contracts\Debug;
 
 use Throwable;
 interface ExceptionHandler

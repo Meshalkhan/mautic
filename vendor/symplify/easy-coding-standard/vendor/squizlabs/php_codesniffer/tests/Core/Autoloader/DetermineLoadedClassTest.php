@@ -5,31 +5,24 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Tests\Core\Autoloader;
 
 use PHP_CodeSniffer\Autoload;
-use ECSPrefix202408\PHPUnit\Framework\TestCase;
-/**
- * Tests for the \PHP_CodeSniffer\Autoload::determineLoadedClass method.
- *
- * @covers \PHP_CodeSniffer\Autoload::determineLoadedClass
- */
-final class DetermineLoadedClassTest extends TestCase
+use ECSPrefix202312\PHPUnit\Framework\TestCase;
+class DetermineLoadedClassTest extends TestCase
 {
     /**
      * Load the test files.
      *
-     * @beforeClass
-     *
      * @return void
      */
-    public static function includeFixture()
+    public static function setUpBeforeClass()
     {
         include __DIR__ . '/TestFiles/Sub/C.inc';
     }
-    //end includeFixture()
+    //end setUpBeforeClass()
     /**
      * Test for when class list is ordered.
      *

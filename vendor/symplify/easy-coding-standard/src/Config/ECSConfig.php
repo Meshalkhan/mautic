@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Config;
 
-use ECSPrefix202408\Illuminate\Container\Container;
+use ECSPrefix202312\Illuminate\Container\Container;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PhpCsFixer\Fixer\ConfigurableFixerInterface;
 use PhpCsFixer\Fixer\FixerInterface;
@@ -11,29 +11,19 @@ use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerFactory;
 use PhpCsFixer\RuleSet\RuleSet;
 use PhpCsFixer\WhitespacesFixerConfig;
-use Symplify\EasyCodingStandard\Configuration\ECSConfigBuilder;
-use Symplify\EasyCodingStandard\Contract\Console\Output\OutputFormatterInterface;
 use Symplify\EasyCodingStandard\DependencyInjection\CompilerPass\ConflictingCheckersCompilerPass;
 use Symplify\EasyCodingStandard\DependencyInjection\CompilerPass\RemoveExcludedCheckersCompilerPass;
 use Symplify\EasyCodingStandard\DependencyInjection\CompilerPass\RemoveMutualCheckersCompilerPass;
 use Symplify\EasyCodingStandard\DependencyInjection\SimpleParameterProvider;
 use Symplify\EasyCodingStandard\ValueObject\Option;
-use ECSPrefix202408\Symplify\RuleDocGenerator\Contract\ConfigurableRuleInterface;
-use ECSPrefix202408\Webmozart\Assert\Assert;
-use ECSPrefix202408\Webmozart\Assert\InvalidArgumentException;
+use ECSPrefix202312\Symplify\RuleDocGenerator\Contract\ConfigurableRuleInterface;
+use ECSPrefix202312\Webmozart\Assert\Assert;
+use ECSPrefix202312\Webmozart\Assert\InvalidArgumentException;
 /**
  * @api
  */
 final class ECSConfig extends Container
 {
-    /**
-     * @var string[]
-     */
-    private const AUTOTAG_INTERFACES = [Sniff::class, FixerInterface::class, OutputFormatterInterface::class];
-    public static function configure() : ECSConfigBuilder
-    {
-        return new ECSConfigBuilder();
-    }
     /**
      * @param string[] $paths
      */
@@ -66,7 +56,10 @@ final class ECSConfig extends Container
     public function rule(string $checkerClass) : void
     {
         $this->assertCheckerClass($checkerClass);
+        // tag for autowiring of tagged_iterator()
+        $interfaceTag = \is_a($checkerClass, Sniff::class, \true) ? Sniff::class : FixerInterface::class;
         $this->singleton($checkerClass);
+        $this->tag($checkerClass, $interfaceTag);
         $this->autowireWhitespaceAwareFixer($checkerClass);
     }
     /**
@@ -87,6 +80,9 @@ final class ECSConfig extends Container
     {
         $this->assertCheckerClass($checkerClass);
         $this->singleton($checkerClass);
+        // tag for autowiring of tagged_iterator()
+        $interfaceTag = \is_a($checkerClass, Sniff::class, \true) ? Sniff::class : FixerInterface::class;
+        $this->tag($checkerClass, $interfaceTag);
         $this->autowireWhitespaceAwareFixer($checkerClass);
         if (\is_a($checkerClass, FixerInterface::class, \true)) {
             Assert::isAnyOf($checkerClass, [ConfigurableFixerInterface::class, ConfigurableRuleInterface::class]);
@@ -142,7 +138,7 @@ final class ECSConfig extends Container
         Assert::allString($fileExtensions);
         SimpleParameterProvider::addParameter(Option::FILE_EXTENSIONS, $fileExtensions);
     }
-    public function parallel(int $seconds = 120, int $maxNumberOfProcess = 32, int $jobSize = 20) : void
+    public function parallel(int $seconds = 120, int $maxNumberOfProcess = 16, int $jobSize = 20) : void
     {
         SimpleParameterProvider::setParameter(Option::PARALLEL, \true);
         SimpleParameterProvider::setParameter(Option::PARALLEL_TIMEOUT_IN_SECONDS, $seconds);
@@ -157,11 +153,12 @@ final class ECSConfig extends Container
         SimpleParameterProvider::setParameter(Option::PARALLEL, \false);
     }
     /**
-     * @api
+     * @deprecated
+     * @param array<class-string<Sniff>> $sniffClasses
      */
-    public function reportingRealPath(bool $absolute = \true) : void
+    public function reportSniffClassWarnings(array $sniffClasses) : void
     {
-        SimpleParameterProvider::setParameter(Option::REPORTING_REALPATH, $absolute);
+        echo \sprintf('The "%s()" is deprecated. Use default sniff class setup instead or add classes to ECS core to make them available for everyone', __METHOD__);
     }
     /**
      * @link https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/blob/master/doc/ruleSets/index.rst
@@ -198,20 +195,6 @@ final class ECSConfig extends Container
         $removeMutualCheckersCompilerPass->process($this);
         $conflictingCheckersCompilerPass = new ConflictingCheckersCompilerPass();
         $conflictingCheckersCompilerPass->process($this);
-    }
-    /**
-     * @param string $abstract
-     * @param mixed $concrete
-     */
-    public function singleton($abstract, $concrete = null) : void
-    {
-        parent::singleton($abstract, $concrete);
-        foreach (self::AUTOTAG_INTERFACES as $autotagInterface) {
-            if (!\is_a($abstract, $autotagInterface, \true)) {
-                continue;
-            }
-            $this->tag($abstract, $autotagInterface);
-        }
     }
     /**
      * @param class-string $checkerClass

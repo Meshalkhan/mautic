@@ -158,7 +158,7 @@ final class NoSpacesAfterFunctionNameFixer extends AbstractFixer
     /**
      * Gets the token kinds of actually language construction.
      *
-     * @return list<int>
+     * @return int[]
      */
     private function getLanguageConstructionTokenKinds(): array
     {

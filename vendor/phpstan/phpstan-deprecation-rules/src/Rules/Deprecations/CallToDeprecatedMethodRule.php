@@ -10,9 +10,7 @@ use PHPStan\Broker\ClassNotFoundException;
 use PHPStan\Reflection\MissingMethodFromReflectionException;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
 use function sprintf;
-use function strtolower;
 
 /**
  * @implements Rule<MethodCall>
@@ -23,13 +21,9 @@ class CallToDeprecatedMethodRule implements Rule
 	/** @var ReflectionProvider */
 	private $reflectionProvider;
 
-	/** @var DeprecatedScopeHelper */
-	private $deprecatedScopeHelper;
-
-	public function __construct(ReflectionProvider $reflectionProvider, DeprecatedScopeHelper $deprecatedScopeHelper)
+	public function __construct(ReflectionProvider $reflectionProvider)
 	{
 		$this->reflectionProvider = $reflectionProvider;
-		$this->deprecatedScopeHelper = $deprecatedScopeHelper;
 	}
 
 	public function getNodeType(): string
@@ -39,7 +33,7 @@ class CallToDeprecatedMethodRule implements Rule
 
 	public function processNode(Node $node, Scope $scope): array
 	{
-		if ($this->deprecatedScopeHelper->isScopeDeprecated($scope)) {
+		if (DeprecatedScopeHelper::isScopeDeprecated($scope)) {
 			return [];
 		}
 
@@ -62,25 +56,19 @@ class CallToDeprecatedMethodRule implements Rule
 
 				$description = $methodReflection->getDeprecatedDescription();
 				if ($description === null) {
-					return [
-						RuleErrorBuilder::message(sprintf(
-							'Call to deprecated method %s() of %s %s.',
-							$methodReflection->getName(),
-							strtolower($methodReflection->getDeclaringClass()->getClassTypeDescription()),
-							$methodReflection->getDeclaringClass()->getName()
-						))->identifier('method.deprecated')->build(),
-					];
+					return [sprintf(
+						'Call to deprecated method %s() of class %s.',
+						$methodReflection->getName(),
+						$methodReflection->getDeclaringClass()->getName()
+					)];
 				}
 
-				return [
-					RuleErrorBuilder::message(sprintf(
-						"Call to deprecated method %s() of %s %s:\n%s",
-						$methodReflection->getName(),
-						strtolower($methodReflection->getDeclaringClass()->getClassTypeDescription()),
-						$methodReflection->getDeclaringClass()->getName(),
-						$description
-					))->identifier('method.deprecated')->build(),
-				];
+				return [sprintf(
+					"Call to deprecated method %s() of class %s:\n%s",
+					$methodReflection->getName(),
+					$methodReflection->getDeclaringClass()->getName(),
+					$description
+				)];
 			} catch (ClassNotFoundException $e) {
 				// Other rules will notify if the class is not found
 			} catch (MissingMethodFromReflectionException $e) {

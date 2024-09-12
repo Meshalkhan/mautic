@@ -59,7 +59,6 @@ final class ImplodeCallFixer extends AbstractFixer
             }
             $argumentsIndices = $this->getArgumentIndices($tokens, $index);
             if (1 === \count($argumentsIndices)) {
-                \reset($argumentsIndices);
                 $firstArgumentIndex = \key($argumentsIndices);
                 $tokens->insertAt($firstArgumentIndex, [new Token([\T_CONSTANT_ENCAPSED_STRING, "''"]), new Token(','), new Token([\T_WHITESPACE, ' '])]);
                 continue;
@@ -77,7 +76,6 @@ final class ImplodeCallFixer extends AbstractFixer
                 // collect tokens from first argument
                 $firstArgumentEndIndex = $argumentsIndices[\key($argumentsIndices)];
                 $newSecondArgumentTokens = [];
-                \reset($argumentsIndices);
                 for ($i = \key($argumentsIndices); $i <= $firstArgumentEndIndex; ++$i) {
                     $newSecondArgumentTokens[] = clone $tokens[$i];
                     $tokens->clearAt($i);

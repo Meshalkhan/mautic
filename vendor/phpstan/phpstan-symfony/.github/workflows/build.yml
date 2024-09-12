@@ -6,7 +6,7 @@ on:
   pull_request:
   push:
     branches:
-      - "1.4.x"
+      - "1.2.x"
 
 jobs:
   lint:
@@ -22,12 +22,10 @@ jobs:
           - "8.0"
           - "8.1"
           - "8.2"
-          - "8.3"
-          - "8.4"
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
@@ -44,36 +42,25 @@ jobs:
       - name: "Lint"
         run: "make lint"
 
-  coding-standard:
+  coding-standards:
     name: "Coding Standard"
 
     runs-on: "ubuntu-latest"
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v4
-
-      - name: "Checkout build-cs"
-        uses: actions/checkout@v4
-        with:
-          repository: "phpstan/build-cs"
-          path: "build-cs"
-          ref: "1.x"
+        uses: actions/checkout@v3
 
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
         with:
           coverage: "none"
-          php-version: "8.2"
+          php-version: "8.0"
 
       - name: "Validate Composer"
         run: "composer validate"
 
       - name: "Install dependencies"
-        run: "composer install --no-interaction --no-progress"
-
-      - name: "Install build-cs dependencies"
-        working-directory: "build-cs"
         run: "composer install --no-interaction --no-progress"
 
       - name: "Lint"
@@ -96,15 +83,13 @@ jobs:
           - "8.0"
           - "8.1"
           - "8.2"
-          - "8.3"
-          - "8.4"
         dependencies:
           - "lowest"
           - "highest"
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
@@ -137,15 +122,13 @@ jobs:
           - "8.0"
           - "8.1"
           - "8.2"
-          - "8.3"
-          - "8.4"
         dependencies:
           - "lowest"
           - "highest"
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"

@@ -1,9 +1,9 @@
 <?php
 
-namespace ECSPrefix202408\Illuminate\Contracts\Container;
+namespace ECSPrefix202312\Illuminate\Contracts\Container;
 
 use Closure;
-use ECSPrefix202408\Psr\Container\ContainerInterface;
+use ECSPrefix202312\Psr\Container\ContainerInterface;
 interface Container extends ContainerInterface
 {
     /**

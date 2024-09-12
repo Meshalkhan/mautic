@@ -28,26 +28,9 @@ class EventParsingIterator implements Iterator
         StructureShape $shape,
         AbstractParser $parser
     ) {
-        $this->decodingIterator = $this->chooseDecodingIterator($stream);
+        $this->decodingIterator = new DecodingEventStreamIterator($stream);
         $this->shape = $shape;
         $this->parser = $parser;
-    }
-
-    /**
-     * This method choose a decoding iterator implementation based on if the stream
-     * is seekable or not.
-     *
-     * @param $stream
-     *
-     * @return Iterator
-     */
-    private function chooseDecodingIterator($stream)
-    {
-        if ($stream->isSeekable()) {
-            return new DecodingEventStreamIterator($stream);
-        } else {
-            return new NonSeekableStreamDecodingEventStreamIterator($stream);
-        }
     }
 
     #[\ReturnTypeWillChange]
@@ -97,12 +80,8 @@ class EventParsingIterator implements Iterator
             throw new ParserException('Failed to parse without event type.');
         }
 
-        $eventPayload = $event['payload'];
-        if ($eventType === 'initial-response') {
-            return $this->parseInitialResponseEvent($eventPayload);
-        }
-
         $eventShape = $this->shape->getMember($eventType);
+        $eventPayload = $event['payload'];
 
         return [
             $eventType => array_merge(
@@ -173,10 +152,5 @@ class EventParsingIterator implements Iterator
             $event['headers'][':error-code'],
             $event['headers'][':error-message']
         );
-    }
-
-    private function parseInitialResponseEvent($payload): array
-    {
-        return ['initial-response' => json_decode($payload, true)];
     }
 }

@@ -83,13 +83,13 @@ final class NativeTypeDeclarationCasingFixer extends AbstractFixer
      */
     private $functionsAnalyzer;
     /**
-     * @var list<array{int}|string>
+     * @var list<list<int>>
      */
-    private $beforePropertyTypeTokens;
+    private $propertyTypeModifiers;
     public function __construct()
     {
         parent::__construct();
-        $this->beforePropertyTypeTokens = ['{', ';', [\T_PRIVATE], [\T_PROTECTED], [\T_PUBLIC], [\T_VAR]];
+        $this->propertyTypeModifiers = [[\T_PRIVATE], [\T_PROTECTED], [\T_PUBLIC]];
         $this->functionTypeHints = ['array' => \true, 'bool' => \true, 'callable' => \true, 'float' => \true, 'int' => \true, 'iterable' => \true, 'object' => \true, 'self' => \true, 'string' => \true, 'void' => \true];
         if (\PHP_VERSION_ID >= 80000) {
             $this->functionTypeHints['false'] = \true;
@@ -99,7 +99,7 @@ final class NativeTypeDeclarationCasingFixer extends AbstractFixer
         }
         if (\PHP_VERSION_ID >= 80100) {
             $this->functionTypeHints['never'] = \true;
-            $this->beforePropertyTypeTokens[] = [\T_READONLY];
+            $this->propertyTypeModifiers[] = [\T_READONLY];
         }
         if (\PHP_VERSION_ID >= 80200) {
             $this->functionTypeHints['true'] = \true;
@@ -199,7 +199,7 @@ final class NativeTypeDeclarationCasingFixer extends AbstractFixer
     private function getNativeTypeHintCandidatesForProperty(Tokens $tokens, int $index) : iterable
     {
         $propertyNameIndex = $index;
-        $index = $tokens->getPrevTokenOfKind($index, $this->beforePropertyTypeTokens);
+        $index = $tokens->getPrevTokenOfKind($index, $this->propertyTypeModifiers);
         $index = $this->getFirstIndexOfType($tokens, $index);
         do {
             $typeEnd = $this->getTypeEnd($tokens, $index, $propertyNameIndex);

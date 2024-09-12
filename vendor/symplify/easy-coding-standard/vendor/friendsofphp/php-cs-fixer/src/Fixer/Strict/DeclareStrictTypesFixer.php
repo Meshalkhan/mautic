@@ -39,7 +39,7 @@ final class DeclareStrictTypesFixer extends AbstractFixer implements Whitespaces
     }
     public function isCandidate(Tokens $tokens) : bool
     {
-        return $tokens->isMonolithicPhp() && !$tokens->isTokenKindFound(\T_OPEN_TAG_WITH_ECHO);
+        return isset($tokens[0]) && $tokens[0]->isGivenKind(\T_OPEN_TAG);
     }
     public function isRisky() : bool
     {
@@ -47,10 +47,16 @@ final class DeclareStrictTypesFixer extends AbstractFixer implements Whitespaces
     }
     protected function applyFix(\SplFileInfo $file, Tokens $tokens) : void
     {
-        $openTagIndex = $tokens[0]->isGivenKind(\T_INLINE_HTML) ? 1 : 0;
-        $sequenceLocation = $tokens->findSequence([[\T_DECLARE, 'declare'], '(', [\T_STRING, 'strict_types'], '=', [\T_LNUMBER], ')'], $openTagIndex, null, \false);
+        // check if the declaration is already done
+        $searchIndex = $tokens->getNextMeaningfulToken(0);
+        if (null === $searchIndex) {
+            $this->insertSequence($tokens);
+            // declaration not found, insert one
+            return;
+        }
+        $sequenceLocation = $tokens->findSequence([[\T_DECLARE, 'declare'], '(', [\T_STRING, 'strict_types'], '=', [\T_LNUMBER], ')'], $searchIndex, null, \false);
         if (null === $sequenceLocation) {
-            $this->insertSequence($openTagIndex, $tokens);
+            $this->insertSequence($tokens);
             // declaration not found, insert one
             return;
         }
@@ -74,26 +80,26 @@ final class DeclareStrictTypesFixer extends AbstractFixer implements Whitespaces
             }
         }
     }
-    private function insertSequence(int $openTagIndex, Tokens $tokens) : void
+    private function insertSequence(Tokens $tokens) : void
     {
         $sequence = [new Token([\T_DECLARE, 'declare']), new Token('('), new Token([\T_STRING, 'strict_types']), new Token('='), new Token([\T_LNUMBER, '1']), new Token(')'), new Token(';')];
-        $nextIndex = $openTagIndex + \count($sequence) + 1;
-        $tokens->insertAt($openTagIndex + 1, $sequence);
-        // transform "<?php" or "<?php\n" to "<?php " if needed
-        $content = $tokens[$openTagIndex]->getContent();
-        if (\strpos($content, ' ') === \false || \strpos($content, "\n") !== \false) {
-            $tokens[$openTagIndex] = new Token([$tokens[$openTagIndex]->getId(), \trim($tokens[$openTagIndex]->getContent()) . ' ']);
+        $endIndex = \count($sequence);
+        $tokens->insertAt(1, $sequence);
+        // start index of the sequence is always 1 here, 0 is always open tag
+        // transform "<?php\n" to "<?php " if needed
+        if (\strpos($tokens[0]->getContent(), "\n") !== \false) {
+            $tokens[0] = new Token([$tokens[0]->getId(), \trim($tokens[0]->getContent()) . ' ']);
         }
-        if (\count($tokens) === $nextIndex) {
+        if ($endIndex === \count($tokens) - 1) {
             return;
             // no more tokens after sequence, single_blank_line_at_eof might add a line
         }
         $lineEnding = $this->whitespacesConfig->getLineEnding();
-        if ($tokens[$nextIndex]->isWhitespace()) {
-            $content = $tokens[$nextIndex]->getContent();
-            $tokens[$nextIndex] = new Token([\T_WHITESPACE, $lineEnding . \ltrim($content, " \t")]);
-        } else {
-            $tokens->insertAt($nextIndex, new Token([\T_WHITESPACE, $lineEnding]));
+        if (!$tokens[1 + $endIndex]->isWhitespace()) {
+            $tokens->insertAt(1 + $endIndex, new Token([\T_WHITESPACE, $lineEnding]));
+            return;
         }
+        $content = $tokens[1 + $endIndex]->getContent();
+        $tokens[1 + $endIndex] = new Token([\T_WHITESPACE, $lineEnding . \ltrim($content, " \t")]);
     }
 }

@@ -3,31 +3,31 @@
 namespace DoctrineExtensions\Query\Mysql;
 
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
-use Doctrine\ORM\Query\Parser;
-use Doctrine\ORM\Query\SqlWalker;
-use Doctrine\ORM\Query\TokenType;
+use Doctrine\ORM\Query\Lexer;
 
-/** @author Andrew Mackrodt <andrew@ajmm.org> */
+/**
+ * @author Andrew Mackrodt <andrew@ajmm.org>
+ */
 class IfNull extends FunctionNode
 {
     private $expr1;
 
     private $expr2;
 
-    public function parse(Parser $parser): void
+    public function parse(\Doctrine\ORM\Query\Parser $parser)
     {
-        $parser->match(TokenType::T_IDENTIFIER);
-        $parser->match(TokenType::T_OPEN_PARENTHESIS);
+        $parser->match(Lexer::T_IDENTIFIER);
+        $parser->match(Lexer::T_OPEN_PARENTHESIS);
         $this->expr1 = $parser->ArithmeticExpression();
-        $parser->match(TokenType::T_COMMA);
+        $parser->match(Lexer::T_COMMA);
         $this->expr2 = $parser->ArithmeticExpression();
-        $parser->match(TokenType::T_CLOSE_PARENTHESIS);
+        $parser->match(Lexer::T_CLOSE_PARENTHESIS);
     }
 
-    public function getSql(SqlWalker $sqlWalker): string
+    public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
     {
         return 'IFNULL('
-            . $sqlWalker->walkArithmeticPrimary($this->expr1) . ', '
-            . $sqlWalker->walkArithmeticPrimary($this->expr2) . ')';
+            .$sqlWalker->walkArithmeticPrimary($this->expr1). ', '
+            .$sqlWalker->walkArithmeticPrimary($this->expr2).')';
     }
 }

@@ -2,10 +2,12 @@
 
 namespace DoctrineExtensions\Query\Sqlite;
 
-/** @author Tarjei Huse <tarjei.huse@gmail.com> */
+/**
+ * @author Tarjei Huse <tarjei.huse@gmail.com>
+ */
 class Date extends AbstractStrfTime
 {
-    protected function getFormat(): string
+    protected function getFormat()
     {
         return '%Y-%m-%d';
     }

@@ -15,13 +15,12 @@ namespace Liip\TestFixturesBundle\Services;
 
 use Doctrine\Bundle\FixturesBundle\Loader\SymfonyFixturesLoader;
 use Doctrine\Common\DataFixtures\Loader;
-use Liip\TestFixturesBundle\FixturesLoaderFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @author Aleksey Tupichenkov <alekseytupichenkov@gmail.com>
  */
-final class FixturesLoaderFactory implements FixturesLoaderFactoryInterface
+final class FixturesLoaderFactory
 {
     private ContainerInterface $container;
 

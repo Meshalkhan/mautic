@@ -126,11 +126,15 @@ final class EscaperNodeVisitor implements NodeVisitorInterface
             return $node;
         }
 
-        return new InlinePrint($this->getEscaperFilter($env, $type, $expression), $node->getTemplateLine());
+        return new InlinePrint($this->getEscaperFilter($type, $expression), $node->getTemplateLine());
     }
 
     private function escapePrintNode(PrintNode $node, Environment $env, string $type): Node
     {
+        if (false === $type) {
+            return $node;
+        }
+
         $expression = $node->getNode('expr');
 
         if ($this->isSafeFor($type, $expression, $env)) {
@@ -139,19 +143,14 @@ final class EscaperNodeVisitor implements NodeVisitorInterface
 
         $class = \get_class($node);
 
-        return new $class($this->getEscaperFilter($env, $type, $expression), $node->getTemplateLine());
+        return new $class($this->getEscaperFilter($type, $expression), $node->getTemplateLine());
     }
 
     private function preEscapeFilterNode(FilterExpression $filter, Environment $env): FilterExpression
     {
-        if ($filter->hasAttribute('twig_callable')) {
-            $type = $filter->getAttribute('twig_callable')->getPreEscape();
-        } else {
-            // legacy
-            $name = $filter->getNode('filter', false)->getAttribute('value');
-            $type = $env->getFilter($name)->getPreEscape();
-        }
+        $name = $filter->getNode('filter')->getAttribute('value');
 
+        $type = $env->getFilter($name)->getPreEscape();
         if (null === $type) {
             return $filter;
         }
@@ -161,7 +160,7 @@ final class EscaperNodeVisitor implements NodeVisitorInterface
             return $filter;
         }
 
-        $filter->setNode('node', $this->getEscaperFilter($env, $type, $node));
+        $filter->setNode('node', $this->getEscaperFilter($type, $node));
 
         return $filter;
     }
@@ -193,13 +192,13 @@ final class EscaperNodeVisitor implements NodeVisitorInterface
         return $this->defaultStrategy ?: false;
     }
 
-    private function getEscaperFilter(Environment $env, string $type, Node $node): FilterExpression
+    private function getEscaperFilter(string $type, Node $node): FilterExpression
     {
         $line = $node->getTemplateLine();
-        $filter = $env->getFilter('escape');
+        $name = new ConstantExpression('escape', $line);
         $args = new Node([new ConstantExpression($type, $line), new ConstantExpression(null, $line), new ConstantExpression(true, $line)]);
 
-        return new FilterExpression($node, $filter, $args, $line);
+        return new FilterExpression($node, $name, $args, $line);
     }
 
     public function getPriority(): int

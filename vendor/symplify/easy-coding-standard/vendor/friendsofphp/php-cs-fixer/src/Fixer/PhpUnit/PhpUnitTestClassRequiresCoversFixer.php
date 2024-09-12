@@ -54,6 +54,6 @@ final class MyTest extends \\PHPUnit_Framework_TestCase
             return;
             // don't add `@covers` annotation for abstract base classes
         }
-        $this->ensureIsDocBlockWithAnnotation($tokens, $classIndex, 'coversNothing', ['covers', 'coversDefaultClass', 'coversNothing'], ['ECSPrefix202408\\phpunit\\framework\\attributes\\coversclass', 'ECSPrefix202408\\phpunit\\framework\\attributes\\coversnothing']);
+        $this->ensureIsDockBlockWithAnnotation($tokens, $classIndex, 'coversNothing', ['covers', 'coversDefaultClass', 'coversNothing']);
     }
 }

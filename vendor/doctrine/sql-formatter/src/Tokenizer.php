@@ -710,7 +710,6 @@ final class Tokenizer
     private $boundaries = [
         ',',
         ';',
-        '::', // PostgreSQL cast operator
         ':',
         ')',
         '(',
@@ -909,7 +908,7 @@ final class Tokenizer
             ) {
                 return new Token(
                     Token::TOKEN_TYPE_RESERVED_TOPLEVEL,
-                    substr($upper, 0, strlen($matches[1]))
+                    substr($string, 0, strlen($matches[1]))
                 );
             }
 
@@ -923,7 +922,7 @@ final class Tokenizer
             ) {
                 return new Token(
                     Token::TOKEN_TYPE_RESERVED_NEWLINE,
-                    substr($upper, 0, strlen($matches[1]))
+                    substr($string, 0, strlen($matches[1]))
                 );
             }
 
@@ -937,7 +936,7 @@ final class Tokenizer
             ) {
                 return new Token(
                     Token::TOKEN_TYPE_RESERVED,
-                    substr($upper, 0, strlen($matches[1]))
+                    substr($string, 0, strlen($matches[1]))
                 );
             }
         }
@@ -949,7 +948,7 @@ final class Tokenizer
         if (preg_match('/^(' . $this->regexFunction . '[(]|\s|[)])/', $upper, $matches)) {
             return new Token(
                 Token::TOKEN_TYPE_RESERVED,
-                substr($upper, 0, strlen($matches[1]) - 1)
+                substr($string, 0, strlen($matches[1]) - 1)
             );
         }
 

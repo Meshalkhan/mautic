@@ -103,7 +103,7 @@ final class Foo
         }
     }
     /**
-     * @return array<int, Line>
+     * @return Line[]
      */
     private function getFirstLevelLines(DocBlock $docBlock) : array
     {

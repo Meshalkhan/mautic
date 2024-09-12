@@ -28,8 +28,6 @@ final class TagComparator
     /**
      * Groups of tags that should be allowed to immediately follow each other.
      *
-     * @var list<list<string>>
-     *
      * @internal
      */
     public const DEFAULT_GROUPS = [
@@ -42,7 +40,7 @@ final class TagComparator
     /**
      * Should the given tags be kept together, or kept apart?
      *
-     * @param list<list<string>> $groups
+     * @param string[][] $groups
      */
     public static function shouldBeTogether(Tag $first, Tag $second, array $groups = self::DEFAULT_GROUPS): bool
     {

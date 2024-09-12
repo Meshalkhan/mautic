@@ -60,10 +60,7 @@ class Baz
     protected function createProxyFixers(): array
     {
         $fixer = new GeneralPhpdocAnnotationRemoveFixer();
-        $fixer->configure([
-            'annotations' => ['package', 'subpackage'],
-            'case_sensitive' => true,
-        ]);
+        $fixer->configure(['annotations' => ['package', 'subpackage']]);
 
         return [$fixer];
     }

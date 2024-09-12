@@ -8,10 +8,10 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202408\Symfony\Component\Filesystem;
+namespace ECSPrefix202312\Symfony\Component\Filesystem;
 
-use ECSPrefix202408\Symfony\Component\Filesystem\Exception\InvalidArgumentException;
-use ECSPrefix202408\Symfony\Component\Filesystem\Exception\RuntimeException;
+use ECSPrefix202312\Symfony\Component\Filesystem\Exception\InvalidArgumentException;
+use ECSPrefix202312\Symfony\Component\Filesystem\Exception\RuntimeException;
 /**
  * Contains utility methods for handling path strings.
  *
@@ -223,7 +223,7 @@ final class Path
      * @param string|null $extension if specified, only that extension is cut
      *                               off (may contain leading dot)
      */
-    public static function getFilenameWithoutExtension(string $path, ?string $extension = null) : string
+    public static function getFilenameWithoutExtension(string $path, string $extension = null) : string
     {
         if ('' === $path) {
             return '';
@@ -299,12 +299,12 @@ final class Path
         $actualExtension = self::getExtension($path);
         $extension = \ltrim($extension, '.');
         // No extension for paths
-        if (\substr_compare($path, '/', -\strlen('/')) === 0) {
+        if ('/' === \substr($path, -1)) {
             return $path;
         }
         // No actual extension in path
-        if (!$actualExtension) {
-            return $path . (\substr_compare($path, '.', -\strlen('.')) === 0 ? '' : '.') . $extension;
+        if (empty($actualExtension)) {
+            return $path . ('.' === \substr($path, -1) ? '' : '.') . $extension;
         }
         return \substr($path, 0, -\strlen($actualExtension)) . $extension;
     }
@@ -314,7 +314,7 @@ final class Path
             return \false;
         }
         // Strip scheme
-        if (\false !== ($schemeSeparatorPosition = \strpos($path, '://')) && 1 !== $schemeSeparatorPosition) {
+        if (\false !== ($schemeSeparatorPosition = \strpos($path, '://'))) {
             $path = \substr($path, $schemeSeparatorPosition + 3);
         }
         $firstCharacter = $path[0];
@@ -580,7 +580,7 @@ final class Path
                 continue;
             }
             // Only add slash if previous part didn't end with '/' or '\'
-            if (!\in_array(\substr($finalPath, -1), ['/', '\\'], \true)) {
+            if (!\in_array(\substr($finalPath, -1), ['/', '\\'])) {
                 $finalPath .= '/';
             }
             // If first part included a scheme like 'phar://' we allow \current part to start with '/', otherwise trim

@@ -3,10 +3,10 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Console\Style;
 
-use ECSPrefix202408\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
-use ECSPrefix202408\Symfony\Component\Console\Style\SymfonyStyle;
-use ECSPrefix202408\Symfony\Component\Console\Terminal;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Style\SymfonyStyle;
+use ECSPrefix202312\Symfony\Component\Console\Terminal;
 use Symplify\EasyCodingStandard\SniffRunner\ValueObject\Error\CodingStandardError;
 final class EasyCodingStandardStyle extends SymfonyStyle
 {

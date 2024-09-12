@@ -17,7 +17,7 @@
  *
  * @author    Manuel Pichler <mapi@manuel-pichler.de>
  * @copyright 2007-2014 Manuel Pichler. All rights reserved.
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\CodeAnalysis;
 
@@ -27,15 +27,9 @@ use PHP_CodeSniffer\Util\Tokens;
 class UselessOverridingMethodSniff implements Sniff
 {
     /**
-     * Object-Oriented scopes in which a call to parent::method() can exist.
-     *
-     * @var array<int|string, bool> Keys are the token constants, value is irrelevant.
-     */
-    private $validOOScopes = [\T_CLASS => \true, \T_ANON_CLASS => \true, \T_TRAIT => \true];
-    /**
      * Registers the tokens that this sniff wants to listen for.
      *
-     * @return array<int|string>
+     * @return int[]
      */
     public function register()
     {
@@ -56,13 +50,7 @@ class UselessOverridingMethodSniff implements Sniff
         $tokens = $phpcsFile->getTokens();
         $token = $tokens[$stackPtr];
         // Skip function without body.
-        if (isset($token['scope_opener'], $token['scope_closer']) === \false) {
-            return;
-        }
-        $conditions = $token['conditions'];
-        $lastCondition = \end($conditions);
-        // Skip functions that are not a method part of a class, anon class or trait.
-        if (isset($this->validOOScopes[$lastCondition]) === \false) {
+        if (isset($token['scope_opener']) === \false) {
             return;
         }
         // Get function name.
@@ -92,24 +80,25 @@ class UselessOverridingMethodSniff implements Sniff
         // Find next non empty token index, should be double colon.
         $next = $phpcsFile->findNext(Tokens::$emptyTokens, $next + 1, null, \true);
         // Skip for invalid code.
-        if ($tokens[$next]['code'] !== \T_DOUBLE_COLON) {
+        if ($next === \false || $tokens[$next]['code'] !== \T_DOUBLE_COLON) {
             return;
         }
-        // Find next non empty token index, should be the name of the method being called.
+        // Find next non empty token index, should be the function name.
         $next = $phpcsFile->findNext(Tokens::$emptyTokens, $next + 1, null, \true);
         // Skip for invalid code or other method.
-        if (\strcasecmp($tokens[$next]['content'], $methodName) !== 0) {
+        if ($next === \false || $tokens[$next]['content'] !== $methodName) {
             return;
         }
         // Find next non empty token index, should be the open parenthesis.
         $next = $phpcsFile->findNext(Tokens::$emptyTokens, $next + 1, null, \true);
         // Skip for invalid code.
-        if ($tokens[$next]['code'] !== \T_OPEN_PARENTHESIS || isset($tokens[$next]['parenthesis_closer']) === \false) {
+        if ($next === \false || $tokens[$next]['code'] !== \T_OPEN_PARENTHESIS) {
             return;
         }
         $parameters = [''];
         $parenthesisCount = 1;
-        for (++$next; $next < $phpcsFile->numTokens; ++$next) {
+        $count = \count($tokens);
+        for (++$next; $next < $count; ++$next) {
             $code = $tokens[$next]['code'];
             if ($code === \T_OPEN_PARENTHESIS) {
                 ++$parenthesisCount;
@@ -132,18 +121,14 @@ class UselessOverridingMethodSniff implements Sniff
         }
         //end for
         $next = $phpcsFile->findNext(Tokens::$emptyTokens, $next + 1, null, \true);
-        if ($tokens[$next]['code'] !== \T_SEMICOLON && $tokens[$next]['code'] !== \T_CLOSE_TAG) {
+        if ($next === \false || $tokens[$next]['code'] !== \T_SEMICOLON) {
             return;
         }
-        // This list deliberately does not include the `T_OPEN_TAG_WITH_ECHO` as that token implicitly is an echo statement, i.e. content.
-        $nonContent = Tokens::$emptyTokens;
-        $nonContent[\T_OPEN_TAG] = \T_OPEN_TAG;
-        $nonContent[\T_CLOSE_TAG] = \T_CLOSE_TAG;
         // Check rest of the scope.
         for (++$next; $next <= $end; ++$next) {
             $code = $tokens[$next]['code'];
             // Skip for any other content.
-            if (isset($nonContent[$code]) === \false) {
+            if (isset(Tokens::$emptyTokens[$code]) === \false) {
                 return;
             }
         }

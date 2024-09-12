@@ -101,7 +101,7 @@
 <IfModule authz_core_module>
     # Deny access via HTTP requests to all PHP files.
     <FilesMatch "\.php$">
-     
+   
     </FilesMatch>
 
     # Deny access via HTTP requests to composer files.
@@ -111,7 +111,7 @@
 
     # Except those allowed below.
     <If "%{REQUEST_URI} =~ m#^/(index|upgrade/upgrade)\.php#">
-        
+        Require all granted
     </If>
 </IfModule>
 
@@ -119,6 +119,7 @@
 <IfModule !authz_core_module>
     # Deny access via HTTP requests to all PHP files.
     <FilesMatch "\.php$">
+     
     </FilesMatch>
 
     # Deny access via HTTP requests to composer files
@@ -128,6 +129,7 @@
 
     # Except those allowed below.
     <If "%{REQUEST_URI} =~ m#^/(index|upgrade/upgrade)\.php#">
+      
         Allow from all
     </If>
 </IfModule>

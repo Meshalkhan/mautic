@@ -7,23 +7,21 @@ use PHPStan\Analyser\Scope;
 class DeprecatedScopeHelper
 {
 
-	/** @var DeprecatedScopeResolver[]  */
-	private $resolvers;
-
-	/**
-	 * @param DeprecatedScopeResolver[] $checkers
-	 */
-	public function __construct(array $checkers)
+	public static function isScopeDeprecated(Scope $scope): bool
 	{
-		$this->resolvers = $checkers;
-	}
+		$class = $scope->getClassReflection();
+		if ($class !== null && $class->isDeprecated()) {
+			return true;
+		}
 
-	public function isScopeDeprecated(Scope $scope): bool
-	{
-		foreach ($this->resolvers as $checker) {
-			if ($checker->isScopeDeprecated($scope)) {
-				return true;
-			}
+		$trait = $scope->getTraitReflection();
+		if ($trait !== null && $trait->isDeprecated()) {
+			return true;
+		}
+
+		$function = $scope->getFunction();
+		if ($function !== null && $function->isDeprecated()->yes()) {
+			return true;
 		}
 
 		return false;

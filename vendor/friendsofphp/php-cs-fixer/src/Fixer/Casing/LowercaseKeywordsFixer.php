@@ -29,7 +29,7 @@ use PhpCsFixer\Tokenizer\Tokens;
 final class LowercaseKeywordsFixer extends AbstractFixer
 {
     /**
-     * @var list<int>
+     * @var int[]
      */
     private static array $excludedTokens = [T_HALT_COMPILER];
 

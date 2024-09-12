@@ -85,10 +85,7 @@ final class AMQPConnectionConfig
     /** @var bool */
     private $dispatchSignals = true;
 
-    /**
-     * @var string
-     * @deprecated
-     */
+    /** @var string */
     private $amqpProtocol = Wire\Constants091::VERSION;
 
     /**
@@ -424,19 +421,11 @@ final class AMQPConnectionConfig
         $this->dispatchSignals = $dispatchSignals;
     }
 
-    /**
-     * @return string
-     * @deprecated
-     */
     public function getAMQPProtocol(): string
     {
         return $this->amqpProtocol;
     }
 
-    /**
-     * @param string $protocol
-     * @deprecated
-     */
     public function setAMQPProtocol(string $protocol): void
     {
         if ($protocol !== Wire\Constants091::VERSION && $protocol !== Wire\Constants080::VERSION) {

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Doctrine\ORM\Mapping;
 
-use BackedEnum;
 use DateInterval;
 use DateTime;
 use DateTimeImmutable;
@@ -17,7 +16,6 @@ use ReflectionProperty;
 use function array_merge;
 use function assert;
 use function enum_exists;
-use function is_a;
 
 use const PHP_VERSION_ID;
 
@@ -56,18 +54,18 @@ final class DefaultTypedFieldMapper implements TypedFieldMapper
             && ($type instanceof ReflectionNamedType)
         ) {
             if (PHP_VERSION_ID >= 80100 && ! $type->isBuiltin() && enum_exists($type->getName())) {
+                $mapping['enumType'] = $type->getName();
+
                 $reflection = new ReflectionEnum($type->getName());
                 if (! $reflection->isBacked()) {
                     throw MappingException::backedEnumTypeRequired(
                         $field->class,
                         $mapping['fieldName'],
-                        $type->getName()
+                        $mapping['enumType']
                     );
                 }
 
-                assert(is_a($type->getName(), BackedEnum::class, true));
-                $mapping['enumType'] = $type->getName();
-                $type                = $reflection->getBackingType();
+                $type = $reflection->getBackingType();
 
                 assert($type instanceof ReflectionNamedType);
             }

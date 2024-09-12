@@ -3,7 +3,7 @@
 namespace PHPStan\Type\Doctrine;
 
 use Doctrine\Common\Annotations\AnnotationException;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\Persistence\ObjectManager;
 use PHPStan\Doctrine\Mapping\ClassMetadataFactory;
@@ -26,16 +26,11 @@ final class ObjectMetadataResolver
 	/** @var ClassMetadataFactory|null */
 	private $metadataFactory;
 
-	/** @var string */
-	private $tmpDir;
-
 	public function __construct(
-		?string $objectManagerLoader,
-		string $tmpDir
+		?string $objectManagerLoader
 	)
 	{
 		$this->objectManagerLoader = $objectManagerLoader;
-		$this->tmpDir = $tmpDir;
 	}
 
 	public function hasObjectManagerLoader(): bool
@@ -102,15 +97,15 @@ final class ObjectMetadataResolver
 			return null;
 		}
 
-		return $this->metadataFactory = new ClassMetadataFactory($this->tmpDir);
+		return $this->metadataFactory = new ClassMetadataFactory();
 	}
 
 	/**
 	 * @template T of object
 	 * @param class-string<T> $className
-	 * @return ClassMetadata<T>|null
+	 * @return ClassMetadataInfo<T>|null
 	 */
-	public function getClassMetadata(string $className): ?ClassMetadata
+	public function getClassMetadata(string $className): ?ClassMetadataInfo
 	{
 		if ($this->isTransient($className)) {
 			return null;
@@ -125,21 +120,19 @@ final class ObjectMetadataResolver
 					return null;
 				}
 
-				/** @throws \Doctrine\Persistence\Mapping\MappingException | MappingException | AnnotationException */
 				$metadata = $metadataFactory->getMetadataFor($className);
 			} else {
-				/** @throws \Doctrine\Persistence\Mapping\MappingException | MappingException | AnnotationException */
 				$metadata = $objectManager->getClassMetadata($className);
 			}
 		} catch (\Doctrine\Persistence\Mapping\MappingException | MappingException | AnnotationException $e) {
 			return null;
 		}
 
-		if (!$metadata instanceof ClassMetadata) {
+		if (!$metadata instanceof ClassMetadataInfo) {
 			return null;
 		}
 
-		/** @var ClassMetadata<T> $ormMetadata */
+		/** @var ClassMetadataInfo<T> $ormMetadata */
 		$ormMetadata = $metadata;
 
 		return $ormMetadata;

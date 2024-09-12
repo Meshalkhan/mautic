@@ -12,9 +12,8 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Console\Report\FixReport;
 
-use PhpCsFixer\Console\Application;
 use PhpCsFixer\Preg;
-use ECSPrefix202408\Symfony\Component\Console\Formatter\OutputFormatter;
+use ECSPrefix202312\Symfony\Component\Console\Formatter\OutputFormatter;
 /**
  * @author Boris Gorbylev <ekho@ekho.name>
  *
@@ -36,12 +35,6 @@ final class JunitReporter implements \PhpCsFixer\Console\Report\FixReport\Report
         /** @var \DOMElement $testsuite */
         $testsuite = $testsuites->appendChild($dom->createElement('testsuite'));
         $testsuite->setAttribute('name', 'PHP CS Fixer');
-        $properties = $dom->createElement('properties');
-        $property = $dom->createElement('property');
-        $property->setAttribute('name', 'about');
-        $property->setAttribute('value', Application::getAbout());
-        $properties->appendChild($property);
-        $testsuite->appendChild($properties);
         if (\count($reportSummary->getChanged()) > 0) {
             $this->createFailedTestCases($dom, $testsuite, $reportSummary);
         } else {

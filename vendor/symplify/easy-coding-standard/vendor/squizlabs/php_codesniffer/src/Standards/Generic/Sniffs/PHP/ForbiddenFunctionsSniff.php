@@ -8,7 +8,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\PHP;
 
@@ -46,7 +46,7 @@ class ForbiddenFunctionsSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
@@ -120,10 +120,6 @@ class ForbiddenFunctionsSniff implements Sniff
         }
         if ($tokens[$stackPtr]['code'] === \T_STRING && $tokens[$nextToken]['code'] !== \T_OPEN_PARENTHESIS) {
             // Not a call to a PHP function.
-            return;
-        }
-        if (empty($tokens[$stackPtr]['nested_attributes']) === \false) {
-            // Class instantiation in attribute, not function call.
             return;
         }
         $function = \strtolower($tokens[$stackPtr]['content']);

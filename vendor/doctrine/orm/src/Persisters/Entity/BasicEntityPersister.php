@@ -15,7 +15,6 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\Deprecations\Deprecation;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Internal\CriteriaOrderings;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\Mapping\QuoteStrategy;
@@ -94,7 +93,6 @@ use function trim;
  */
 class BasicEntityPersister implements EntityPersister
 {
-    use CriteriaOrderings;
     use LockSqlHelper;
 
     /** @var array<string,string> */
@@ -832,42 +830,17 @@ class BasicEntityPersister implements EntityPersister
 
         $computedIdentifier = [];
 
-        /** @var array<string,mixed>|null $sourceEntityData */
-        $sourceEntityData = null;
-
         // TRICKY: since the association is specular source and target are flipped
         foreach ($owningAssoc['targetToSourceKeyColumns'] as $sourceKeyColumn => $targetKeyColumn) {
             if (! isset($sourceClass->fieldNames[$sourceKeyColumn])) {
-                // The likely case here is that the column is a join column
-                // in an association mapping. However, there is no guarantee
-                // at this point that a corresponding (generally identifying)
-                // association has been mapped in the source entity. To handle
-                // this case we directly reference the column-keyed data used
-                // to initialize the source entity before throwing an exception.
-                $resolvedSourceData = false;
-                if (! isset($sourceEntityData)) {
-                    $sourceEntityData = $this->em->getUnitOfWork()->getOriginalEntityData($sourceEntity);
-                }
-
-                if (isset($sourceEntityData[$sourceKeyColumn])) {
-                    $dataValue = $sourceEntityData[$sourceKeyColumn];
-                    if ($dataValue !== null) {
-                        $resolvedSourceData                                                    = true;
-                        $computedIdentifier[$targetClass->getFieldForColumn($targetKeyColumn)] =
-                            $dataValue;
-                    }
-                }
-
-                if (! $resolvedSourceData) {
-                    throw MappingException::joinColumnMustPointToMappedField(
-                        $sourceClass->name,
-                        $sourceKeyColumn
-                    );
-                }
-            } else {
-                $computedIdentifier[$targetClass->getFieldForColumn($targetKeyColumn)] =
-                    $sourceClass->reflFields[$sourceClass->fieldNames[$sourceKeyColumn]]->getValue($sourceEntity);
+                throw MappingException::joinColumnMustPointToMappedField(
+                    $sourceClass->name,
+                    $sourceKeyColumn
+                );
             }
+
+            $computedIdentifier[$targetClass->getFieldForColumn($targetKeyColumn)] =
+                $sourceClass->reflFields[$sourceClass->fieldNames[$sourceKeyColumn]]->getValue($sourceEntity);
         }
 
         $targetEntity = $this->load($computedIdentifier, null, $assoc);
@@ -911,7 +884,7 @@ class BasicEntityPersister implements EntityPersister
      */
     public function loadCriteria(Criteria $criteria)
     {
-        $orderBy = self::getCriteriaOrderings($criteria);
+        $orderBy = $criteria->getOrderings();
         $limit   = $criteria->getMaxResults();
         $offset  = $criteria->getFirstResult();
         $query   = $this->getSelectSQL($criteria, null, null, $limit, $offset, $orderBy);

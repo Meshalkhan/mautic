@@ -8,11 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202408\Symfony\Component\Console\Output;
+namespace ECSPrefix202312\Symfony\Component\Console\Output;
 
-use ECSPrefix202408\Symfony\Component\Console\Formatter\OutputFormatterInterface;
-use ECSPrefix202408\Symfony\Component\Console\Helper\Helper;
-use ECSPrefix202408\Symfony\Component\Console\Terminal;
+use ECSPrefix202312\Symfony\Component\Console\Formatter\OutputFormatterInterface;
+use ECSPrefix202312\Symfony\Component\Console\Helper\Helper;
+use ECSPrefix202312\Symfony\Component\Console\Terminal;
 /**
  * @author Pierre du Plessis <pdples@gmail.com>
  * @author Gabriel Ostrolucký <gabriel.ostrolucky@gmail.com>
@@ -72,7 +72,7 @@ class ConsoleSectionOutput extends StreamOutput
      *
      * @return void
      */
-    public function clear(?int $lines = null)
+    public function clear(int $lines = null)
     {
         if (empty($this->content) || !$this->isDecorated()) {
             return;

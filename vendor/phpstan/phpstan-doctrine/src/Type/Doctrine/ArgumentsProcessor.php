@@ -13,17 +13,9 @@ use function strpos;
 class ArgumentsProcessor
 {
 
-	/** @var ObjectMetadataResolver */
-	private $objectMetadataResolver;
-
-	public function __construct(ObjectMetadataResolver $objectMetadataResolver)
-	{
-		$this->objectMetadataResolver = $objectMetadataResolver;
-	}
-
 	/**
 	 * @param Arg[] $methodCallArgs
-	 * @return list<mixed>
+	 * @return mixed[]
 	 * @throws DynamicQueryBuilderArgumentException
 	 */
 	public function processArgs(
@@ -34,9 +26,6 @@ class ArgumentsProcessor
 	{
 		$args = [];
 		foreach ($methodCallArgs as $arg) {
-			if ($arg->unpack) {
-				throw new DynamicQueryBuilderArgumentException();
-			}
 			$value = $scope->getType($arg->value);
 			if (
 				$value instanceof ExprType
@@ -58,18 +47,6 @@ class ArgumentsProcessor
 				$args[] = $array;
 				continue;
 			}
-
-			if ($value->isClassStringType()->yes() && count($value->getClassStringObjectType()->getObjectClassNames()) === 1) {
-				/** @var class-string $className */
-				$className = $value->getClassStringObjectType()->getObjectClassNames()[0];
-				if ($this->objectMetadataResolver->isTransient($className)) {
-					throw new DynamicQueryBuilderArgumentException();
-				}
-
-				$args[] = $className;
-				continue;
-			}
-
 			if (count($value->getConstantScalarValues()) !== 1) {
 				throw new DynamicQueryBuilderArgumentException();
 			}

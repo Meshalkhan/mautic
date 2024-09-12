@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202408\Illuminate\Contracts\Queue;
+namespace ECSPrefix202312\Illuminate\Contracts\Queue;
 
 interface Queue
 {

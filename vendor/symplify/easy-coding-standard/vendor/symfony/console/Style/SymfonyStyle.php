@@ -8,27 +8,27 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202408\Symfony\Component\Console\Style;
+namespace ECSPrefix202312\Symfony\Component\Console\Style;
 
-use ECSPrefix202408\Symfony\Component\Console\Exception\InvalidArgumentException;
-use ECSPrefix202408\Symfony\Component\Console\Exception\RuntimeException;
-use ECSPrefix202408\Symfony\Component\Console\Formatter\OutputFormatter;
-use ECSPrefix202408\Symfony\Component\Console\Helper\Helper;
-use ECSPrefix202408\Symfony\Component\Console\Helper\OutputWrapper;
-use ECSPrefix202408\Symfony\Component\Console\Helper\ProgressBar;
-use ECSPrefix202408\Symfony\Component\Console\Helper\SymfonyQuestionHelper;
-use ECSPrefix202408\Symfony\Component\Console\Helper\Table;
-use ECSPrefix202408\Symfony\Component\Console\Helper\TableCell;
-use ECSPrefix202408\Symfony\Component\Console\Helper\TableSeparator;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202408\Symfony\Component\Console\Output\ConsoleOutputInterface;
-use ECSPrefix202408\Symfony\Component\Console\Output\ConsoleSectionOutput;
-use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
-use ECSPrefix202408\Symfony\Component\Console\Output\TrimmedBufferOutput;
-use ECSPrefix202408\Symfony\Component\Console\Question\ChoiceQuestion;
-use ECSPrefix202408\Symfony\Component\Console\Question\ConfirmationQuestion;
-use ECSPrefix202408\Symfony\Component\Console\Question\Question;
-use ECSPrefix202408\Symfony\Component\Console\Terminal;
+use ECSPrefix202312\Symfony\Component\Console\Exception\InvalidArgumentException;
+use ECSPrefix202312\Symfony\Component\Console\Exception\RuntimeException;
+use ECSPrefix202312\Symfony\Component\Console\Formatter\OutputFormatter;
+use ECSPrefix202312\Symfony\Component\Console\Helper\Helper;
+use ECSPrefix202312\Symfony\Component\Console\Helper\OutputWrapper;
+use ECSPrefix202312\Symfony\Component\Console\Helper\ProgressBar;
+use ECSPrefix202312\Symfony\Component\Console\Helper\SymfonyQuestionHelper;
+use ECSPrefix202312\Symfony\Component\Console\Helper\Table;
+use ECSPrefix202312\Symfony\Component\Console\Helper\TableCell;
+use ECSPrefix202312\Symfony\Component\Console\Helper\TableSeparator;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Output\ConsoleOutputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Output\ConsoleSectionOutput;
+use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Output\TrimmedBufferOutput;
+use ECSPrefix202312\Symfony\Component\Console\Question\ChoiceQuestion;
+use ECSPrefix202312\Symfony\Component\Console\Question\ConfirmationQuestion;
+use ECSPrefix202312\Symfony\Component\Console\Question\Question;
+use ECSPrefix202312\Symfony\Component\Console\Terminal;
 /**
  * Output decorator helpers for the Symfony Style Guide.
  *
@@ -76,7 +76,7 @@ class SymfonyStyle extends OutputStyle
      * @return void
      * @param string|mixed[] $messages
      */
-    public function block($messages, ?string $type = null, ?string $style = null, string $prefix = ' ', bool $padding = \false, bool $escape = \true)
+    public function block($messages, string $type = null, string $style = null, string $prefix = ' ', bool $padding = \false, bool $escape = \true)
     {
         $messages = \is_array($messages) ? \array_values($messages) : [$messages];
         $this->autoPrependBlock();
@@ -240,7 +240,7 @@ class SymfonyStyle extends OutputStyle
     /**
      * @return mixed
      */
-    public function ask(string $question, ?string $default = null, ?callable $validator = null)
+    public function ask(string $question, string $default = null, callable $validator = null)
     {
         $question = new Question($question, $default);
         $question->setValidator($validator);
@@ -249,7 +249,7 @@ class SymfonyStyle extends OutputStyle
     /**
      * @return mixed
      */
-    public function askHidden(string $question, ?callable $validator = null)
+    public function askHidden(string $question, callable $validator = null)
     {
         $question = new Question($question);
         $question->setHidden(\true);
@@ -321,7 +321,7 @@ class SymfonyStyle extends OutputStyle
      *
      * @return iterable<TKey, TValue>
      */
-    public function progressIterate(iterable $iterable, ?int $max = null) : iterable
+    public function progressIterate(iterable $iterable, int $max = null) : iterable
     {
         yield from $this->createProgressBar()->iterate($iterable, $max);
         $this->newLine(2);
@@ -428,7 +428,7 @@ class SymfonyStyle extends OutputStyle
         // We need to know if the last chars are PHP_EOL
         $this->bufferedOutput->write($message, $newLine, $type);
     }
-    private function createBlock(iterable $messages, ?string $type = null, ?string $style = null, string $prefix = ' ', bool $padding = \false, bool $escape = \false) : array
+    private function createBlock(iterable $messages, string $type = null, string $style = null, string $prefix = ' ', bool $padding = \false, bool $escape = \false) : array
     {
         $indentLength = 0;
         $prefixLength = Helper::width(Helper::removeDecoration($this->getFormatter(), $prefix));

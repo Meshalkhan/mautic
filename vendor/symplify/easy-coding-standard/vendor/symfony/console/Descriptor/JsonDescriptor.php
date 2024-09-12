@@ -8,13 +8,13 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202408\Symfony\Component\Console\Descriptor;
+namespace ECSPrefix202312\Symfony\Component\Console\Descriptor;
 
-use ECSPrefix202408\Symfony\Component\Console\Application;
-use ECSPrefix202408\Symfony\Component\Console\Command\Command;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputArgument;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputDefinition;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202312\Symfony\Component\Console\Application;
+use ECSPrefix202312\Symfony\Component\Console\Command\Command;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputArgument;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputDefinition;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputOption;
 /**
  * JSON descriptor.
  *

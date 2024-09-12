@@ -3,7 +3,7 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Console\Output;
 
-use ECSPrefix202408\Nette\Utils\Json;
+use ECSPrefix202312\Nette\Utils\Json;
 use Symplify\EasyCodingStandard\Console\ExitCode;
 use Symplify\EasyCodingStandard\Console\Style\EasyCodingStandardStyle;
 use Symplify\EasyCodingStandard\Contract\Console\Output\OutputFormatterInterface;
@@ -14,6 +14,10 @@ use Symplify\EasyCodingStandard\ValueObject\Error\ErrorAndDiffResult;
  */
 final class JsonOutputFormatter implements OutputFormatterInterface
 {
+    /**
+     * @var string
+     */
+    public const NAME = 'json';
     /**
      * @var string
      */
@@ -38,33 +42,27 @@ final class JsonOutputFormatter implements OutputFormatterInterface
      */
     public function report(ErrorAndDiffResult $errorAndDiffResult, Configuration $configuration) : int
     {
-        $json = $this->createJsonContent($errorAndDiffResult, $configuration->isReportingWithRealPath());
+        $json = $this->createJsonContent($errorAndDiffResult);
         $this->easyCodingStandardStyle->writeln($json);
         return $this->exitCodeResolver->resolve($errorAndDiffResult, $configuration);
     }
-    public static function getName() : string
+    public function getName() : string
     {
-        return 'json';
-    }
-    public static function hasSupportForProgressBars() : bool
-    {
-        return \false;
+        return self::NAME;
     }
     /**
      * @api
      */
-    public function createJsonContent(ErrorAndDiffResult $errorAndDiffResult, bool $absoluteFilePath = \false) : string
+    public function createJsonContent(ErrorAndDiffResult $errorAndDiffResult) : string
     {
         $errorsArrayJson = $this->createBaseErrorsJson($errorAndDiffResult);
         $codingStandardErrors = $errorAndDiffResult->getErrors();
         foreach ($codingStandardErrors as $codingStandardError) {
-            $filePath = $absoluteFilePath ? $codingStandardError->getAbsoluteFilePath() : $codingStandardError->getRelativeFilePath();
-            $errorsArrayJson[self::FILES][$filePath]['errors'][] = ['line' => $codingStandardError->getLine(), 'file_path' => $filePath, 'message' => $codingStandardError->getMessage(), 'source_class' => $codingStandardError->getCheckerClass()];
+            $errorsArrayJson[self::FILES][$codingStandardError->getRelativeFilePath()]['errors'][] = ['line' => $codingStandardError->getLine(), 'file_path' => $codingStandardError->getRelativeFilePath(), 'message' => $codingStandardError->getMessage(), 'source_class' => $codingStandardError->getCheckerClass()];
         }
         $fileDiffs = $errorAndDiffResult->getFileDiffs();
         foreach ($fileDiffs as $fileDiff) {
-            $filePath = $absoluteFilePath ? $fileDiff->getAbsoluteFilePath() : $fileDiff->getRelativeFilePath();
-            $errorsArrayJson[self::FILES][$filePath]['diffs'][] = ['diff' => $fileDiff->getDiff(), 'applied_checkers' => $fileDiff->getAppliedCheckers()];
+            $errorsArrayJson[self::FILES][$fileDiff->getRelativeFilePath()]['diffs'][] = ['diff' => $fileDiff->getDiff(), 'applied_checkers' => $fileDiff->getAppliedCheckers()];
         }
         return Json::encode($errorsArrayJson, Json::PRETTY);
     }

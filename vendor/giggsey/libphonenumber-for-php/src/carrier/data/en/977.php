@@ -11,7 +11,6 @@
  */
 
 return array (
-  97790 => 'NCell',
   977960 => 'STM Telecom',
   977961 => 'Smart Telecom',
   977962 => 'Smart Telecom',

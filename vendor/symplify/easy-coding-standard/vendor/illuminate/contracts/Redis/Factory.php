@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202408\Illuminate\Contracts\Redis;
+namespace ECSPrefix202312\Illuminate\Contracts\Redis;
 
 interface Factory
 {

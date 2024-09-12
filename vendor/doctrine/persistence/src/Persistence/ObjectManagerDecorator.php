@@ -18,7 +18,7 @@ abstract class ObjectManagerDecorator implements ObjectManager
     protected $wrapped;
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function find(string $className, $id)
     {
@@ -56,7 +56,7 @@ abstract class ObjectManagerDecorator implements ObjectManager
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getRepository(string $className)
     {
@@ -64,7 +64,7 @@ abstract class ObjectManagerDecorator implements ObjectManager
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getClassMetadata(string $className)
     {
@@ -83,7 +83,7 @@ abstract class ObjectManagerDecorator implements ObjectManager
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function contains(object $object)
     {

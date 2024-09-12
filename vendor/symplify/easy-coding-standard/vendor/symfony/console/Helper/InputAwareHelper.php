@@ -8,10 +8,10 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202408\Symfony\Component\Console\Helper;
+namespace ECSPrefix202312\Symfony\Component\Console\Helper;
 
-use ECSPrefix202408\Symfony\Component\Console\Input\InputAwareInterface;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputAwareInterface;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputInterface;
 /**
  * An implementation of InputAwareInterface for Helpers.
  *

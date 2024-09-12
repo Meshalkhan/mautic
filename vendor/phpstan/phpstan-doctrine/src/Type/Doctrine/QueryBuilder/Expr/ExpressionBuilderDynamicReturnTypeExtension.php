@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PhpParser\Node\Expr\MethodCall;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\MethodReflection;
+use PHPStan\Reflection\ParametersAcceptorSelector;
 use PHPStan\Rules\Doctrine\ORM\DynamicQueryBuilderArgumentException;
 use PHPStan\Type\Doctrine\ArgumentsProcessor;
 use PHPStan\Type\Doctrine\ObjectMetadataResolver;
@@ -43,15 +44,17 @@ class ExpressionBuilderDynamicReturnTypeExtension implements DynamicMethodReturn
 		return true;
 	}
 
-	public function getTypeFromMethodCall(MethodReflection $methodReflection, MethodCall $methodCall, Scope $scope): ?Type
+	public function getTypeFromMethodCall(MethodReflection $methodReflection, MethodCall $methodCall, Scope $scope): Type
 	{
+		$defaultReturnType = ParametersAcceptorSelector::selectFromArgs($scope, $methodCall->getArgs(), $methodReflection->getVariants())->getReturnType();
+
 		$objectManager = $this->objectMetadataResolver->getObjectManager();
 		if ($objectManager === null) {
-			return null;
+			return $defaultReturnType;
 		}
 		$entityManagerInterface = 'Doctrine\ORM\EntityManagerInterface';
 		if (!$objectManager instanceof $entityManagerInterface) {
-			return null;
+			return $defaultReturnType;
 		}
 
 		/** @var EntityManagerInterface $objectManager */
@@ -62,7 +65,7 @@ class ExpressionBuilderDynamicReturnTypeExtension implements DynamicMethodReturn
 		try {
 			$args = $this->argumentsProcessor->processArgs($scope, $methodReflection->getName(), $methodCall->getArgs());
 		} catch (DynamicQueryBuilderArgumentException $e) {
-			return null;
+			return $defaultReturnType;
 		}
 
 		$calledOnType = $scope->getType($methodCall->var);
@@ -73,7 +76,7 @@ class ExpressionBuilderDynamicReturnTypeExtension implements DynamicMethodReturn
 		}
 
 		if (!method_exists($expr, $methodReflection->getName())) {
-			return null;
+			return $defaultReturnType;
 		}
 
 		$exprValue = $expr->{$methodReflection->getName()}(...$args);

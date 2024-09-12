@@ -62,19 +62,9 @@ final class Configuration
      */
     private $memoryLimit = null;
     /**
-     * @readonly
-     * @var bool
-     */
-    private $showDiffs = \true;
-    /**
-     * @readonly
-     * @var bool
-     */
-    private $reportingWithRealPath = \false;
-    /**
      * @param string[] $sources
      */
-    public function __construct(bool $isFixer = \false, bool $shouldClearCache = \false, bool $showProgressBar = \true, bool $showErrorTable = \true, array $sources = [], string $outputFormat = ConsoleOutputFormatter::NAME, bool $isParallel = \false, ?string $config = null, ?string $parallelPort = null, ?string $parallelIdentifier = null, ?string $memoryLimit = null, bool $showDiffs = \true, bool $reportingWithRealPath = \false)
+    public function __construct(bool $isFixer = \false, bool $shouldClearCache = \false, bool $showProgressBar = \true, bool $showErrorTable = \true, array $sources = [], string $outputFormat = ConsoleOutputFormatter::NAME, bool $isParallel = \false, ?string $config = null, ?string $parallelPort = null, ?string $parallelIdentifier = null, ?string $memoryLimit = null)
     {
         $this->isFixer = $isFixer;
         $this->shouldClearCache = $shouldClearCache;
@@ -87,8 +77,6 @@ final class Configuration
         $this->parallelPort = $parallelPort;
         $this->parallelIdentifier = $parallelIdentifier;
         $this->memoryLimit = $memoryLimit;
-        $this->showDiffs = $showDiffs;
-        $this->reportingWithRealPath = $reportingWithRealPath;
     }
     public function isFixer() : bool
     {
@@ -105,10 +93,6 @@ final class Configuration
     public function shouldShowErrorTable() : bool
     {
         return $this->showErrorTable;
-    }
-    public function shouldShowDiffs() : bool
-    {
-        return $this->showDiffs;
     }
     /**
      * @return string[]
@@ -140,9 +124,5 @@ final class Configuration
     public function getMemoryLimit() : ?string
     {
         return $this->memoryLimit;
-    }
-    public function isReportingWithRealPath() : bool
-    {
-        return $this->reportingWithRealPath;
     }
 }

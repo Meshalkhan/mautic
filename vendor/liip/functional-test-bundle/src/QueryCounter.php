@@ -19,10 +19,13 @@ use Liip\FunctionalTestBundle\Exception\AllowedQueriesExceededException;
 
 final class QueryCounter
 {
-    private ?int $defaultMaxCount;
-    private ?Reader $annotationReader;
+    /** @var int */
+    private $defaultMaxCount;
 
-    public function __construct(?int $defaultMaxCount, ?Reader $annotationReader)
+    /** @var Reader */
+    private $annotationReader;
+
+    public function __construct(?int $defaultMaxCount, Reader $annotationReader)
     {
         $this->defaultMaxCount = $defaultMaxCount;
         $this->annotationReader = $annotationReader;
@@ -54,10 +57,6 @@ final class QueryCounter
 
     private function getMaxQueryAnnotation(): ?int
     {
-        if (null === $this->annotationReader) {
-            @trigger_error('The annotationReader is not available', \E_USER_ERROR);
-        }
-
         foreach (debug_backtrace() as $step) {
             if ('test' === substr($step['function'], 0, 4)) { //TODO: handle tests with the @test annotation
                 $annotations = $this->annotationReader->getMethodAnnotations(

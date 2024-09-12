@@ -5,7 +5,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\PEAR\Sniffs\WhiteSpace;
 
@@ -23,7 +23,7 @@ class ScopeClosingBraceSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return int[]
      */
     public function register()
     {
@@ -80,15 +80,7 @@ class ScopeClosingBraceSniff implements Sniff
             }
         }
         // Check that the closing brace is on it's own line.
-        for ($lastContent = $scopeEnd - 1; $lastContent > $scopeStart; $lastContent--) {
-            if ($tokens[$lastContent]['code'] === \T_WHITESPACE || $tokens[$lastContent]['code'] === \T_OPEN_TAG) {
-                continue;
-            }
-            if ($tokens[$lastContent]['code'] === \T_INLINE_HTML && \ltrim($tokens[$lastContent]['content']) === '') {
-                continue;
-            }
-            break;
-        }
+        $lastContent = $phpcsFile->findPrevious([\T_WHITESPACE, \T_INLINE_HTML, \T_OPEN_TAG], $scopeEnd - 1, $scopeStart, \true);
         if ($tokens[$lastContent]['line'] === $tokens[$scopeEnd]['line']) {
             $error = 'Closing brace must be on a line by itself';
             $fix = $phpcsFile->addFixableError($error, $scopeEnd, 'Line');

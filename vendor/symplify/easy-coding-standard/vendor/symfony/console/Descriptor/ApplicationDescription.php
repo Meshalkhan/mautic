@@ -8,11 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202408\Symfony\Component\Console\Descriptor;
+namespace ECSPrefix202312\Symfony\Component\Console\Descriptor;
 
-use ECSPrefix202408\Symfony\Component\Console\Application;
-use ECSPrefix202408\Symfony\Component\Console\Command\Command;
-use ECSPrefix202408\Symfony\Component\Console\Exception\CommandNotFoundException;
+use ECSPrefix202312\Symfony\Component\Console\Application;
+use ECSPrefix202312\Symfony\Component\Console\Command\Command;
+use ECSPrefix202312\Symfony\Component\Console\Exception\CommandNotFoundException;
 /**
  * @author Jean-François Simon <jeanfrancois.simon@sensiolabs.com>
  *
@@ -45,7 +45,7 @@ class ApplicationDescription
      * @var array<string, Command>
      */
     private $aliases = [];
-    public function __construct(Application $application, ?string $namespace = null, bool $showHidden = \false)
+    public function __construct(Application $application, string $namespace = null, bool $showHidden = \false)
     {
         $this->application = $application;
         $this->namespace = $namespace;

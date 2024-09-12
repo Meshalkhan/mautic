@@ -4,7 +4,6 @@ namespace Doctrine\ORM;
 
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
-use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 interface EntityManagerInterface extends ObjectManager
@@ -37,8 +36,6 @@ interface EntityManagerInterface extends ObjectManager
 	 * @phpstan-param class-string<T> $entityName
 	 * @phpstan-param mixed $id
 	 * @phpstan-return T|null
-	 *
-	 * @throws ORMException
 	 */
 	public function getReference($entityName, $id);
 
@@ -60,21 +57,11 @@ interface EntityManagerInterface extends ObjectManager
 	 */
 	public function copy($entity, $deep = false);
 
-	/**
-	 * @template T of object
-	 * @phpstan-param class-string<T> $className
-	 *
-	 * @phpstan-return ClassMetadata<T>
-	 */
-	public function getClassMetadata($className);
-
-	/**
-	 * @param-immediately-invoked-callable $func
-	 * @param callable(self): T $func
-	 * @return T
-	 *
-	 * @template T
-	 */
-	public function wrapInTransaction(callable $func);
-
+  /**
+   * @template T of object
+   * @phpstan-param class-string<T> $className
+   *
+   * @phpstan-return ClassMetadata<T>
+   */
+  public function getClassMetadata($className);
 }

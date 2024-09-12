@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202408\Illuminate\Contracts\Auth;
+namespace ECSPrefix202312\Illuminate\Contracts\Auth;
 
 interface StatefulGuard extends Guard
 {

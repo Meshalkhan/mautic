@@ -6,7 +6,7 @@ use PhpParser\Node;
 use PhpParser\Node\Expr\MethodCall;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
+use PHPStan\Rules\RuleError;
 use PHPStan\Symfony\ServiceMap;
 use PHPStan\TrinaryLogic;
 use PHPStan\Type\ObjectType;
@@ -32,6 +32,9 @@ final class ContainerInterfacePrivateServiceRule implements Rule
 		return MethodCall::class;
 	}
 
+	/**
+	 * @return (string|RuleError)[] errors
+	 */
 	public function processNode(Node $node, Scope $scope): array
 	{
 		if (!$node->name instanceof Node\Identifier) {
@@ -69,11 +72,7 @@ final class ContainerInterfacePrivateServiceRule implements Rule
 		if ($serviceId !== null) {
 			$service = $this->serviceMap->getService($serviceId);
 			if ($service !== null && !$service->isPublic()) {
-				return [
-					RuleErrorBuilder::message(sprintf('Service "%s" is private.', $serviceId))
-						->identifier('symfonyContainer.privateService')
-						->build(),
-				];
+				return [sprintf('Service "%s" is private.', $serviceId)];
 			}
 		}
 

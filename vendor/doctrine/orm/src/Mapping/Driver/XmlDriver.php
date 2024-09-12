@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Doctrine\ORM\Mapping\Driver;
 
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\Common\Collections\Order;
 use Doctrine\ORM\Mapping\Builder\EntityListenerBuilder;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException;
@@ -17,7 +16,6 @@ use LogicException;
 use SimpleXMLElement;
 
 use function assert;
-use function class_exists;
 use function constant;
 use function count;
 use function defined;
@@ -37,8 +35,6 @@ use function strtoupper;
  * XmlDriver is a metadata driver that enables mapping through XML files.
  *
  * @link        www.doctrine-project.org
- *
- * @template-extends FileDriver<SimpleXMLElement>
  */
 class XmlDriver extends FileDriver
 {
@@ -81,6 +77,7 @@ class XmlDriver extends FileDriver
     public function loadMetadataForClass($className, PersistenceClassMetadata $metadata)
     {
         $xmlRoot = $this->getElement($className);
+        assert($xmlRoot instanceof SimpleXMLElement);
 
         if ($xmlRoot->getName() === 'entity') {
             if (isset($xmlRoot['repository-class'])) {
@@ -204,7 +201,6 @@ class XmlDriver extends FileDriver
                     ];
 
                     if (isset($discrColumn['options'])) {
-                        assert($discrColumn['options'] instanceof SimpleXMLElement);
                         $columnDef['options'] = $this->parseOptions($discrColumn['options']->children());
                     }
 
@@ -216,7 +212,6 @@ class XmlDriver extends FileDriver
                 // Evaluate <discriminator-map...>
                 if (isset($xmlRoot->{'discriminator-map'})) {
                     $map = [];
-                    assert($xmlRoot->{'discriminator-map'}->{'discriminator-mapping'} instanceof SimpleXMLElement);
                     foreach ($xmlRoot->{'discriminator-map'}->{'discriminator-mapping'} as $discrMapElement) {
                         $map[(string) $discrMapElement['value']] = (string) $discrMapElement['class'];
                     }
@@ -486,10 +481,9 @@ class XmlDriver extends FileDriver
                 if (isset($oneToManyElement->{'order-by'})) {
                     $orderBy = [];
                     foreach ($oneToManyElement->{'order-by'}->{'order-by-field'} ?? [] as $orderByField) {
-                        /** @psalm-suppress DeprecatedConstant */
                         $orderBy[(string) $orderByField['name']] = isset($orderByField['direction'])
                             ? (string) $orderByField['direction']
-                            : (class_exists(Order::class) ? (Order::Ascending)->value : Criteria::ASC);
+                            : Criteria::ASC;
                     }
 
                     $mapping['orderBy'] = $orderBy;
@@ -615,10 +609,9 @@ class XmlDriver extends FileDriver
                 if (isset($manyToManyElement->{'order-by'})) {
                     $orderBy = [];
                     foreach ($manyToManyElement->{'order-by'}->{'order-by-field'} ?? [] as $orderByField) {
-                        /** @psalm-suppress DeprecatedConstant */
                         $orderBy[(string) $orderByField['name']] = isset($orderByField['direction'])
                             ? (string) $orderByField['direction']
-                            : (class_exists(Order::class) ? (Order::Ascending)->value : Criteria::ASC);
+                            : Criteria::ASC;
                     }
 
                     $mapping['orderBy'] = $orderBy;

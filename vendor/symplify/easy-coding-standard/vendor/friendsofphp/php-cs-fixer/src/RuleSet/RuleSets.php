@@ -12,7 +12,7 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\RuleSet;
 
-use ECSPrefix202408\Symfony\Component\Finder\Finder;
+use ECSPrefix202312\Symfony\Component\Finder\Finder;
 /**
  * Set of rule sets to be used by fixer.
  *
@@ -21,7 +21,7 @@ use ECSPrefix202408\Symfony\Component\Finder\Finder;
 final class RuleSets
 {
     /**
-     * @var array<string, RuleSetDescriptionInterface>
+     * @var array<string,RuleSetDescriptionInterface>
      */
     private static $setDefinitions;
     /**
@@ -43,7 +43,7 @@ final class RuleSets
         return self::$setDefinitions;
     }
     /**
-     * @return list<string>
+     * @return string[]
      */
     public static function getSetDefinitionNames() : array
     {

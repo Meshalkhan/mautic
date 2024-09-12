@@ -46,7 +46,7 @@ final class Annotation
     /**
      * The lines that make up the annotation.
      *
-     * @var array<int, Line>
+     * @var Line[]
      */
     private array $lines;
 
@@ -91,16 +91,16 @@ final class Annotation
     private $namespace;
 
     /**
-     * @var list<NamespaceUseAnalysis>
+     * @var NamespaceUseAnalysis[]
      */
     private array $namespaceUses;
 
     /**
      * Create a new line instance.
      *
-     * @param array<int, Line>           $lines
-     * @param null|NamespaceAnalysis     $namespace
-     * @param list<NamespaceUseAnalysis> $namespaceUses
+     * @param Line[]                 $lines
+     * @param null|NamespaceAnalysis $namespace
+     * @param NamespaceUseAnalysis[] $namespaceUses
      */
     public function __construct(array $lines, $namespace = null, array $namespaceUses = [])
     {
@@ -108,8 +108,10 @@ final class Annotation
         $this->namespace = $namespace;
         $this->namespaceUses = $namespaceUses;
 
-        $this->start = array_key_first($lines);
-        $this->end = array_key_last($lines);
+        $keys = array_keys($lines);
+
+        $this->start = $keys[0];
+        $this->end = end($keys);
     }
 
     /**
@@ -171,17 +173,14 @@ final class Annotation
     }
 
     /**
+     * @return null|string
+     *
      * @internal
      */
-    public function getVariableName(): ?string
+    public function getVariableName()
     {
         $type = preg_quote($this->getTypesContent() ?? '', '/');
-        $regex = \sprintf(
-            '/@%s\s+(%s\s*)?(&\s*)?(\.{3}\s*)?(?<variable>\$%s)(?:.*|$)/',
-            $this->tag->getName(),
-            $type,
-            TypeExpression::REGEX_IDENTIFIER
-        );
+        $regex = "/@{$this->tag->getName()}\\s+({$type}\\s*)?(&\\s*)?(\\.{3}\\s*)?(?<variable>\\$.+?)(?:[\\s*]|$)/";
 
         if (Preg::match($regex, $this->lines[0]->getContent(), $matches)) {
             return $matches['variable'];

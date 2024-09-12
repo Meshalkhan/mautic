@@ -24,10 +24,11 @@ final class TypeAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analysis\Star
      *
      * @see https://php.net/manual/en/functions.arguments.php#functions.arguments.type-declaration.types
      * @see https://php.net/manual/en/reserved.other-reserved-words.php
+     * @see https://php.net/manual/en/language.pseudo-types.php
      *
      * @var list<string>
      */
-    private static $reservedTypes = ['array', 'bool', 'callable', 'false', 'float', 'int', 'iterable', 'list', 'mixed', 'never', 'null', 'object', 'parent', 'resource', 'self', 'static', 'string', 'true', 'void'];
+    private static $reservedTypes = ['array', 'bool', 'callable', 'false', 'float', 'int', 'iterable', 'mixed', 'never', 'null', 'object', 'parent', 'resource', 'self', 'static', 'string', 'true', 'void'];
     /**
      * @var string
      */
@@ -43,13 +44,14 @@ final class TypeAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analysis\Star
     /**
      * @var bool
      */
-    private $nullable = \false;
+    private $nullable;
     /**
      * @param ($startIndex is null ? null : int) $endIndex
      */
-    public function __construct(string $name, ?int $startIndex = null, ?int $endIndex = null)
+    public function __construct(string $name, int $startIndex = null, int $endIndex = null)
     {
         $this->name = $name;
+        $this->nullable = \false;
         if (\strncmp($name, '?', \strlen('?')) === 0) {
             $this->name = \substr($name, 1);
             $this->nullable = \true;

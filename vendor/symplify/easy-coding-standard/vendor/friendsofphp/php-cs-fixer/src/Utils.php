@@ -38,7 +38,7 @@ final class Utils
      */
     public static function camelCaseToUnderscore(string $string) : string
     {
-        return \mb_strtolower(\PhpCsFixer\Preg::replace('/(?<!^)(?<!_)((?=[\\p{Lu}][^\\p{Lu}])|(?<![\\p{Lu}])(?=[\\p{Lu}]))/', '_', $string));
+        return \mb_strtolower(\PhpCsFixer\Preg::replace('/(?<!^)((?=[\\p{Lu}][^\\p{Lu}])|(?<![\\p{Lu}])(?=[\\p{Lu}]))/', '_', $string));
     }
     /**
      * Calculate the trailing whitespace.
@@ -61,14 +61,11 @@ final class Utils
      *
      * Stability is ensured by using Schwartzian transform.
      *
-     * @template T
-     * @template R
+     * @param mixed[]  $elements
+     * @param callable $getComparedValue a callable that takes a single element and returns the value to compare
+     * @param callable $compareValues    a callable that compares two values
      *
-     * @param list<T>             $elements
-     * @param callable(T): R      $getComparedValue a callable that takes a single element and returns the value to compare
-     * @param callable(R, R): int $compareValues    a callable that compares two values
-     *
-     * @return list<T>
+     * @return mixed[]
      */
     public static function stableSort(array $elements, callable $getComparedValue, callable $compareValues) : array
     {
@@ -89,9 +86,9 @@ final class Utils
     /**
      * Sort fixers by their priorities.
      *
-     * @param list<FixerInterface> $fixers
+     * @param FixerInterface[] $fixers
      *
-     * @return list<FixerInterface>
+     * @return FixerInterface[]
      */
     public static function sortFixers(array $fixers) : array
     {
@@ -106,7 +103,7 @@ final class Utils
     /**
      * Join names in natural language using specified wrapper (double quote by default).
      *
-     * @param list<string> $names
+     * @param string[] $names
      *
      * @throws \InvalidArgumentException
      */
@@ -130,7 +127,7 @@ final class Utils
     /**
      * Join names in natural language wrapped in backticks, e.g. `a`, `b` and `c`.
      *
-     * @param list<string> $names
+     * @param string[] $names
      *
      * @throws \InvalidArgumentException
      */
@@ -138,13 +135,9 @@ final class Utils
     {
         return self::naturalLanguageJoin($names, '`');
     }
-    public static function isFutureModeEnabled() : bool
-    {
-        return \filter_var(\getenv('PHP_CS_FIXER_FUTURE_MODE'), \FILTER_VALIDATE_BOOL);
-    }
     public static function triggerDeprecation(\Exception $futureException) : void
     {
-        if (self::isFutureModeEnabled()) {
+        if (\getenv('PHP_CS_FIXER_FUTURE_MODE')) {
             throw new \RuntimeException('Your are using something deprecated, see previous exception. Aborting execution because `PHP_CS_FIXER_FUTURE_MODE` environment variable is set.', 0, $futureException);
         }
         $message = $futureException->getMessage();
@@ -159,12 +152,6 @@ final class Utils
         $triggeredDeprecations = \array_keys(self::$deprecations);
         \sort($triggeredDeprecations);
         return $triggeredDeprecations;
-    }
-    public static function convertArrayTypeToList(string $type) : string
-    {
-        $parts = \explode('[]', $type);
-        $count = \count($parts) - 1;
-        return \str_repeat('list<', $count) . $parts[0] . \str_repeat('>', $count);
     }
     /**
      * @param mixed $value
@@ -182,7 +169,7 @@ final class Utils
         return \PhpCsFixer\Preg::replace('/\\bNULL\\b/', 'null', $str);
     }
     /**
-     * @param array<array-key, mixed> $value
+     * @param array<mixed> $value
      */
     private static function arrayToString(array $value) : string
     {

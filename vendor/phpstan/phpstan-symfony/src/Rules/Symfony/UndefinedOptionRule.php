@@ -8,7 +8,7 @@ use PhpParser\Node\Expr\MethodCall;
 use PhpParser\PrettyPrinter\Standard;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
+use PHPStan\Rules\RuleError;
 use PHPStan\Symfony\ConsoleApplicationResolver;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Symfony\Helper;
@@ -39,6 +39,9 @@ final class UndefinedOptionRule implements Rule
 		return MethodCall::class;
 	}
 
+	/**
+	 * @return (string|RuleError)[] errors
+	 */
 	public function processNode(Node $node, Scope $scope): array
 	{
 		$classReflection = $scope->getClassReflection();
@@ -75,9 +78,7 @@ final class UndefinedOptionRule implements Rule
 				if ($scope->getType(Helper::createMarkerNode($node->var, $optType, $this->printer))->equals($optType)) {
 					continue;
 				}
-				$errors[] = RuleErrorBuilder::message(sprintf('Command "%s" does not define option "%s".', $name, $optName))
-					->identifier('symfonyConsole.optionNotFound')
-					->build();
+				$errors[] = sprintf('Command "%s" does not define option "%s".', $name, $optName);
 			}
 		}
 

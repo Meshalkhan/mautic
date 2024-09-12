@@ -12,17 +12,16 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Console\Command;
 
-use PhpCsFixer\Console\Application;
 use PhpCsFixer\Console\SelfUpdate\NewVersionCheckerInterface;
 use PhpCsFixer\PharCheckerInterface;
 use PhpCsFixer\Preg;
 use PhpCsFixer\ToolInfoInterface;
-use ECSPrefix202408\Symfony\Component\Console\Attribute\AsCommand;
-use ECSPrefix202408\Symfony\Component\Console\Command\Command;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputOption;
-use ECSPrefix202408\Symfony\Component\Console\Output\ConsoleOutputInterface;
-use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Attribute\AsCommand;
+use ECSPrefix202312\Symfony\Component\Console\Command\Command;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202312\Symfony\Component\Console\Output\ConsoleOutputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
 /**
  * @author Igor Wiedler <igor@wiedler.ch>
  * @author Stephane PY <py.stephane1@gmail.com>
@@ -33,7 +32,6 @@ use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
  */
 final class SelfUpdateCommand extends Command
 {
-    /** @var string */
     protected static $defaultName = 'self-update';
     /**
      * @var \PhpCsFixer\Console\SelfUpdate\NewVersionCheckerInterface
@@ -68,9 +66,9 @@ EOT
     }
     protected function execute(InputInterface $input, OutputInterface $output) : int
     {
-        if ($output instanceof ConsoleOutputInterface) {
+        if (OutputInterface::VERBOSITY_VERBOSE <= $output->getVerbosity() && $output instanceof ConsoleOutputInterface) {
             $stdErr = $output->getErrorOutput();
-            $stdErr->writeln(Application::getAboutWithRuntime(\true));
+            $stdErr->writeln($this->getApplication()->getLongVersion());
         }
         if (!$this->toolInfo->isInstalledAsPhar()) {
             $output->writeln('<error>Self-update is available only for PHAR version.</error>');
@@ -102,11 +100,7 @@ EOT
             }
             $remoteTag = $latestVersionOfCurrentMajor;
         }
-        $localFilename = $_SERVER['argv'][0];
-        $realPath = \realpath($localFilename);
-        if (\false !== $realPath) {
-            $localFilename = $realPath;
-        }
+        $localFilename = \realpath($_SERVER['argv'][0]) ?: $_SERVER['argv'][0];
         if (!\is_writable($localFilename)) {
             $output->writeln(\sprintf('<error>No permission to update</error> "%s" <error>file.</error>', $localFilename));
             return 1;

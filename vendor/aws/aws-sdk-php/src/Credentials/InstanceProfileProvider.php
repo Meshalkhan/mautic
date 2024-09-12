@@ -60,9 +60,6 @@ class InstanceProfileProvider
     /** @var string */
     private $endpointMode;
 
-    /** @var array */
-    private $config;
-
     /**
      * The constructor accepts the following options:
      *
@@ -71,12 +68,10 @@ class InstanceProfileProvider
      * - retries: Optional number of retries to be attempted.
      * - ec2_metadata_v1_disabled: Optional for disabling the fallback to IMDSv1.
      * - endpoint: Optional for overriding the default endpoint to be used for fetching credentials.
-     *   The value must contain a valid URI scheme. If the URI scheme is not https, it must
-     *   resolve to a loopback address.
+     *             The value must contain a valid URI scheme. If the URI scheme is not https, it must
+     *             resolve to a loopback address.
      * - endpoint_mode: Optional for overriding the default endpoint mode (IPv4|IPv6) to be used for
      *   resolving the default endpoint.
-     * - use_aws_shared_config_files: Decides whether the shared config file should be considered when
-     *   using the ConfigurationResolver::resolve method.
      *
      * @param array $config Configuration options.
      */
@@ -93,7 +88,6 @@ class InstanceProfileProvider
         }
 
         $this->endpointMode = $config[self::CFG_EC2_METADATA_SERVICE_ENDPOINT_MODE] ?? null;
-        $this->config = $config;
     }
 
     /**
@@ -226,8 +220,7 @@ class InstanceProfileProvider
                     $result['AccessKeyId'],
                     $result['SecretAccessKey'],
                     $result['Token'],
-                    strtotime($result['Expiration']),
-                    $result['AccountId'] ?? null
+                    strtotime($result['Expiration'])
                 );
             }
 
@@ -351,7 +344,7 @@ class InstanceProfileProvider
                     self::CFG_EC2_METADATA_V1_DISABLED,
                     self::DEFAULT_AWS_EC2_METADATA_V1_DISABLED,
                     'bool',
-                    $this->config
+                    ['use_aws_shared_config_files' => true]
                 )
             )
             ?? self::DEFAULT_AWS_EC2_METADATA_V1_DISABLED;
@@ -376,7 +369,7 @@ class InstanceProfileProvider
                 self::CFG_EC2_METADATA_SERVICE_ENDPOINT,
                 $this->getDefaultEndpoint(),
                 'string',
-                $this->config
+                ['use_aws_shared_config_files' => true]
             );
         }
 
@@ -427,7 +420,7 @@ class InstanceProfileProvider
                 self::CFG_EC2_METADATA_SERVICE_ENDPOINT_MODE,
                     self::ENDPOINT_MODE_IPv4,
                 'string',
-                $this->config
+                ['use_aws_shared_config_files' => true]
             );
         }
 

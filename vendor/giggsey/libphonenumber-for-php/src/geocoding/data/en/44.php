@@ -26,7 +26,6 @@ return array (
   44114704 => 'Sheffield',
   44114705 => 'Sheffield',
   44114707 => 'Sheffield',
-  44114708 => 'Sheffield',
   44114709 => 'Sheffield',
   44115 => 'Nottingham',
   44116 => 'Leicester',

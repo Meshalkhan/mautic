@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202408\Illuminate\Contracts\Container;
+namespace ECSPrefix202312\Illuminate\Contracts\Container;
 
 interface ContextualBindingBuilder
 {

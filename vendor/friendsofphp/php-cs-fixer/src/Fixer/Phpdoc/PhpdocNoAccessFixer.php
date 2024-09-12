@@ -60,11 +60,7 @@ class Foo
     protected function createProxyFixers(): array
     {
         $fixer = new GeneralPhpdocAnnotationRemoveFixer();
-        $fixer->configure(
-            ['annotations' => ['access'],
-                'case_sensitive' => true,
-            ]
-        );
+        $fixer->configure(['annotations' => ['access']]);
 
         return [$fixer];
     }

@@ -4,69 +4,48 @@ namespace DoctrineExtensions\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
-use Exception;
-
-use function preg_match;
-use function sprintf;
 
 class PolygonType extends Type
 {
-    public const FIELD = 'polygon';
+    const FIELD = 'polygon';
 
-    public function getName(): string
-    {
-        return self::FIELD;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
         return 'POLYGON';
     }
 
-    public function canRequireSQLConversion(): bool
+    public function canRequireSQLConversion()
     {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return string
-     */
-    public function convertToPHPValue($value, AbstractPlatform $platform): string
+    public function convertToPHPValue($value, AbstractPlatform $platform)
     {
         preg_match('/POLYGON\(\((.*)\)\)/', $value, $matches);
-        if (! isset($matches[1])) {
+        if (!isset($matches[1])) {
             throw new Exception('No Polygon Points');
         }
 
         return $matches[1];
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function convertToPHPValueSQL($sqlExpr, $platform): string
+    public function convertToPHPValueSQL($sqlExpr, $platform)
     {
         return sprintf('AsText(%s)', $sqlExpr);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform): string
+    public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
         return sprintf('POLYGON((%s))', $value);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function convertToDatabaseValueSQL($sqlExpr, AbstractPlatform $platform): string
+    public function convertToDatabaseValueSQL($sqlExpr, AbstractPlatform $platform)
     {
         return sprintf('ST_PolygonFromText(%s)', $sqlExpr);
+    }
+
+    public function getName()
+    {
+        return self::FIELD;
     }
 }

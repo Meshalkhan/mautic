@@ -8,14 +8,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202408\Symfony\Component\Console\EventListener;
+namespace ECSPrefix202312\Symfony\Component\Console\EventListener;
 
-use ECSPrefix202408\Psr\Log\LoggerInterface;
-use ECSPrefix202408\Symfony\Component\Console\ConsoleEvents;
-use ECSPrefix202408\Symfony\Component\Console\Event\ConsoleErrorEvent;
-use ECSPrefix202408\Symfony\Component\Console\Event\ConsoleEvent;
-use ECSPrefix202408\Symfony\Component\Console\Event\ConsoleTerminateEvent;
-use ECSPrefix202408\Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use ECSPrefix202312\Psr\Log\LoggerInterface;
+use ECSPrefix202312\Symfony\Component\Console\ConsoleEvents;
+use ECSPrefix202312\Symfony\Component\Console\Event\ConsoleErrorEvent;
+use ECSPrefix202312\Symfony\Component\Console\Event\ConsoleEvent;
+use ECSPrefix202312\Symfony\Component\Console\Event\ConsoleTerminateEvent;
+use ECSPrefix202312\Symfony\Component\EventDispatcher\EventSubscriberInterface;
 /**
  * @author James Halsall <james.t.halsall@googlemail.com>
  * @author Robin Chalas <robin.chalas@gmail.com>
@@ -26,7 +26,7 @@ class ErrorListener implements EventSubscriberInterface
      * @var \Psr\Log\LoggerInterface|null
      */
     private $logger;
-    public function __construct(?LoggerInterface $logger = null)
+    public function __construct(LoggerInterface $logger = null)
     {
         $this->logger = $logger;
     }

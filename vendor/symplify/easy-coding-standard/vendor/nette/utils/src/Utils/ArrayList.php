@@ -5,9 +5,9 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 declare (strict_types=1);
-namespace ECSPrefix202408\Nette\Utils;
+namespace ECSPrefix202312\Nette\Utils;
 
-use ECSPrefix202408\Nette;
+use ECSPrefix202312\Nette;
 /**
  * Provides the base class for a generic list (items can be accessed by index).
  * @template T
@@ -17,9 +17,7 @@ use ECSPrefix202408\Nette;
 class ArrayList implements \ArrayAccess, \Countable, \IteratorAggregate
 {
     use Nette\SmartObject;
-    /**
-     * @var mixed[]
-     */
+    /** @var mixed[] */
     private $list = [];
     /**
      * Transforms array to ArrayList.
@@ -37,13 +35,11 @@ class ArrayList implements \ArrayAccess, \Countable, \IteratorAggregate
     }
     /**
      * Returns an iterator over all items.
-     * @return \Iterator<int, T>
+     * @return \ArrayIterator<int, T>
      */
-    public function &getIterator() : \Iterator
+    public function getIterator() : \ArrayIterator
     {
-        foreach ($this->list as &$item) {
-            (yield $item);
-        }
+        return new \ArrayIterator($this->list);
     }
     /**
      * Returns items count.
@@ -104,7 +100,7 @@ class ArrayList implements \ArrayAccess, \Countable, \IteratorAggregate
     }
     /**
      * Prepends a item.
-     * @param mixed $value
+     * @param  T  $value
      */
     public function prepend($value) : void
     {

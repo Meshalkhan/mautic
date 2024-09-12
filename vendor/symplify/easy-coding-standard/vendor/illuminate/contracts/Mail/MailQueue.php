@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202408\Illuminate\Contracts\Mail;
+namespace ECSPrefix202312\Illuminate\Contracts\Mail;
 
 interface MailQueue
 {

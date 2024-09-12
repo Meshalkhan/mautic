@@ -29,7 +29,7 @@ class PhoneNumberToTimeZonesMapper
     protected function __construct($phonePrefixDataDirectory)
     {
         $this->prefixTimeZonesMap = static::loadPrefixTimeZonesMapFromFile(
-            __DIR__ . $phonePrefixDataDirectory . DIRECTORY_SEPARATOR . static::MAPPING_DATA_FILE_NAME
+            \dirname(__FILE__) . $phonePrefixDataDirectory . DIRECTORY_SEPARATOR . static::MAPPING_DATA_FILE_NAME
         );
         $this->phoneUtil = PhoneNumberUtil::getInstance();
 

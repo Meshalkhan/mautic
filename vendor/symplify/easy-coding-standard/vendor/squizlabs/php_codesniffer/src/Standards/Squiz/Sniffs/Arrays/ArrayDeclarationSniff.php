@@ -5,7 +5,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\Arrays;
 
@@ -17,7 +17,7 @@ class ArrayDeclarationSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
@@ -286,12 +286,8 @@ class ArrayDeclarationSniff implements Sniff
                 // Check the closing bracket is lined up under the "a" in array.
                 $expected = $keywordStart - 1;
                 $found = $tokens[$arrayEnd]['column'] - 1;
-                $pluralizeSpace = 's';
-                if ($expected === 1) {
-                    $pluralizeSpace = '';
-                }
-                $error = 'Closing parenthesis not aligned correctly; expected %s space%s but found %s';
-                $data = [$expected, $pluralizeSpace, $found];
+                $error = 'Closing parenthesis not aligned correctly; expected %s space(s) but found %s';
+                $data = [$expected, $found];
                 $fix = $phpcsFile->addFixableError($error, $arrayEnd, 'CloseBraceNotAligned', $data);
                 if ($fix === \true) {
                     if ($found === 0) {
@@ -368,13 +364,9 @@ class ArrayDeclarationSniff implements Sniff
                     continue;
                 }
                 if ($keyUsed === \true && $tokens[$lastToken]['code'] === \T_COMMA) {
-                    $nextToken = $phpcsFile->findNext(Tokens::$emptyTokens, $lastToken + 1, null, \true);
-                    // Allow for PHP 7.4+ array unpacking within an array declaration.
-                    if ($tokens[$nextToken]['code'] !== \T_ELLIPSIS) {
-                        $error = 'No key specified for array entry; first entry specifies key';
-                        $phpcsFile->addError($error, $nextToken, 'NoKeySpecified');
-                        return;
-                    }
+                    $error = 'No key specified for array entry; first entry specifies key';
+                    $phpcsFile->addError($error, $nextToken, 'NoKeySpecified');
+                    return;
                 }
                 if ($keyUsed === \false) {
                     if ($tokens[$nextToken - 1]['code'] === \T_WHITESPACE) {
@@ -401,11 +393,7 @@ class ArrayDeclarationSniff implements Sniff
                     //end if
                     $valueContent = $phpcsFile->findNext(Tokens::$emptyTokens, $lastToken + 1, $nextToken, \true);
                     $indices[] = ['value' => $valueContent];
-                    $usesArrayUnpacking = $phpcsFile->findPrevious(Tokens::$emptyTokens, $nextToken - 2, null, \true);
-                    if ($tokens[$usesArrayUnpacking]['code'] !== \T_ELLIPSIS) {
-                        // Don't decide if an array is key => value indexed or not when PHP 7.4+ array unpacking is used.
-                        $singleUsed = \true;
-                    }
+                    $singleUsed = \true;
                 }
                 //end if
                 $lastToken = $nextToken;
@@ -536,11 +524,7 @@ class ArrayDeclarationSniff implements Sniff
                 $ignoreTokens = [\T_WHITESPACE => \T_WHITESPACE, \T_COMMA => \T_COMMA];
                 $ignoreTokens += Tokens::$castTokens;
                 if ($tokens[$valuePointer]['code'] === \T_CLOSURE || $tokens[$valuePointer]['code'] === \T_FN) {
-                    // Check if the closure is static, if it is, override the value pointer as indices before skip static.
-                    $staticPointer = $phpcsFile->findPrevious($ignoreTokens, $valuePointer - 1, $arrayStart + 1, \true);
-                    if ($staticPointer !== \false && $tokens[$staticPointer]['code'] === \T_STATIC) {
-                        $valuePointer = $staticPointer;
-                    }
+                    $ignoreTokens += [\T_STATIC => \T_STATIC];
                 }
                 $previous = $phpcsFile->findPrevious($ignoreTokens, $valuePointer - 1, $arrayStart + 1, \true);
                 if ($previous === \false) {
@@ -565,13 +549,9 @@ class ArrayDeclarationSniff implements Sniff
                         $expected = $keywordStart;
                         $first = $phpcsFile->findFirstOnLine(\T_WHITESPACE, $valuePointer, \true);
                         $found = $tokens[$first]['column'] - 1;
-                        $pluralizeSpace = 's';
-                        if ($expected === 1) {
-                            $pluralizeSpace = '';
-                        }
                         if ($found !== $expected) {
-                            $error = 'Array value not aligned correctly; expected %s space%s but found %s';
-                            $data = [$expected, $pluralizeSpace, $found];
+                            $error = 'Array value not aligned correctly; expected %s spaces but found %s';
+                            $data = [$expected, $found];
                             $fix = $phpcsFile->addFixableError($error, $first, 'ValueNotAligned', $data);
                             if ($fix === \true) {
                                 if ($found === 0) {
@@ -649,12 +629,8 @@ class ArrayDeclarationSniff implements Sniff
             if ($tokens[$indexPointer]['column'] !== $indicesStart && $indexPointer - 1 !== $arrayStart) {
                 $expected = $indicesStart - 1;
                 $found = $tokens[$indexPointer]['column'] - 1;
-                $pluralizeSpace = 's';
-                if ($expected === 1) {
-                    $pluralizeSpace = '';
-                }
-                $error = 'Array key not aligned correctly; expected %s space%s but found %s';
-                $data = [$expected, $pluralizeSpace, $found];
+                $error = 'Array key not aligned correctly; expected %s spaces but found %s';
+                $data = [$expected, $found];
                 $fix = $phpcsFile->addFixableError($error, $indexPointer, 'KeyNotAligned', $data);
                 if ($fix === \true) {
                     if ($found === 0 || $tokens[$indexPointer - 1]['code'] !== \T_WHITESPACE) {
@@ -664,17 +640,12 @@ class ArrayDeclarationSniff implements Sniff
                     }
                 }
             }
-            //end if
             $arrowStart = $tokens[$indexPointer]['column'] + $maxLength + 1;
             if ($tokens[$index['arrow']]['column'] !== $arrowStart) {
                 $expected = $arrowStart - ($index['index_length'] + $tokens[$indexPointer]['column']);
                 $found = $tokens[$index['arrow']]['column'] - ($index['index_length'] + $tokens[$indexPointer]['column']);
-                $pluralizeSpace = 's';
-                if ($expected === 1) {
-                    $pluralizeSpace = '';
-                }
-                $error = 'Array double arrow not aligned correctly; expected %s space%s but found %s';
-                $data = [$expected, $pluralizeSpace, $found];
+                $error = 'Array double arrow not aligned correctly; expected %s space(s) but found %s';
+                $data = [$expected, $found];
                 $fix = $phpcsFile->addFixableError($error, $index['arrow'], 'DoubleArrowNotAligned', $data);
                 if ($fix === \true) {
                     if ($found === 0) {
@@ -685,7 +656,6 @@ class ArrayDeclarationSniff implements Sniff
                 }
                 continue;
             }
-            //end if
             $valueStart = $arrowStart + 3;
             if ($tokens[$valuePointer]['column'] !== $valueStart) {
                 $expected = $valueStart - ($tokens[$index['arrow']]['length'] + $tokens[$index['arrow']]['column']);
@@ -693,12 +663,8 @@ class ArrayDeclarationSniff implements Sniff
                 if ($found < 0) {
                     $found = 'newline';
                 }
-                $pluralizeSpace = 's';
-                if ($expected === 1) {
-                    $pluralizeSpace = '';
-                }
-                $error = 'Array value not aligned correctly; expected %s space%s but found %s';
-                $data = [$expected, $pluralizeSpace, $found];
+                $error = 'Array value not aligned correctly; expected %s space(s) but found %s';
+                $data = [$expected, $found];
                 $fix = $phpcsFile->addFixableError($error, $index['arrow'], 'ValueNotAligned', $data);
                 if ($fix === \true) {
                     if ($found === 'newline') {

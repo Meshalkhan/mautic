@@ -17,8 +17,8 @@ use PhpCsFixer\Fixer\ConfigurableFixerInterface;
 use PhpCsFixer\Fixer\FixerInterface;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\RuleSet\RuleSetInterface;
-use ECSPrefix202408\Symfony\Component\Finder\Finder as SymfonyFinder;
-use ECSPrefix202408\Symfony\Component\Finder\SplFileInfo;
+use ECSPrefix202312\Symfony\Component\Finder\Finder as SymfonyFinder;
+use ECSPrefix202312\Symfony\Component\Finder\SplFileInfo;
 /**
  * Class provides a way to create a group of fixers.
  *
@@ -74,25 +74,21 @@ final class FixerFactory
     {
         static $builtInFixers = null;
         if (null === $builtInFixers) {
-            /** @var list<class-string<FixerInterface>> */
             $builtInFixers = [];
-            $finder = SymfonyFinder::create()->files()->in(__DIR__ . '/Fixer')->exclude(['Internal'])->name('*Fixer.php')->depth(1);
             /** @var SplFileInfo $file */
-            foreach ($finder as $file) {
+            foreach (SymfonyFinder::create()->files()->in(__DIR__ . '/Fixer')->name('*Fixer.php')->depth(1) as $file) {
                 $relativeNamespace = $file->getRelativePath();
                 $fixerClass = 'PhpCsFixer\\Fixer\\' . ('' !== $relativeNamespace ? $relativeNamespace . '\\' : '') . $file->getBasename('.php');
                 $builtInFixers[] = $fixerClass;
             }
         }
         foreach ($builtInFixers as $class) {
-            /** @var FixerInterface */
-            $fixer = new $class();
-            $this->registerFixer($fixer, \false);
+            $this->registerFixer(new $class(), \false);
         }
         return $this;
     }
     /**
-     * @param iterable<FixerInterface> $fixers
+     * @param FixerInterface[] $fixers
      *
      * @return $this
      */
@@ -168,7 +164,7 @@ final class FixerFactory
         return isset($this->fixersByName[$name]);
     }
     /**
-     * @return list<string>
+     * @return string[]
      */
     private function getFixersConflicts(FixerInterface $fixer) : array
     {
@@ -177,7 +173,7 @@ final class FixerFactory
         return \array_key_exists($fixerName, $conflictMap) ? $conflictMap[$fixerName] : [];
     }
     /**
-     * @param array<string, list<string>> $fixerConflicts
+     * @param array<string, string[]> $fixerConflicts
      */
     private function generateConflictMessage(array $fixerConflicts) : string
     {

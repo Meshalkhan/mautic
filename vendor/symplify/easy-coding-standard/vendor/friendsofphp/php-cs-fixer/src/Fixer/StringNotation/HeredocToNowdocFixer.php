@@ -29,7 +29,7 @@ final class HeredocToNowdocFixer extends AbstractFixer
         return new FixerDefinition('Convert `heredoc` to `nowdoc` where possible.', [new CodeSample(<<<'EOF'
 <?php
 
-namespace ECSPrefix202408;
+namespace ECSPrefix202312;
 
 $a = <<<TEST
 Foo
@@ -42,7 +42,7 @@ EOF
     /**
      * {@inheritdoc}
      *
-     * Must run after EscapeImplicitBackslashesFixer, StringImplicitBackslashesFixer.
+     * Must run after EscapeImplicitBackslashesFixer.
      */
     public function getPriority() : int
     {

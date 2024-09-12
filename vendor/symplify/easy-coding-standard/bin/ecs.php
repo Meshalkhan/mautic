@@ -1,12 +1,12 @@
 <?php
 
 declare (strict_types=1);
-namespace ECSPrefix202408;
+namespace ECSPrefix202312;
 
 // decoupled in own "*.php" file, so ECS, Rector and PHPStan works out of the box here
 use PHP_CodeSniffer\Util\Tokens;
-use ECSPrefix202408\Symfony\Component\Console\Command\Command;
-use ECSPrefix202408\Symfony\Component\Console\Input\ArgvInput;
+use ECSPrefix202312\Symfony\Component\Console\Command\Command;
+use ECSPrefix202312\Symfony\Component\Console\Input\ArgvInput;
 use Symplify\EasyCodingStandard\Console\EasyCodingStandardConsoleApplication;
 use Symplify\EasyCodingStandard\Console\Style\SymfonyStyleFactory;
 use Symplify\EasyCodingStandard\DependencyInjection\EasyCodingStandardContainerFactory;
@@ -81,7 +81,7 @@ final class AutoloadIncluder
             }
             require_once $possiblePhpCodeSnifferAutoloadPath;
         }
-        // initialize token with INT type, otherwise php-cs-fixer and php-parser breaks
+        // initalize token with INT type, otherwise php-cs-fixer and php-parser breaks
         if (!\defined('T_MATCH')) {
             \define('T_MATCH', 5000);
         }
@@ -90,9 +90,6 @@ final class AutoloadIncluder
         }
         if (!\defined('T_ENUM')) {
             \define('T_ENUM', 5015);
-        }
-        if (!\defined('T_NULLSAFE_OBJECT_OPERATOR')) {
-            \define('T_NULLSAFE_OBJECT_OPERATOR', 5020);
         }
         // for PHP_CodeSniffer
         \define('PHP_CODESNIFFER_CBF', \false);
@@ -115,10 +112,6 @@ final class AutoloadIncluder
         require_once $file;
     }
 }
-/**
- * Inspired by https://github.com/rectorphp/rector/pull/2373/files#diff-0fc04a2bb7928cac4ae339d5a8bf67f3
- */
-\class_alias('ECSPrefix202408\\AutoloadIncluder', 'AutoloadIncluder', \false);
 try {
     $input = new ArgvInput();
     $ecsContainerFactory = new EasyCodingStandardContainerFactory();

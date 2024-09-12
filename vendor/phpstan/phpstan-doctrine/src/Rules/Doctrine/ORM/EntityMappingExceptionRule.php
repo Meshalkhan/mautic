@@ -8,7 +8,6 @@ use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Node\InClassNode;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\Doctrine\ObjectMetadataResolver;
 use ReflectionException;
 
@@ -57,12 +56,7 @@ class EntityMappingExceptionRule implements Rule
 		try {
 			$objectManager->getClassMetadata($className);
 		} catch (\Doctrine\Persistence\Mapping\MappingException | MappingException | AnnotationException $e) {
-			return [
-				RuleErrorBuilder::message($e->getMessage())
-					->nonIgnorable()
-					->identifier('doctrine.mapping')
-					->build(),
-			];
+			return [$e->getMessage()];
 		}
 
 		return [];

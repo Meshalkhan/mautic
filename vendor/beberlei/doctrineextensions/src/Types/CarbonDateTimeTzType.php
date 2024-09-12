@@ -2,19 +2,32 @@
 
 namespace DoctrineExtensions\Types;
 
+use Carbon\Carbon;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\DateTimeTzType;
 
 class CarbonDateTimeTzType extends DateTimeTzType
 {
-    use CarbonTypeImplementation;
+    const CARBONDATETIMETZ = 'carbondatetimetz';
 
-    public const CARBONDATETIMETZ = 'carbondatetimetz';
-
-    /**
-     * {@inheritDoc}
-     */
     public function getName()
     {
-        return self::CARBONDATETIMETZ;
+        return static::CARBONDATETIMETZ;
+    }
+
+    public function convertToPHPValue($value, AbstractPlatform $platform)
+    {
+        $result = parent::convertToPHPValue($value, $platform);
+
+        if ($result instanceof \DateTime) {
+            return Carbon::instance($result);
+        }
+
+        return $result;
+    }
+
+    public function requiresSQLCommentHint(AbstractPlatform $platform)
+    {
+        return true;
     }
 }

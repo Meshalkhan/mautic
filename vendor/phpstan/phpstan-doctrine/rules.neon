@@ -17,7 +17,6 @@ parametersSchema:
 		reportDynamicQueryBuilders: bool()
 		reportUnknownTypes: bool()
 		allowNullablePropertyForRequiredField: bool()
-		literalString: bool()
 	])
 
 rules:
@@ -44,7 +43,6 @@ services:
 			reportUnknownTypes: %doctrine.reportUnknownTypes%
 			allowNullablePropertyForRequiredField: %doctrine.allowNullablePropertyForRequiredField%
 			bleedingEdge: %featureToggles.bleedingEdge%
-			descriptorRegistry: @doctrineTypeDescriptorRegistry
 		tags:
 			- phpstan.rules.rule
 	-
@@ -60,7 +58,3 @@ services:
 			- phpstan.rules.rule
 	-
 		class: PHPStan\Rules\Doctrine\ORM\EntityConstructorNotFinalRule
-	-
-		class: PHPStan\Classes\DoctrineProxyForbiddenClassNamesExtension
-		tags:
-			- phpstan.forbiddenClassNamesExtension

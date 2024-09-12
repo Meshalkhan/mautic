@@ -12,7 +12,7 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Console\Report\FixReport;
 
-use ECSPrefix202408\Symfony\Component\Finder\Finder as SymfonyFinder;
+use ECSPrefix202312\Symfony\Component\Finder\Finder as SymfonyFinder;
 /**
  * @author Boris Gorbylev <ekho@ekho.name>
  *

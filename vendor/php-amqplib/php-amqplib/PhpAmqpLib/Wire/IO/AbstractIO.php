@@ -46,7 +46,7 @@ abstract class AbstractIO
     /** @var int|float */
     protected $last_write;
 
-    /** @var \ErrorException|null */
+    /** @var array|null */
     protected $last_error;
 
     /** @var bool */
@@ -93,7 +93,7 @@ abstract class AbstractIO
             $result = $this->do_select($sec, $usec);
             $this->throwOnError();
         } catch (\ErrorException $e) {
-            throw new AMQPIOWaitException($e->getMessage(), $e->getCode(), $e->getPrevious());
+            throw new AMQPIOWaitException($e->getMessage(), $e->getCode(), $e);
         } finally {
             $this->restoreErrorHandler();
         }
@@ -159,7 +159,7 @@ abstract class AbstractIO
     /**
      * @throws \PhpAmqpLib\Exception\AMQPHeartbeatMissedException
      */
-    protected function checkBrokerHeartbeat(): void
+    protected function checkBrokerHeartbeat()
     {
         if ($this->heartbeat > 0 && ($this->last_read > 0 || $this->last_write > 0)) {
             $lastActivity = $this->getLastActivity();
@@ -229,10 +229,14 @@ abstract class AbstractIO
 
     protected function throwOnError(): void
     {
-        if ($this->last_error instanceof \ErrorException) {
-            $error = $this->last_error;
-            $this->last_error = null;
-            throw $error;
+        if ($this->last_error !== null) {
+            throw new \ErrorException(
+                $this->last_error['errstr'],
+                0,
+                $this->last_error['errno'],
+                $this->last_error['errfile'],
+                $this->last_error['errline']
+            );
         }
     }
 
@@ -248,16 +252,20 @@ abstract class AbstractIO
      * @param  string $errstr
      * @param  string $errfile
      * @param  int $errline
+     * @param  array $errcontext
      * @return void
      */
-    public function error_handler($errno, $errstr, $errfile, $errline): void
+    public function error_handler($errno, $errstr, $errfile, $errline, $errcontext = null)
     {
         // throwing an exception in an error handler will halt execution
-        // collect error continue
-        $this->last_error = new \ErrorException($errstr, $errno, 1, $errfile, $errline, $this->last_error);
+        //   set the last error and continue
+        $this->last_error = compact('errno', 'errstr', 'errfile', 'errline', 'errcontext');
     }
 
-    protected function isPcntlSignalEnabled(): bool
+    /**
+     * @return bool
+     */
+    protected function isPcntlSignalEnabled()
     {
         return extension_loaded('pcntl')
             && function_exists('pcntl_signal_dispatch')

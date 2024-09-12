@@ -9,7 +9,5 @@ use Aws\AwsClient;
  * @method \GuzzleHttp\Promise\Promise createBillOfMaterialsImportJobAsync(array $args = [])
  * @method \Aws\Result getBillOfMaterialsImportJob(array $args = [])
  * @method \GuzzleHttp\Promise\Promise getBillOfMaterialsImportJobAsync(array $args = [])
- * @method \Aws\Result sendDataIntegrationEvent(array $args = [])
- * @method \GuzzleHttp\Promise\Promise sendDataIntegrationEventAsync(array $args = [])
  */
 class SupplyChainClient extends AwsClient {}

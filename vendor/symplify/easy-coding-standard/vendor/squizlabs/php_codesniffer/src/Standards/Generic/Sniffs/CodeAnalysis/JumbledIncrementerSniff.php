@@ -25,7 +25,7 @@
  *
  * @author    Manuel Pichler <mapi@manuel-pichler.de>
  * @copyright 2007-2014 Manuel Pichler. All rights reserved.
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\CodeAnalysis;
 
@@ -36,7 +36,7 @@ class JumbledIncrementerSniff implements Sniff
     /**
      * Registers the tokens that this sniff wants to listen for.
      *
-     * @return array<int|string>
+     * @return int[]
      */
     public function register()
     {
@@ -60,7 +60,7 @@ class JumbledIncrementerSniff implements Sniff
         if (isset($token['scope_opener']) === \false) {
             return;
         }
-        // Find incrementers for outer loop.
+        // Find incrementors for outer loop.
         $outer = $this->findIncrementers($tokens, $token);
         // Skip if empty.
         if (\count($outer) === 0) {
@@ -76,8 +76,8 @@ class JumbledIncrementerSniff implements Sniff
             $inner = $this->findIncrementers($tokens, $tokens[$start]);
             $diff = \array_intersect($outer, $inner);
             if (\count($diff) !== 0) {
-                $error = 'Loop incrementer (%s) jumbling with inner loop';
-                $data = [\implode(', ', $diff)];
+                $error = 'Loop incrementor (%s) jumbling with inner loop';
+                $data = [\join(', ', $diff)];
                 $phpcsFile->addWarning($error, $stackPtr, 'Found', $data);
             }
         }
@@ -86,15 +86,15 @@ class JumbledIncrementerSniff implements Sniff
     /**
      * Get all used variables in the incrementer part of a for statement.
      *
-     * @param array<int, array>    $tokens Array with all code sniffer tokens.
-     * @param array<string, mixed> $token  Current for loop token.
+     * @param array(integer=>array) $tokens Array with all code sniffer tokens.
+     * @param array(string=>mixed)  $token  Current for loop token
      *
      * @return string[] List of all found incrementer variables.
      */
     protected function findIncrementers(array $tokens, array $token)
     {
         // Skip invalid statement.
-        if (isset($token['parenthesis_opener'], $token['parenthesis_closer']) === \false) {
+        if (isset($token['parenthesis_opener']) === \false) {
             return [];
         }
         $start = ++$token['parenthesis_opener'];

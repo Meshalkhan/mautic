@@ -6,7 +6,6 @@ use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Node\InClassNode;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\Doctrine\ObjectMetadataResolver;
 use function sprintf;
@@ -49,12 +48,10 @@ class EntityNotFinalRule implements Rule
 			return [];
 		}
 
-		return [
-			RuleErrorBuilder::message(sprintf(
-				'Entity class %s is final which can cause problems with proxies.',
-				$classReflection->getDisplayName()
-			))->identifier('doctrine.finalEntity')->build(),
-		];
+		return [sprintf(
+			'Entity class %s is final which can cause problems with proxies.',
+			$classReflection->getDisplayName()
+		)];
 	}
 
 }

@@ -16,7 +16,6 @@ use PhpCsFixer\Console\Command\HelpCommand;
 use PhpCsFixer\Differ\FullDiffer;
 use PhpCsFixer\Fixer\ConfigurableFixerInterface;
 use PhpCsFixer\Fixer\DeprecatedFixerInterface;
-use PhpCsFixer\Fixer\ExperimentalFixerInterface;
 use PhpCsFixer\Fixer\FixerInterface;
 use PhpCsFixer\FixerConfiguration\AliasedFixerOption;
 use PhpCsFixer\FixerConfiguration\AllowedValueSubset;
@@ -80,17 +79,6 @@ RST;
                 $deprecationDescription .= \PhpCsFixer\Documentation\RstUtils::toRst(\sprintf("\n\nYou should use %s instead.", Utils::naturalLanguageJoinWithBackticks($alternatives)), 0);
             }
         }
-        $experimentalDescription = '';
-        if ($fixer instanceof ExperimentalFixerInterface) {
-            $experimentalDescriptionRaw = \PhpCsFixer\Documentation\RstUtils::toRst('Rule is not covered with backward compatibility promise, use it at your own risk. Rule\'s behaviour may be changed at any point, including rule\'s name; its options\' names, availability and allowed values; its default configuration. Rule may be even removed without prior notice. Feel free to provide feedback and help with determining final state of the rule.', 0);
-            $experimentalDescription = <<<RST
-
-This rule is experimental
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-{$experimentalDescriptionRaw}
-RST;
-        }
         $riskyDescription = '';
         $riskyDescriptionRaw = $definition->getRiskyDescription();
         if (null !== $riskyDescriptionRaw) {
@@ -109,9 +97,7 @@ RST;
                 $warningsHeader = 'Warnings';
             }
             $warningsHeaderLine = \str_repeat('-', \strlen($warningsHeader));
-            $doc .= "\n\n" . \implode("\n", \array_filter([$warningsHeader, $warningsHeaderLine, $deprecationDescription, $experimentalDescription, $riskyDescription], static function (string $text) : bool {
-                return '' !== $text;
-            }));
+            $doc .= "\n\n" . \implode("\n", \array_filter([$warningsHeader, $warningsHeaderLine, $deprecationDescription, $riskyDescription]));
         }
         if ($fixer instanceof ConfigurableFixerInterface) {
             $doc .= <<<'RST'
@@ -135,8 +121,8 @@ RST;
                 $allowed = HelpCommand::getDisplayableAllowedValues($option);
                 if (null === $allowed) {
                     $allowedKind = 'Allowed types';
-                    $allowed = \array_map(static function (string $value) : string {
-                        return '``' . Utils::convertArrayTypeToList($value) . '``';
+                    $allowed = \array_map(static function ($value) : string {
+                        return '``' . $value . '``';
                     }, $option->getAllowedTypes());
                 } else {
                     $allowedKind = 'Allowed values';
@@ -206,18 +192,12 @@ RST;
         $fileName = \str_replace('\\', '/', $fileName);
         $fileName = \substr($fileName, \strrpos($fileName, '/src/Fixer/') + 1);
         $fileName = "`{$className} <./../../../{$fileName}>`_";
-        $testFileName = Preg::replace('~.*\\K/src/(?=Fixer/)~', '/tests/', $fileName);
-        $testFileName = Preg::replace('~PhpCsFixer\\\\\\\\\\K(?=Fixer\\\\\\\\)~', 'Tests\\\\\\\\', $testFileName);
-        $testFileName = Preg::replace('~(?= <|\\.php>)~', 'Test', $testFileName);
         $doc .= <<<RST
 
-References
-----------
+Source class
+------------
 
-- Fixer class: {$fileName}
-- Test class: {$testFileName}
-
-The test class defines officially supported behaviour. Each test case is a part of our backward compatibility promise.
+{$fileName}
 RST;
         $doc = \str_replace("\t", '<TAB>', $doc);
         return "{$doc}\n";
@@ -239,7 +219,7 @@ RST;
         return $ruleSetConfigs;
     }
     /**
-     * @param list<FixerInterface> $fixers
+     * @param FixerInterface[] $fixers
      */
     public function generateFixersDocumentationIndex(array $fixers) : string
     {
@@ -265,9 +245,6 @@ RST;
             $attributes = [];
             if ($fixer instanceof DeprecatedFixerInterface) {
                 $attributes[] = 'deprecated';
-            }
-            if ($fixer instanceof ExperimentalFixerInterface) {
-                $attributes[] = 'experimental';
             }
             if ($fixer->isRisky()) {
                 $attributes[] = 'risky';

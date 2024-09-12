@@ -6,7 +6,7 @@ use PhpParser\Node;
 use PhpParser\Node\Expr\MethodCall;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
+use PHPStan\Rules\RuleError;
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\BooleanType;
 use PHPStan\Type\Constant\ConstantIntegerType;
@@ -32,6 +32,9 @@ final class InvalidOptionDefaultValueRule implements Rule
 		return MethodCall::class;
 	}
 
+	/**
+	 * @return (string|RuleError)[] errors
+	 */
 	public function processNode(Node $node, Scope $scope): array
 	{
 		if (!(new ObjectType('Symfony\Component\Console\Command\Command'))->isSuperTypeOf($scope->getType($node->var))->yes()) {
@@ -63,24 +66,13 @@ final class InvalidOptionDefaultValueRule implements Rule
 		if (($mode & 8) !== 8) {
 			$checkType = new UnionType([new StringType(), new IntegerType(), new NullType(), new BooleanType()]);
 			if (!$checkType->isSuperTypeOf($defaultType)->yes()) {
-				return [
-					RuleErrorBuilder::message(sprintf(
-						'Parameter #5 $default of method Symfony\Component\Console\Command\Command::addOption() expects %s, %s given.',
-						$checkType->describe(VerbosityLevel::typeOnly()),
-						$defaultType->describe(VerbosityLevel::typeOnly())
-					))->identifier('argument.type')->build(),
-				];
+				return [sprintf('Parameter #5 $default of method Symfony\Component\Console\Command\Command::addOption() expects %s, %s given.', $checkType->describe(VerbosityLevel::typeOnly()), $defaultType->describe(VerbosityLevel::typeOnly()))];
 			}
 		}
 
 		// is array
 		if (($mode & 8) === 8 && !(new UnionType([new ArrayType(new MixedType(), new StringType()), new NullType()]))->isSuperTypeOf($defaultType)->yes()) {
-			return [
-				RuleErrorBuilder::message(sprintf(
-					'Parameter #5 $default of method Symfony\Component\Console\Command\Command::addOption() expects array<string>|null, %s given.',
-					$defaultType->describe(VerbosityLevel::typeOnly())
-				))->identifier('argument.type')->build(),
-			];
+			return [sprintf('Parameter #5 $default of method Symfony\Component\Console\Command\Command::addOption() expects array<string>|null, %s given.', $defaultType->describe(VerbosityLevel::typeOnly()))];
 		}
 
 		return [];

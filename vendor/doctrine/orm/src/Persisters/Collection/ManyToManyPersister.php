@@ -8,7 +8,6 @@ use BadMethodCallException;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Collections\Expr\Comparison;
 use Doctrine\DBAL\Exception as DBALException;
-use Doctrine\ORM\Internal\CriteriaOrderings;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Persisters\SqlValueVisitor;
@@ -31,8 +30,6 @@ use function sprintf;
  */
 class ManyToManyPersister extends AbstractCollectionPersister
 {
-    use CriteriaOrderings;
-
     /**
      * {@inheritDoc}
      */
@@ -748,7 +745,7 @@ class ManyToManyPersister extends AbstractCollectionPersister
 
     private function getOrderingSql(Criteria $criteria, ClassMetadata $targetClass): string
     {
-        $orderings = self::getCriteriaOrderings($criteria);
+        $orderings = $criteria->getOrderings();
         if ($orderings) {
             $orderBy = [];
             foreach ($orderings as $name => $direction) {

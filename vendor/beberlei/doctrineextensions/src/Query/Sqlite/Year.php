@@ -2,10 +2,12 @@
 
 namespace DoctrineExtensions\Query\Sqlite;
 
-/** @author Tarjei Huse <tarjei.huse@gmail.com> */
+/**
+ * @author Tarjei Huse <tarjei.huse@gmail.com>
+ */
 class Year extends NumberFromStrfTime
 {
-    protected function getFormat(): string
+    protected function getFormat()
     {
         return '%Y';
     }

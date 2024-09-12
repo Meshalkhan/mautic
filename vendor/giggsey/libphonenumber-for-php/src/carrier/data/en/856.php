@@ -18,5 +18,4 @@ return array (
   856208 => 'Best Telecom',
   856209 => 'Unitel',
   856302 => 'ETL',
-  856304 => 'Unitel',
 );

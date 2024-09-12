@@ -122,6 +122,9 @@ class JS extends Minify
      */
     protected $operatorsAfter = array();
 
+    /**
+     * {@inheritdoc}
+     */
     public function __construct()
     {
         call_user_func_array(array('\\MatthiasMullie\Minify\\Minify', '__construct'), func_get_args());

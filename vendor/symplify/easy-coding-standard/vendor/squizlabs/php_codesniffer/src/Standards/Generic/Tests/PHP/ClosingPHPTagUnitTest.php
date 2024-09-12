@@ -5,17 +5,12 @@
  *
  * @author    Andy Grunwald <andygrunwald@gmail.com>
  * @copyright 2010-2014 Andy Grunwald
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Tests\PHP;
 
 use PHP_CodeSniffer\Tests\Standards\AbstractSniffUnitTest;
-/**
- * Unit test class for the ClosingPHPTag sniff.
- *
- * @covers \PHP_CodeSniffer\Standards\Generic\Sniffs\PHP\ClosingPHPTagSniff
- */
-final class ClosingPHPTagUnitTest extends AbstractSniffUnitTest
+class ClosingPHPTagUnitTest extends AbstractSniffUnitTest
 {
     /**
      * Returns the lines where errors should occur.
@@ -34,8 +29,10 @@ final class ClosingPHPTagUnitTest extends AbstractSniffUnitTest
                 return [9 => 1];
             case 'ClosingPHPTagUnitTest.2.inc':
                 return [5 => 1];
+                break;
             default:
                 return [];
+                break;
         }
     }
     //end getErrorList()

@@ -20,7 +20,7 @@ interface DeprecatedFixerInterface extends \PhpCsFixer\Fixer\FixerInterface
     /**
      * Returns names of fixers to use instead, if any.
      *
-     * @return list<string>
+     * @return string[]
      */
     public function getSuccessorsNames() : array;
 }

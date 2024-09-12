@@ -6,7 +6,7 @@
  * @author    Ben Selby <benmatselby@gmail.com>
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Reports;
 
@@ -27,17 +27,16 @@ abstract class VersionControl implements \PHP_CodeSniffer\Reports\Report
      * and FALSE if it ignored the file. Returning TRUE indicates that the file and
      * its data should be counted in the grand totals.
      *
-     * @param array<string, string|int|array> $report      Prepared report data.
-     *                                                     See the {@see Report} interface for a detailed specification.
-     * @param \PHP_CodeSniffer\Files\File     $phpcsFile   The file being reported on.
-     * @param bool                            $showSources Show sources?
-     * @param int                             $width       Maximum allowed line width.
+     * @param array                 $report      Prepared report data.
+     * @param \PHP_CodeSniffer\File $phpcsFile   The file being reported on.
+     * @param bool                  $showSources Show sources?
+     * @param int                   $width       Maximum allowed line width.
      *
      * @return bool
      */
     public function generateFileReport($report, File $phpcsFile, $showSources = \false, $width = 80)
     {
-        $blames = $this->getBlameContent($phpcsFile->getFilename());
+        $blames = $this->getBlameContent($report['filename']);
         $authorCache = [];
         $praiseCache = [];
         $sourceCache = [];
@@ -54,7 +53,7 @@ abstract class VersionControl implements \PHP_CodeSniffer\Reports\Report
                 $praiseCache[$author] = ['good' => 0, 'bad' => 0];
             }
             $praiseCache[$author]['bad']++;
-            foreach ($lineErrors as $colErrors) {
+            foreach ($lineErrors as $column => $colErrors) {
                 foreach ($colErrors as $error) {
                     $authorCache[$author]++;
                     if ($showSources === \true) {

@@ -8,14 +8,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202408\Symfony\Component\Console\Input;
+namespace ECSPrefix202312\Symfony\Component\Console\Input;
 
-use ECSPrefix202408\Symfony\Component\Console\Command\Command;
-use ECSPrefix202408\Symfony\Component\Console\Completion\CompletionInput;
-use ECSPrefix202408\Symfony\Component\Console\Completion\CompletionSuggestions;
-use ECSPrefix202408\Symfony\Component\Console\Completion\Suggestion;
-use ECSPrefix202408\Symfony\Component\Console\Exception\InvalidArgumentException;
-use ECSPrefix202408\Symfony\Component\Console\Exception\LogicException;
+use ECSPrefix202312\Symfony\Component\Console\Command\Command;
+use ECSPrefix202312\Symfony\Component\Console\Completion\CompletionInput;
+use ECSPrefix202312\Symfony\Component\Console\Completion\CompletionSuggestions;
+use ECSPrefix202312\Symfony\Component\Console\Completion\Suggestion;
+use ECSPrefix202312\Symfony\Component\Console\Exception\InvalidArgumentException;
+use ECSPrefix202312\Symfony\Component\Console\Exception\LogicException;
 /**
  * Represents a command line option.
  *
@@ -48,7 +48,7 @@ class InputOption
      */
     private $name;
     /**
-     * @var mixed[]|string|null
+     * @var string|mixed[]|null
      */
     private $shortcut;
     /**
@@ -56,7 +56,7 @@ class InputOption
      */
     private $mode;
     /**
-     * @var mixed[]|bool|float|int|string|null
+     * @var string|int|bool|mixed[]|null|float
      */
     private $default;
     /**
@@ -75,7 +75,7 @@ class InputOption
      *
      * @throws InvalidArgumentException If option mode is invalid or incompatible
      */
-    public function __construct(string $name, $shortcut = null, ?int $mode = null, string $description = '', $default = null, $suggestedValues = [])
+    public function __construct(string $name, $shortcut = null, int $mode = null, string $description = '', $default = null, $suggestedValues = [])
     {
         if (\strncmp($name, '--', \strlen('--')) === 0) {
             $name = \substr($name, 2);
@@ -83,7 +83,7 @@ class InputOption
         if (empty($name)) {
             throw new InvalidArgumentException('An option name cannot be empty.');
         }
-        if ('' === $shortcut || [] === $shortcut || \false === $shortcut) {
+        if (empty($shortcut)) {
             $shortcut = null;
         }
         if (null !== $shortcut) {
@@ -91,9 +91,9 @@ class InputOption
                 $shortcut = \implode('|', $shortcut);
             }
             $shortcuts = \preg_split('{(\\|)-?}', \ltrim($shortcut, '-'));
-            $shortcuts = \array_filter($shortcuts, 'strlen');
+            $shortcuts = \array_filter($shortcuts);
             $shortcut = \implode('|', $shortcuts);
-            if ('' === $shortcut) {
+            if (empty($shortcut)) {
                 throw new InvalidArgumentException('An option shortcut cannot be empty.');
             }
         }
@@ -174,12 +174,12 @@ class InputOption
     }
     /**
      * @return void
-     * @param string|bool|int|float|mixed[]|null $default
+     * @param string|bool|int|float|mixed[] $default
      */
     public function setDefault($default = null)
     {
         if (1 > \func_num_args()) {
-            trigger_deprecation('symfony/console', '6.2', 'Calling "%s()" without any arguments is deprecated, pass null explicitly instead.', __METHOD__);
+            \ECSPrefix202312\trigger_deprecation('symfony/console', '6.2', 'Calling "%s()" without any arguments is deprecated, pass null explicitly instead.', __METHOD__);
         }
         if (self::VALUE_NONE === (self::VALUE_NONE & $this->mode) && null !== $default) {
             throw new LogicException('Cannot set a default value when using InputOption::VALUE_NONE mode.');
@@ -195,7 +195,7 @@ class InputOption
     }
     /**
      * Returns the default value.
-     * @return mixed[]|bool|float|int|string|null
+     * @return string|bool|int|float|mixed[]|null
      */
     public function getDefault()
     {

@@ -29,15 +29,6 @@ final class MethodChainingIndentationFixer extends AbstractFixer implements Whit
     {
         return new FixerDefinition('Method chaining MUST be properly indented. Method chaining with different levels of indentation is not supported.', [new CodeSample("<?php\n\$user->setEmail('voff.web@gmail.com')\n         ->setPassword('233434');\n")]);
     }
-    /**
-     * {@inheritdoc}
-     *
-     * Must run after NoSpaceAroundDoubleColonFixer.
-     */
-    public function getPriority() : int
-    {
-        return 0;
-    }
     public function isCandidate(Tokens $tokens) : bool
     {
         return $tokens->isAnyTokenKindsFound(Token::getObjectOperatorKinds());

@@ -14,7 +14,6 @@ namespace PhpCsFixer\Cache;
 
 /**
  * @author Andreas Möller <am@localheinz.com>
- * @author Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * @internal
  */
@@ -25,9 +24,6 @@ final class NullCacheManager implements \PhpCsFixer\Cache\CacheManagerInterface
         return \true;
     }
     public function setFile(string $file, string $fileContent) : void
-    {
-    }
-    public function setFileHash(string $file, string $hash) : void
     {
     }
 }

@@ -10,9 +10,9 @@ use PhpCsFixer\Tokenizer\Tokens;
 use PhpCsFixer\WhitespacesFixerConfig;
 use SplFileInfo;
 use Symplify\CodingStandard\Fixer\AbstractSymplifyFixer;
-use ECSPrefix202408\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
-use ECSPrefix202408\Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
-use ECSPrefix202408\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
+use ECSPrefix202312\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
+use ECSPrefix202312\Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
+use ECSPrefix202312\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
  * Inspired at https://github.com/aidantwoods/PHP-CS-Fixer/tree/feature/DeclareStrictTypesFixer-split
  *
@@ -62,8 +62,7 @@ final class BlankLineAfterStrictTypesFixer extends AbstractSymplifyFixer impleme
             return;
         }
         \end($sequenceLocation);
-        $semicolonPosition = \key($sequenceLocation);
-        \reset($sequenceLocation);
+        $semicolonPosition = (int) \key($sequenceLocation);
         // empty file
         if (!isset($tokens[$semicolonPosition + 2])) {
             return;

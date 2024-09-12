@@ -34,24 +34,18 @@ final class BlockFinder
         // shift "array" to "(", event its position
         if ($token->isGivenKind(\T_ARRAY)) {
             $position = $tokens->getNextMeaningfulToken($position);
-            if ($position === null) {
-                return null;
-            }
             /** @var Token $token */
             $token = $tokens[$position];
         }
         if ($token->isGivenKind([\T_FUNCTION, CT::T_USE_LAMBDA, \T_NEW])) {
             $position = $tokens->getNextTokenOfKind($position, ['(', ';']);
-            if ($position === null) {
-                return null;
-            }
             /** @var Token $token */
             $token = $tokens[$position];
             // end of line was sooner => has no block
             if ($token->equals(';')) {
                 return null;
             }
-            if ($token->equals('(')) {
+            if ($position !== null && $token->equals('(')) {
                 $closingPosition = $tokens->getNextMeaningfulToken($position);
                 if ($closingPosition !== null) {
                     $closingToken = $tokens[$closingPosition];
@@ -61,6 +55,10 @@ final class BlockFinder
                     }
                 }
             }
+        }
+        // some invalid code
+        if ($position === null) {
+            return null;
         }
         $blockType = $this->getBlockTypeByToken($token);
         return $this->createBlockInfo($token, $position, $tokens, $blockType);

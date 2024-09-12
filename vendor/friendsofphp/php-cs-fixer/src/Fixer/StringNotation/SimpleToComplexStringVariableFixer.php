@@ -73,24 +73,38 @@ final class SimpleToComplexStringVariableFixer extends AbstractFixer
     protected function applyFix(\SplFileInfo $file, Tokens $tokens): void
     {
         for ($index = \count($tokens) - 3; $index > 0; --$index) {
-            if (!$tokens[$index]->isGivenKind(T_DOLLAR_OPEN_CURLY_BRACES)) {
+            $token = $tokens[$index];
+
+            if (!$token->isGivenKind(T_DOLLAR_OPEN_CURLY_BRACES)) {
                 continue;
             }
+
             $varnameToken = $tokens[$index + 1];
 
             if (!$varnameToken->isGivenKind(T_STRING_VARNAME)) {
                 continue;
             }
 
-            $dollarCloseToken = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_COMPLEX_STRING_VARIABLE, $index);
+            $dollarCloseToken = $tokens[$index + 2];
 
-            $prevTokenContent = $tokens[$index - 1]->getContent();
-            if (str_ends_with($prevTokenContent, '$') && !str_ends_with($prevTokenContent, '\$')) {
-                $tokens[$index - 1] = new Token([T_ENCAPSED_AND_WHITESPACE, substr($prevTokenContent, 0, -1).'\$']);
+            if (!$dollarCloseToken->isGivenKind(CT::T_DOLLAR_CLOSE_CURLY_BRACES)) {
+                continue;
             }
-            $tokens[$index] = new Token([T_CURLY_OPEN, '{']);
-            $tokens[$index + 1] = new Token([T_VARIABLE, '$'.$varnameToken->getContent()]);
-            $tokens[$dollarCloseToken] = new Token([CT::T_CURLY_CLOSE, '}']);
+
+            $tokenOfStringBeforeToken = $tokens[$index - 1];
+            $stringContent = $tokenOfStringBeforeToken->getContent();
+
+            if (str_ends_with($stringContent, '$') && !str_ends_with($stringContent, '\\$')) {
+                $newContent = substr($stringContent, 0, -1).'\\$';
+                $tokenOfStringBeforeToken = new Token([T_ENCAPSED_AND_WHITESPACE, $newContent]);
+            }
+
+            $tokens->overrideRange($index - 1, $index + 2, [
+                $tokenOfStringBeforeToken,
+                new Token([T_CURLY_OPEN, '{']),
+                new Token([T_VARIABLE, '$'.$varnameToken->getContent()]),
+                new Token([CT::T_CURLY_CLOSE, '}']),
+            ]);
         }
     }
 }

@@ -6,7 +6,6 @@ use PhpParser\Node;
 use PhpParser\Node\Expr\MethodCall;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
 use PHPUnit\Framework\MockObject\Builder\InvocationMocker;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
@@ -29,6 +28,9 @@ class MockMethodCallRule implements Rule
 
 	public function processNode(Node $node, Scope $scope): array
 	{
+		/** @var Node\Expr\MethodCall $node */
+		$node = $node;
+
 		if (!$node->name instanceof Node\Identifier || $node->name->name !== 'method') {
 			return [];
 		}
@@ -61,11 +63,11 @@ class MockMethodCallRule implements Rule
 					continue;
 				}
 
-				$errors[] = RuleErrorBuilder::message(sprintf(
+				$errors[] = sprintf(
 					'Trying to mock an undefined method %s() on class %s.',
 					$method,
 					implode('&', $mockClasses)
-				))->identifier('phpunit.mockMethod')->build();
+				);
 				continue;
 			}
 
@@ -79,11 +81,11 @@ class MockMethodCallRule implements Rule
 				continue;
 			}
 
-			$errors[] = RuleErrorBuilder::message(sprintf(
+			$errors[] = sprintf(
 				'Trying to mock an undefined method %s() on class %s.',
 				$method,
 				implode('|', $classNames)
-			))->identifier('phpunit.mockMethod')->build();
+			);
 		}
 
 		return $errors;

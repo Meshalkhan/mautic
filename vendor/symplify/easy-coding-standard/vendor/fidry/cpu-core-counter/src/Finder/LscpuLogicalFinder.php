@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 declare (strict_types=1);
-namespace ECSPrefix202408\Fidry\CpuCoreCounter\Finder;
+namespace ECSPrefix202312\Fidry\CpuCoreCounter\Finder;
 
 use function count;
 use function explode;

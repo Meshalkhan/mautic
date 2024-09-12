@@ -119,7 +119,7 @@ final class ExpectedNameResolver
             return null;
         }
         $expectedName = $this->propertyNaming->getExpectedNameFromType($returnedType);
-        if ($expectedName instanceof ExpectedName) {
+        if ($expectedName !== null) {
             return $expectedName->getName();
         }
         // call with args can return different value, so skip there if not sure about the type
@@ -127,22 +127,22 @@ final class ExpectedNameResolver
             return null;
         }
         $expectedNameFromMethodName = $this->propertyNaming->getExpectedNameFromMethodName($name);
-        if ($expectedNameFromMethodName instanceof ExpectedName) {
+        if ($expectedNameFromMethodName !== null) {
             return $expectedNameFromMethodName->getName();
         }
         return null;
     }
     public function resolveForForeach(VariableAndCallForeach $variableAndCallForeach) : ?string
     {
-        $call = $variableAndCallForeach->getCall();
-        if ($this->isDynamicNameCall($call)) {
+        $expr = $variableAndCallForeach->getCall();
+        if ($this->isDynamicNameCall($expr)) {
             return null;
         }
-        $name = $this->nodeNameResolver->getName($call->name);
+        $name = $this->nodeNameResolver->getName($expr->name);
         if ($name === null) {
             return null;
         }
-        $returnedType = $this->nodeTypeResolver->getType($call);
+        $returnedType = $this->nodeTypeResolver->getType($expr);
         if ($returnedType->isIterable()->no()) {
             return null;
         }
@@ -168,7 +168,7 @@ final class ExpectedNameResolver
     }
     private function isReturnedTypeAnArrayAndExpectedNameFromTypeNotNull(Type $returnedType, ?ExpectedName $expectedName) : bool
     {
-        return $returnedType instanceof ArrayType && $expectedName instanceof ExpectedName;
+        return $returnedType instanceof ArrayType && $expectedName !== null;
     }
     /**
      * @param \PhpParser\Node\Expr\MethodCall|\PhpParser\Node\Expr\StaticCall|\PhpParser\Node\Expr\FuncCall $expr

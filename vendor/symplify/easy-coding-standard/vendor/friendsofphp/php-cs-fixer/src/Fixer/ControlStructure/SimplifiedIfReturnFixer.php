@@ -24,7 +24,7 @@ use PhpCsFixer\Tokenizer\Tokens;
 final class SimplifiedIfReturnFixer extends AbstractFixer
 {
     /**
-     * @var list<array{isNegative: bool, sequence: non-empty-list<array{0: int, 1?: string}|string>}>
+     * @var list<array{isNegative: bool, sequence: array<int, list<int|string>|string>}>
      */
     private $sequences = [['isNegative' => \false, 'sequence' => ['{', [\T_RETURN], [\T_STRING, 'true'], ';', '}', [\T_RETURN], [\T_STRING, 'false'], ';']], ['isNegative' => \true, 'sequence' => ['{', [\T_RETURN], [\T_STRING, 'false'], ';', '}', [\T_RETURN], [\T_STRING, 'true'], ';']], ['isNegative' => \false, 'sequence' => [[\T_RETURN], [\T_STRING, 'true'], ';', [\T_RETURN], [\T_STRING, 'false'], ';']], ['isNegative' => \true, 'sequence' => [[\T_RETURN], [\T_STRING, 'false'], ';', [\T_RETURN], [\T_STRING, 'true'], ';']]];
     public function getDefinition() : FixerDefinitionInterface
@@ -63,7 +63,6 @@ final class SimplifiedIfReturnFixer extends AbstractFixer
                 if (null === $sequenceFound) {
                     continue;
                 }
-                \reset($sequenceFound);
                 $firstSequenceIndex = \key($sequenceFound);
                 if ($firstSequenceIndex !== $firstCandidateIndex) {
                     continue;

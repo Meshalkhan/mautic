@@ -12,8 +12,7 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Console\Report\FixReport;
 
-use PhpCsFixer\Console\Application;
-use ECSPrefix202408\Symfony\Component\Console\Formatter\OutputFormatter;
+use ECSPrefix202312\Symfony\Component\Console\Formatter\OutputFormatter;
 /**
  * @author Boris Gorbylev <ekho@ekho.name>
  *
@@ -34,7 +33,6 @@ final class XmlReporter implements \PhpCsFixer\Console\Report\FixReport\Reporter
         // new nodes should be added to this or existing children
         $root = $dom->createElement('report');
         $dom->appendChild($root);
-        $root->appendChild($this->createAboutElement($dom, Application::getAbout()));
         $filesXML = $dom->createElement('files');
         $root->appendChild($filesXML);
         $i = 1;
@@ -95,11 +93,5 @@ final class XmlReporter implements \PhpCsFixer\Console\Report\FixReport\Reporter
         $memoryXML->setAttribute('value', (string) $memory);
         $memoryXML->setAttribute('unit', 'MB');
         return $memoryXML;
-    }
-    private function createAboutElement(\DOMDocument $dom, string $about) : \DOMElement
-    {
-        $xml = $dom->createElement('about');
-        $xml->setAttribute('value', $about);
-        return $xml;
     }
 }

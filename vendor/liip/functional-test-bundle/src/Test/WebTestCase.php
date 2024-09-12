@@ -620,9 +620,16 @@ abstract class WebTestCase extends BaseWebTestCase
 
             return $session;
         }
-
-        /** @var SessionInterface $session */
-        $session = $container->get(SessionInterface::class);
+        // Available before Symfony 6
+        if ($container->has(SessionInterface::class)) {
+            /** @var SessionInterface $session */
+            $session = $container->get(SessionInterface::class);
+        }
+        // Fallback for Symfony 4.4
+        else {
+            /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
+            $session = $container->get('session');
+        }
 
         $session->start();
 

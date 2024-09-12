@@ -2,11 +2,12 @@
 
 namespace PHPStan\Rules\Doctrine\ORM;
 
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use PHPStan\Reflection\PropertyReflection;
 use PHPStan\Rules\Properties\ReadWritePropertiesExtension;
 use PHPStan\Type\Doctrine\ObjectMetadataResolver;
 use Throwable;
+use function array_key_exists;
 use function in_array;
 
 class PropertiesExtension implements ReadWritePropertiesExtension
@@ -46,7 +47,7 @@ class PropertiesExtension implements ReadWritePropertiesExtension
 
 		if (isset($metadata->fieldMappings[$propertyName])) {
 			$mapping = $metadata->fieldMappings[$propertyName];
-			if (isset($mapping['generated']) && $mapping['generated'] !== ClassMetadata::GENERATED_NEVER) {
+			if (array_key_exists('generated', $mapping) && $mapping['generated'] !== ClassMetadataInfo::GENERATED_NEVER) {
 				return true;
 			}
 		}
@@ -83,9 +84,9 @@ class PropertiesExtension implements ReadWritePropertiesExtension
 	}
 
 	/**
-	 * @param ClassMetadata<object> $metadata
+	 * @param ClassMetadataInfo<object> $metadata
 	 */
-	private function isGeneratedIdentifier(ClassMetadata $metadata, string $propertyName): bool
+	private function isGeneratedIdentifier(ClassMetadataInfo $metadata, string $propertyName): bool
 	{
 		if ($metadata->isIdentifierNatural()) {
 			return false;

@@ -17,7 +17,6 @@ use Twig\Environment;
 use Twig\Extension\EscaperExtension;
 use Twig\Extension\ProfilerExtension;
 use Twig\Profiler\Profile;
-use Twig\Runtime\EscaperRuntime;
 use Twig\TwigFunction;
 
 /**
@@ -115,12 +114,6 @@ class WebProfilerExtension extends ProfilerExtension
 
     private static function escape(Environment $env, string $s): string
     {
-        // Twig 3.10 and above
-        if (class_exists(EscaperRuntime::class)) {
-            return $env->getRuntime(EscaperRuntime::class)->escape($s);
-        }
-
-        // Twig 3.9
         if (method_exists(EscaperExtension::class, 'escape')) {
             return EscaperExtension::escape($env, $s);
         }

@@ -5,7 +5,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\Arrays;
 
@@ -55,6 +55,7 @@ class ArrayIndentSniff extends AbstractArraySniff
         // Determine how far indented the entire array declaration should be.
         $ignore = Tokens::$emptyTokens;
         $ignore[] = \T_DOUBLE_ARROW;
+        $ignore[] = \T_COMMA;
         $prev = $phpcsFile->findPrevious($ignore, $stackPtr - 1, null, \true);
         $start = $phpcsFile->findStartOfStatement($prev);
         $first = $phpcsFile->findFirstOnLine(\T_WHITESPACE, $start, \true);
@@ -66,12 +67,8 @@ class ArrayIndentSniff extends AbstractArraySniff
         // check indent levels because it's not valid. But we don't enforce exactly
         // how far indented it should be.
         if ($startIndent < $baseIndent) {
-            $pluralizeSpace = 's';
-            if ($baseIndent === 1) {
-                $pluralizeSpace = '';
-            }
-            $error = 'Array open brace not indented correctly; expected at least %s space%s but found %s';
-            $data = [$baseIndent, $pluralizeSpace, $startIndent];
+            $error = 'Array open brace not indented correctly; expected at least %s spaces but found %s';
+            $data = [$baseIndent, $startIndent];
             $fix = $phpcsFile->addFixableError($error, $stackPtr, 'OpenBraceIncorrect', $data);
             if ($fix === \true) {
                 $padding = \str_repeat(' ', $baseIndent);
@@ -102,12 +99,8 @@ class ArrayIndentSniff extends AbstractArraySniff
             if ($foundIndent === $expectedIndent) {
                 continue;
             }
-            $pluralizeSpace = 's';
-            if ($expectedIndent === 1) {
-                $pluralizeSpace = '';
-            }
-            $error = 'Array key not indented correctly; expected %s space%s but found %s';
-            $data = [$expectedIndent, $pluralizeSpace, $foundIndent];
+            $error = 'Array key not indented correctly; expected %s spaces but found %s';
+            $data = [$expectedIndent, $foundIndent];
             $fix = $phpcsFile->addFixableError($error, $first, 'KeyIncorrect', $data);
             if ($fix === \false) {
                 continue;
@@ -125,27 +118,24 @@ class ArrayIndentSniff extends AbstractArraySniff
             $error = 'Closing brace of array declaration must be on a new line';
             $fix = $phpcsFile->addFixableError($error, $arrayEnd, 'CloseBraceNotNewLine');
             if ($fix === \true) {
-                $padding = $phpcsFile->eolChar . \str_repeat(' ', $startIndent);
+                $padding = $phpcsFile->eolChar . \str_repeat(' ', $expectedIndent);
                 $phpcsFile->fixer->addContentBefore($arrayEnd, $padding);
             }
             return;
         }
         // The close brace must be indented one stop less.
+        $expectedIndent -= $this->indent;
         $foundIndent = $tokens[$arrayEnd]['column'] - 1;
-        if ($foundIndent === $startIndent) {
+        if ($foundIndent === $expectedIndent) {
             return;
         }
-        $pluralizeSpace = 's';
-        if ($startIndent === 1) {
-            $pluralizeSpace = '';
-        }
-        $error = 'Array close brace not indented correctly; expected %s space%s but found %s';
-        $data = [$startIndent, $pluralizeSpace, $foundIndent];
+        $error = 'Array close brace not indented correctly; expected %s spaces but found %s';
+        $data = [$expectedIndent, $foundIndent];
         $fix = $phpcsFile->addFixableError($error, $arrayEnd, 'CloseBraceIncorrect', $data);
         if ($fix === \false) {
             return;
         }
-        $padding = \str_repeat(' ', $startIndent);
+        $padding = \str_repeat(' ', $expectedIndent);
         if ($foundIndent === 0) {
             $phpcsFile->fixer->addContentBefore($arrayEnd, $padding);
         } else {

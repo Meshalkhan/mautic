@@ -16,6 +16,7 @@ use FOS\RestBundle\Util\StopFormatListenerException;
 use FOS\RestBundle\Negotiation\FormatNegotiator;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * This listener handles Accept header format negotiations.
@@ -54,7 +55,7 @@ class FormatListener
             }
 
             if (null === $format) {
-                if ($event->isMainRequest()) {
+                if (HttpKernelInterface::MASTER_REQUEST === $event->getRequestType()) {
                     throw new NotAcceptableHttpException('No matching accepted Response format could be determined');
                 }
 

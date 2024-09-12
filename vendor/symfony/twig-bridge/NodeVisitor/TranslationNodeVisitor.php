@@ -18,14 +18,14 @@ use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\FilterExpression;
 use Twig\Node\Expression\FunctionExpression;
 use Twig\Node\Node;
-use Twig\NodeVisitor\NodeVisitorInterface;
+use Twig\NodeVisitor\AbstractNodeVisitor;
 
 /**
  * TranslationNodeVisitor extracts translation messages.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-final class TranslationNodeVisitor implements NodeVisitorInterface
+final class TranslationNodeVisitor extends AbstractNodeVisitor
 {
     public const UNDEFINED_DOMAIN = '_undefined';
 
@@ -49,7 +49,10 @@ final class TranslationNodeVisitor implements NodeVisitorInterface
         return $this->messages;
     }
 
-    public function enterNode(Node $node, Environment $env): Node
+    /**
+     * {@inheritdoc}
+     */
+    protected function doEnterNode(Node $node, Environment $env): Node
     {
         if (!$this->enabled) {
             return $node;
@@ -57,7 +60,7 @@ final class TranslationNodeVisitor implements NodeVisitorInterface
 
         if (
             $node instanceof FilterExpression &&
-            'trans' === ($node->hasAttribute('twig_callable') ? $node->getAttribute('twig_callable')->getName() : $node->getNode('filter')->getAttribute('value')) &&
+            'trans' === $node->getNode('filter')->getAttribute('value') &&
             $node->getNode('node') instanceof ConstantExpression
         ) {
             // extract constant nodes with a trans filter
@@ -85,7 +88,7 @@ final class TranslationNodeVisitor implements NodeVisitorInterface
             ];
         } elseif (
             $node instanceof FilterExpression &&
-            'trans' === ($node->hasAttribute('twig_callable') ? $node->getAttribute('twig_callable')->getName() : $node->getNode('filter')->getAttribute('value')) &&
+            'trans' === $node->getNode('filter')->getAttribute('value') &&
             $node->getNode('node') instanceof ConcatBinary &&
             $message = $this->getConcatValueFromNode($node->getNode('node'), null)
         ) {
@@ -98,7 +101,10 @@ final class TranslationNodeVisitor implements NodeVisitorInterface
         return $node;
     }
 
-    public function leaveNode(Node $node, Environment $env): ?Node
+    /**
+     * {@inheritdoc}
+     */
+    protected function doLeaveNode(Node $node, Environment $env): ?Node
     {
         return $node;
     }

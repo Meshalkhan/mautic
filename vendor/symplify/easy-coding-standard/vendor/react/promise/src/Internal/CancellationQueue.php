@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202408\React\Promise\Internal;
+namespace ECSPrefix202312\React\Promise\Internal;
 
 /**
  * @internal

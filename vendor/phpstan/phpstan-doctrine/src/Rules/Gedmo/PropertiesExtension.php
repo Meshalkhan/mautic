@@ -2,7 +2,6 @@
 
 namespace PHPStan\Rules\Gedmo;
 
-use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Gedmo\Mapping\Annotation as Gedmo;
 use PHPStan\Reflection\PropertyReflection;
@@ -91,13 +90,7 @@ class PropertiesExtension implements ReadWritePropertiesExtension
 			return false;
 		}
 
-		try {
-			$annotations = $this->annotationReader->getPropertyAnnotations($propertyReflection);
-		} catch (AnnotationException $e) {
-			// Suppress the "The annotation X was never imported." exception in case the `objectManagerLoader` is not configured
-			return false;
-		}
-
+		$annotations = $this->annotationReader->getPropertyAnnotations($propertyReflection);
 		foreach ($annotations as $annotation) {
 			if (in_array(get_class($annotation), $classList, true)) {
 				return true;

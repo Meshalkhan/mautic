@@ -23,12 +23,12 @@ use Twig\Node\Expression\NameExpression;
 use Twig\Node\ModuleNode;
 use Twig\Node\Node;
 use Twig\Node\SetNode;
-use Twig\NodeVisitor\NodeVisitorInterface;
+use Twig\NodeVisitor\AbstractNodeVisitor;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  */
-final class TranslationDefaultDomainNodeVisitor implements NodeVisitorInterface
+final class TranslationDefaultDomainNodeVisitor extends AbstractNodeVisitor
 {
     private $scope;
 
@@ -37,7 +37,10 @@ final class TranslationDefaultDomainNodeVisitor implements NodeVisitorInterface
         $this->scope = new Scope();
     }
 
-    public function enterNode(Node $node, Environment $env): Node
+    /**
+     * {@inheritdoc}
+     */
+    protected function doEnterNode(Node $node, Environment $env): Node
     {
         if ($node instanceof BlockNode || $node instanceof ModuleNode) {
             $this->scope = $this->scope->enter();
@@ -61,7 +64,7 @@ final class TranslationDefaultDomainNodeVisitor implements NodeVisitorInterface
             return $node;
         }
 
-        if ($node instanceof FilterExpression && 'trans' === ($node->hasAttribute('twig_callable') ? $node->getAttribute('twig_callable')->getName() : $node->getNode('filter')->getAttribute('value'))) {
+        if ($node instanceof FilterExpression && 'trans' === $node->getNode('filter')->getAttribute('value')) {
             $arguments = $node->getNode('arguments');
             if ($this->isNamedArguments($arguments)) {
                 if (!$arguments->hasNode('domain') && !$arguments->hasNode(1)) {
@@ -83,7 +86,10 @@ final class TranslationDefaultDomainNodeVisitor implements NodeVisitorInterface
         return $node;
     }
 
-    public function leaveNode(Node $node, Environment $env): ?Node
+    /**
+     * {@inheritdoc}
+     */
+    protected function doLeaveNode(Node $node, Environment $env): ?Node
     {
         if ($node instanceof TransDefaultDomainNode) {
             return null;

@@ -13,16 +13,13 @@ declare (strict_types=1);
 namespace PhpCsFixer\Console\Command;
 
 use PhpCsFixer\Config;
-use PhpCsFixer\Console\Application;
 use PhpCsFixer\Console\ConfigurationResolver;
 use PhpCsFixer\Differ\DiffConsoleFormatter;
 use PhpCsFixer\Differ\FullDiffer;
 use PhpCsFixer\Documentation\FixerDocumentGenerator;
 use PhpCsFixer\Fixer\ConfigurableFixerInterface;
 use PhpCsFixer\Fixer\DeprecatedFixerInterface;
-use PhpCsFixer\Fixer\ExperimentalFixerInterface;
 use PhpCsFixer\Fixer\FixerInterface;
-use PhpCsFixer\Fixer\InternalFixerInterface;
 use PhpCsFixer\FixerConfiguration\AliasedFixerOption;
 use PhpCsFixer\FixerConfiguration\AllowedValueSubset;
 use PhpCsFixer\FixerConfiguration\DeprecatedFixerOption;
@@ -37,14 +34,14 @@ use PhpCsFixer\Tokenizer\Tokens;
 use PhpCsFixer\ToolInfo;
 use PhpCsFixer\Utils;
 use PhpCsFixer\WordMatcher;
-use ECSPrefix202408\Symfony\Component\Console\Attribute\AsCommand;
-use ECSPrefix202408\Symfony\Component\Console\Command\Command;
-use ECSPrefix202408\Symfony\Component\Console\Formatter\OutputFormatter;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputArgument;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputOption;
-use ECSPrefix202408\Symfony\Component\Console\Output\ConsoleOutputInterface;
-use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Attribute\AsCommand;
+use ECSPrefix202312\Symfony\Component\Console\Command\Command;
+use ECSPrefix202312\Symfony\Component\Console\Formatter\OutputFormatter;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputArgument;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202312\Symfony\Component\Console\Output\ConsoleOutputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
 /**
  * @author Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
@@ -52,10 +49,9 @@ use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
  */
 final class DescribeCommand extends Command
 {
-    /** @var string */
     protected static $defaultName = 'describe';
     /**
-     * @var ?list<string>
+     * @var string[]
      */
     private $setNames;
     /**
@@ -81,9 +77,9 @@ final class DescribeCommand extends Command
     }
     protected function execute(InputInterface $input, OutputInterface $output) : int
     {
-        if ($output instanceof ConsoleOutputInterface) {
+        if (OutputInterface::VERBOSITY_VERBOSE <= $output->getVerbosity() && $output instanceof ConsoleOutputInterface) {
             $stdErr = $output->getErrorOutput();
-            $stdErr->writeln(Application::getAboutWithRuntime(\true));
+            $stdErr->writeln($this->getApplication()->getLongVersion());
         }
         $resolver = new ConfigurationResolver(new Config(), ['config' => $input->getOption('config')], \getcwd(), new ToolInfo());
         $this->fixerFactory->registerCustomFixers($resolver->getConfig()->getCustomFixers());
@@ -119,9 +115,7 @@ final class DescribeCommand extends Command
         }
         if ($fixer instanceof DeprecatedFixerInterface) {
             $successors = $fixer->getSuccessorsNames();
-            $message = [] === $successors ? \sprintf('it will be removed in version %d.0', Application::getMajorVersion() + 1) : \sprintf('use %s instead', Utils::naturalLanguageJoinWithBackticks($successors));
-            $endMessage = '. ' . \ucfirst($message);
-            Utils::triggerDeprecation(new \RuntimeException(\str_replace('`', '"', "Rule \"{$name}\" is deprecated{$endMessage}.")));
+            $message = [] === $successors ? 'will be removed in the next major version' : \sprintf('use %s instead', Utils::naturalLanguageJoinWithBackticks($successors));
             $message = Preg::replace('/(`[^`]+`)/', '<info>$1</info>', $message);
             $output->writeln(\sprintf('<error>DEPRECATED</error>: %s.', $message));
             $output->writeln('');
@@ -132,18 +126,8 @@ final class DescribeCommand extends Command
             $output->writeln($description);
         }
         $output->writeln('');
-        if ($fixer instanceof ExperimentalFixerInterface) {
-            $output->writeln('<error>Fixer applying this rule is EXPERIMENTAL.</error>.');
-            $output->writeln('It is not covered with backward compatibility promise and may produce unstable or unexpected results.');
-            $output->writeln('');
-        }
-        if ($fixer instanceof InternalFixerInterface) {
-            $output->writeln('<error>Fixer applying this rule is INTERNAL.</error>.');
-            $output->writeln('It is expected to be used only on PHP CS Fixer project itself.');
-            $output->writeln('');
-        }
         if ($fixer->isRisky()) {
-            $output->writeln('<error>Fixer applying this rule is RISKY.</error>');
+            $output->writeln('<error>Fixer applying this rule is risky.</error>');
             $riskyDescription = $definition->getRiskyDescription();
             if (null !== $riskyDescription) {
                 $output->writeln($riskyDescription);
@@ -184,7 +168,7 @@ final class DescribeCommand extends Command
             }
             $output->writeln('');
         }
-        /** @var list<CodeSampleInterface> $codeSamples */
+        /** @var CodeSampleInterface[] $codeSamples */
         $codeSamples = \array_filter($definition->getCodeSamples(), static function (CodeSampleInterface $codeSample) : bool {
             if ($codeSample instanceof VersionSpecificCodeSampleInterface) {
                 return $codeSample->isSuitableFor(\PHP_VERSION_ID);
@@ -282,7 +266,7 @@ final class DescribeCommand extends Command
         return $this->fixers;
     }
     /**
-     * @return list<string>
+     * @return string[]
      */
     private function getSetNames() : array
     {
@@ -297,21 +281,18 @@ final class DescribeCommand extends Command
      */
     private function describeList(OutputInterface $output, string $type) : void
     {
-        if ($output->getVerbosity() < OutputInterface::VERBOSITY_VERBOSE) {
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+            $describe = ['sets' => $this->getSetNames(), 'rules' => $this->getFixers()];
+        } elseif ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $describe = 'set' === $type ? ['sets' => $this->getSetNames()] : ['rules' => $this->getFixers()];
+        } else {
             return;
         }
-        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE || 'set' === $type) {
-            $output->writeln('<comment>Defined sets:</comment>');
-            $items = $this->getSetNames();
-            foreach ($items as $item) {
-                $output->writeln(\sprintf('* <info>%s</info>', $item));
-            }
-        }
-        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE || 'rule' === $type) {
-            $output->writeln('<comment>Defined rules:</comment>');
-            $items = \array_keys($this->getFixers());
-            foreach ($items as $item) {
-                $output->writeln(\sprintf('* <info>%s</info>', $item));
+        /** @var string[] $items */
+        foreach ($describe as $list => $items) {
+            $output->writeln(\sprintf('<comment>Defined %s:</comment>', $list));
+            foreach ($items as $name => $item) {
+                $output->writeln(\sprintf('* <info>%s</info>', \is_string($name) ? $name : $item));
             }
         }
     }

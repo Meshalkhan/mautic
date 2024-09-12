@@ -9,17 +9,16 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Tests\Standards;
 
-use DirectoryIterator;
+use PHP_CodeSniffer\Config;
 use PHP_CodeSniffer\Exceptions\RuntimeException;
-use PHP_CodeSniffer\Files\LocalFile;
 use PHP_CodeSniffer\Ruleset;
-use PHP_CodeSniffer\Tests\ConfigDouble;
+use PHP_CodeSniffer\Files\LocalFile;
 use PHP_CodeSniffer\Util\Common;
-use ECSPrefix202408\PHPUnit\Framework\TestCase;
+use ECSPrefix202312\PHPUnit\Framework\TestCase;
 abstract class AbstractSniffUnitTest extends TestCase
 {
     /**
@@ -45,17 +44,15 @@ abstract class AbstractSniffUnitTest extends TestCase
     /**
      * Sets up this unit test.
      *
-     * @before
-     *
      * @return void
      */
-    protected function setUpPrerequisites()
+    protected function setUp()
     {
         $class = \get_class($this);
         $this->standardsDir = $GLOBALS['PHP_CODESNIFFER_STANDARD_DIRS'][$class];
         $this->testsDir = $GLOBALS['PHP_CODESNIFFER_TEST_DIRS'][$class];
     }
-    //end setUpPrerequisites()
+    //end setUp()
     /**
      * Get a list of all test files to check.
      *
@@ -70,7 +67,7 @@ abstract class AbstractSniffUnitTest extends TestCase
     {
         $testFiles = [];
         $dir = \substr($testFileBase, 0, \strrpos($testFileBase, \DIRECTORY_SEPARATOR));
-        $di = new DirectoryIterator($dir);
+        $di = new \DirectoryIterator($dir);
         foreach ($di as $file) {
             $path = $file->getPathname();
             if (\substr($path, 0, \strlen($testFileBase)) === $testFileBase) {
@@ -80,7 +77,7 @@ abstract class AbstractSniffUnitTest extends TestCase
             }
         }
         // Put them in order.
-        \sort($testFiles, \SORT_NATURAL);
+        \sort($testFiles);
         return $testFiles;
     }
     //end getTestFiles()
@@ -115,7 +112,7 @@ abstract class AbstractSniffUnitTest extends TestCase
         if (isset($GLOBALS['PHP_CODESNIFFER_CONFIG']) === \true) {
             $config = $GLOBALS['PHP_CODESNIFFER_CONFIG'];
         } else {
-            $config = new ConfigDouble();
+            $config = new Config();
             $config->cache = \false;
             $GLOBALS['PHP_CODESNIFFER_CONFIG'] = $config;
         }
@@ -159,23 +156,15 @@ abstract class AbstractSniffUnitTest extends TestCase
                 }
                 // Check for a .fixed file to check for accuracy of fixes.
                 $fixedFile = $testFile . '.fixed';
-                $filename = \basename($testFile);
                 if (\file_exists($fixedFile) === \true) {
-                    if ($phpcsFile->fixer->getContents() !== \file_get_contents($fixedFile)) {
-                        // Only generate the (expensive) diff if a difference is expected.
-                        $diff = $phpcsFile->fixer->generateDiff($fixedFile);
-                        if (\trim($diff) !== '') {
-                            $fixedFilename = \basename($fixedFile);
-                            $failureMessages[] = "Fixed version of {$filename} does not match expected version in {$fixedFilename}; the diff is\n{$diff}";
-                        }
-                    }
-                } else {
-                    if (\is_callable([$this, 'addWarning']) === \true) {
-                        $this->addWarning("Missing fixed version of {$filename} to verify the accuracy of fixes, while the sniff is making fixes against the test case file");
+                    $diff = $phpcsFile->fixer->generateDiff($fixedFile);
+                    if (\trim($diff) !== '') {
+                        $filename = \basename($testFile);
+                        $fixedFilename = \basename($fixedFile);
+                        $failureMessages[] = "Fixed version of {$filename} does not match expected version in {$fixedFilename}; the diff is\n{$diff}";
                     }
                 }
             }
-            //end if
             // Restore the config.
             $config->setSettings($oldConfig);
         }
@@ -351,6 +340,7 @@ abstract class AbstractSniffUnitTest extends TestCase
      */
     public function setCliValues($filename, $config)
     {
+        return;
     }
     //end setCliValues()
     /**

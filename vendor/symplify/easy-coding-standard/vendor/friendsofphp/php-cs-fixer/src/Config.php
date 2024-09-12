@@ -13,21 +13,19 @@ declare (strict_types=1);
 namespace PhpCsFixer;
 
 use PhpCsFixer\Fixer\FixerInterface;
-use PhpCsFixer\Runner\Parallel\ParallelConfig;
-use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Katsuhiro Ogawa <ko.fivestar@gmail.com>
  * @author Dariusz Rumiński <dariusz.ruminski@gmail.com>
  */
-class Config implements \PhpCsFixer\ConfigInterface, \PhpCsFixer\ParallelAwareConfigInterface
+class Config implements \PhpCsFixer\ConfigInterface
 {
     /**
      * @var string
      */
     private $cacheFile = '.php-cs-fixer.cache';
     /**
-     * @var list<FixerInterface>
+     * @var FixerInterface[]
      */
     private $customFixers = [];
     /**
@@ -59,10 +57,6 @@ class Config implements \PhpCsFixer\ConfigInterface, \PhpCsFixer\ParallelAwareCo
      */
     private $name;
     /**
-     * @var \PhpCsFixer\Runner\Parallel\ParallelConfig
-     */
-    private $parallelConfig;
-    /**
      * @var null|string
      */
     private $phpExecutable;
@@ -71,27 +65,14 @@ class Config implements \PhpCsFixer\ConfigInterface, \PhpCsFixer\ParallelAwareCo
      *
      * @var array<string, array<string, mixed>|bool>
      */
-    private $rules;
+    private $rules = ['@PSR12' => \true];
     /**
      * @var bool
      */
     private $usingCache = \true;
     public function __construct(string $name = 'default')
     {
-        // @TODO 4.0 cleanup
-        if (\PhpCsFixer\Utils::isFutureModeEnabled()) {
-            $this->name = $name . ' (future mode)';
-            $this->rules = ['@PER-CS' => \true];
-        } else {
-            $this->name = $name;
-            $this->rules = ['@PSR12' => \true];
-        }
-        // @TODO 4.0 cleanup
-        if (\PhpCsFixer\Utils::isFutureModeEnabled() || \filter_var(\getenv('PHP_CS_FIXER_PARALLEL'), \FILTER_VALIDATE_BOOL)) {
-            $this->parallelConfig = ParallelConfigFactory::detect();
-        } else {
-            $this->parallelConfig = ParallelConfigFactory::sequential();
-        }
+        $this->name = $name;
     }
     public function getCacheFile() : string
     {
@@ -106,7 +87,9 @@ class Config implements \PhpCsFixer\ConfigInterface, \PhpCsFixer\ParallelAwareCo
      */
     public function getFinder() : iterable
     {
-        $this->finder = $this->finder ?? new \PhpCsFixer\Finder();
+        if (null === $this->finder) {
+            $this->finder = new \PhpCsFixer\Finder();
+        }
         return $this->finder;
     }
     public function getFormat() : string
@@ -128,10 +111,6 @@ class Config implements \PhpCsFixer\ConfigInterface, \PhpCsFixer\ParallelAwareCo
     public function getName() : string
     {
         return $this->name;
-    }
-    public function getParallelConfig() : ParallelConfig
-    {
-        return $this->parallelConfig;
     }
     public function getPhpExecutable() : ?string
     {
@@ -184,11 +163,6 @@ class Config implements \PhpCsFixer\ConfigInterface, \PhpCsFixer\ParallelAwareCo
     public function setLineEnding(string $lineEnding) : \PhpCsFixer\ConfigInterface
     {
         $this->lineEnding = $lineEnding;
-        return $this;
-    }
-    public function setParallelConfig(ParallelConfig $config) : \PhpCsFixer\ConfigInterface
-    {
-        $this->parallelConfig = $config;
         return $this;
     }
     public function setPhpExecutable(?string $phpExecutable) : \PhpCsFixer\ConfigInterface

@@ -8,16 +8,16 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace ECSPrefix202408\Symfony\Component\Console\DataCollector;
+namespace ECSPrefix202312\Symfony\Component\Console\DataCollector;
 
-use ECSPrefix202408\Symfony\Component\Console\Command\Command;
-use ECSPrefix202408\Symfony\Component\Console\Debug\CliRequest;
-use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
-use ECSPrefix202408\Symfony\Component\Console\SignalRegistry\SignalMap;
-use ECSPrefix202408\Symfony\Component\HttpFoundation\Request;
-use ECSPrefix202408\Symfony\Component\HttpFoundation\Response;
-use ECSPrefix202408\Symfony\Component\HttpKernel\DataCollector\DataCollector;
-use ECSPrefix202408\Symfony\Component\VarDumper\Cloner\Data;
+use ECSPrefix202312\Symfony\Component\Console\Command\Command;
+use ECSPrefix202312\Symfony\Component\Console\Debug\CliRequest;
+use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202312\Symfony\Component\Console\SignalRegistry\SignalMap;
+use ECSPrefix202312\Symfony\Component\HttpFoundation\Request;
+use ECSPrefix202312\Symfony\Component\HttpFoundation\Response;
+use ECSPrefix202312\Symfony\Component\HttpKernel\DataCollector\DataCollector;
+use ECSPrefix202312\Symfony\Component\VarDumper\Cloner\Data;
 /**
  * @internal
  *
@@ -25,7 +25,7 @@ use ECSPrefix202408\Symfony\Component\VarDumper\Cloner\Data;
  */
 final class CommandDataCollector extends DataCollector
 {
-    public function collect(Request $request, Response $response, ?\Throwable $exception = null) : void
+    public function collect(Request $request, Response $response, \Throwable $exception = null) : void
     {
         if (!$request instanceof CliRequest) {
             return;

@@ -26,10 +26,6 @@ final class Option
      */
     public const OUTPUT_FORMAT = 'output-format';
     /**
-     * @var string
-     */
-    public const NO_DIFFS = 'no-diffs';
-    /**
      * @api
      * @deprecated Use @see \Symplify\EasyCodingStandard\Config\ECSConfig::skip()
      * @var string
@@ -128,9 +124,4 @@ final class Option
      * @var string
      */
     public const PARALLEL_TIMEOUT_IN_SECONDS = 'parallel-timeout-in-seconds';
-    /**
-     * @see \Symplify\EasyCodingStandard\Config\ECSConfig::reportingRealPath()
-     * @var string
-     */
-    public const REPORTING_REALPATH = 'reporting-realpath';
 }

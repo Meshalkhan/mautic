@@ -6,7 +6,6 @@ use Doctrine\Persistence\ObjectRepository;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\Doctrine\ObjectMetadataResolver;
 use PHPStan\Type\VerbosityLevel;
 use function count;
@@ -77,13 +76,13 @@ class RepositoryMethodCallRule implements Rule
 						continue;
 					}
 
-					$messages[] = RuleErrorBuilder::message(sprintf(
+					$messages[] = sprintf(
 						'Call to method %s::%s() - entity %s does not have a field named $%s.',
 						$calledOnType->describe(VerbosityLevel::typeOnly()),
 						$methodName,
 						$entityClassNames[0],
 						$fieldName->getValue()
-					))->identifier(sprintf('doctrine.%sArgument', $methodName))->build();
+					);
 				}
 			}
 		}

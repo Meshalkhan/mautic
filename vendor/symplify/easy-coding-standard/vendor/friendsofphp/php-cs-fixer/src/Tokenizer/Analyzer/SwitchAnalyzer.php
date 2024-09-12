@@ -19,21 +19,21 @@ use PhpCsFixer\Tokenizer\Tokens;
  */
 final class SwitchAnalyzer
 {
-    /** @var array<string, list<int>> */
+    /** @var array<string, array<int>> */
     private static $cache = [];
     public static function belongsToSwitch(Tokens $tokens, int $index) : bool
     {
         if (!$tokens[$index]->equals(':')) {
             return \false;
         }
-        $tokensHash = \md5(\serialize($tokens->toArray()));
-        if (!\array_key_exists($tokensHash, self::$cache)) {
-            self::$cache[$tokensHash] = self::getColonIndicesForSwitch(clone $tokens);
+        $codeHash = $tokens->getCodeHash();
+        if (!\array_key_exists($codeHash, self::$cache)) {
+            self::$cache[$codeHash] = self::getColonIndicesForSwitch(clone $tokens);
         }
-        return \in_array($index, self::$cache[$tokensHash], \true);
+        return \in_array($index, self::$cache[$codeHash], \true);
     }
     /**
-     * @return list<int>
+     * @return int[]
      */
     private static function getColonIndicesForSwitch(Tokens $tokens) : array
     {

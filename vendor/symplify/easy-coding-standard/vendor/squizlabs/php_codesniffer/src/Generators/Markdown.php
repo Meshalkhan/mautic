@@ -5,12 +5,10 @@
  *
  * @author    Stefano Kowalke <blueduck@gmx.net>
  * @copyright 2014 Arroba IT
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Generators;
 
-use DOMDocument;
-use DOMNode;
 use PHP_CodeSniffer\Config;
 class Markdown extends \PHP_CodeSniffer\Generators\Generator
 {
@@ -25,7 +23,7 @@ class Markdown extends \PHP_CodeSniffer\Generators\Generator
         \ob_start();
         $this->printHeader();
         foreach ($this->docFiles as $file) {
-            $doc = new DOMDocument();
+            $doc = new \DOMDocument();
             $doc->load($file);
             $documentation = $doc->getElementsByTagName('documentation')->item(0);
             $this->processSniff($documentation);
@@ -58,7 +56,7 @@ class Markdown extends \PHP_CodeSniffer\Generators\Generator
         // don't have their timezone set.
         \error_reporting(0);
         echo 'Documentation generated on ' . \date('r');
-        echo ' by [PHP_CodeSniffer ' . Config::VERSION . '](https://github.com/PHPCSStandards/PHP_CodeSniffer)' . \PHP_EOL;
+        echo ' by [PHP_CodeSniffer ' . Config::VERSION . '](https://github.com/squizlabs/PHP_CodeSniffer)' . \PHP_EOL;
     }
     //end printFooter()
     /**
@@ -70,7 +68,7 @@ class Markdown extends \PHP_CodeSniffer\Generators\Generator
      *
      * @return void
      */
-    protected function processSniff(DOMNode $doc)
+    protected function processSniff(\DOMNode $doc)
     {
         $title = $this->getTitle($doc);
         echo \PHP_EOL . "## {$title}" . \PHP_EOL;
@@ -92,7 +90,7 @@ class Markdown extends \PHP_CodeSniffer\Generators\Generator
      *
      * @return void
      */
-    protected function printTextBlock(DOMNode $node)
+    protected function printTextBlock(\DOMNode $node)
     {
         $content = \trim($node->nodeValue);
         $content = \htmlspecialchars($content);
@@ -108,7 +106,7 @@ class Markdown extends \PHP_CodeSniffer\Generators\Generator
      *
      * @return void
      */
-    protected function printCodeComparisonBlock(DOMNode $node)
+    protected function printCodeComparisonBlock(\DOMNode $node)
     {
         $codeBlocks = $node->getElementsByTagName('code');
         $firstTitle = $codeBlocks->item(0)->getAttribute('title');

@@ -3,8 +3,8 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Console\Command;
 
-use ECSPrefix202408\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
 use Symplify\EasyCodingStandard\Application\EasyCodingStandardApplication;
 use Symplify\EasyCodingStandard\Configuration\ConfigInitializer;
 use Symplify\EasyCodingStandard\Configuration\ConfigurationFactory;
@@ -49,12 +49,11 @@ final class CheckCommand extends \Symplify\EasyCodingStandard\Console\Command\Ab
     protected function configure() : void
     {
         $this->setName('check');
-        $this->setDescription('Check coding standard in one or more directories');
+        $this->setDescription('Check coding standard in one or more directories.');
         parent::configure();
     }
     protected function execute(InputInterface $input, OutputInterface $output) : int
     {
-        // create ecs.php config file if does not exist yet
         if (!$this->configInitializer->areSomeCheckersRegistered()) {
             $this->configInitializer->createConfig(\getcwd());
             return self::SUCCESS;

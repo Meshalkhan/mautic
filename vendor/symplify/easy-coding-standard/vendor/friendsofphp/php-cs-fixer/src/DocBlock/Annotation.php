@@ -26,13 +26,13 @@ final class Annotation
     /**
      * All the annotation tag names with types.
      *
-     * @var list<string>
+     * @var string[]
      */
     private static $tags = ['method', 'param', 'property', 'property-read', 'property-write', 'return', 'throws', 'type', 'var'];
     /**
      * The lines that make up the annotation.
      *
-     * @var array<int, Line>
+     * @var Line[]
      */
     private $lines;
     /**
@@ -62,7 +62,7 @@ final class Annotation
     /**
      * The cached types.
      *
-     * @var null|list<string>
+     * @var null|string[]
      */
     private $types;
     /**
@@ -70,26 +70,24 @@ final class Annotation
      */
     private $namespace;
     /**
-     * @var list<NamespaceUseAnalysis>
+     * @var NamespaceUseAnalysis[]
      */
     private $namespaceUses;
     /**
      * Create a new line instance.
      *
-     * @param array<int, Line>           $lines
-     * @param null|NamespaceAnalysis     $namespace
-     * @param list<NamespaceUseAnalysis> $namespaceUses
+     * @param Line[]                 $lines
+     * @param null|NamespaceAnalysis $namespace
+     * @param NamespaceUseAnalysis[] $namespaceUses
      */
     public function __construct(array $lines, $namespace = null, array $namespaceUses = [])
     {
         $this->lines = \array_values($lines);
         $this->namespace = $namespace;
         $this->namespaceUses = $namespaceUses;
-        \reset($lines);
-        $this->start = \key($lines);
-        \end($lines);
-        $this->end = \key($lines);
-        \reset($lines);
+        $keys = \array_keys($lines);
+        $this->start = $keys[0];
+        $this->end = \end($keys);
     }
     /**
      * Get the string representation of object.
@@ -101,7 +99,7 @@ final class Annotation
     /**
      * Get all the annotation tag names with types.
      *
-     * @return list<string>
+     * @return string[]
      */
     public static function getTagsWithTypes() : array
     {
@@ -140,12 +138,14 @@ final class Annotation
         return null === $typesContent ? null : new \PhpCsFixer\DocBlock\TypeExpression($typesContent, $this->namespace, $this->namespaceUses);
     }
     /**
+     * @return null|string
+     *
      * @internal
      */
-    public function getVariableName() : ?string
+    public function getVariableName()
     {
         $type = \preg_quote($this->getTypesContent() ?? '', '/');
-        $regex = \sprintf('/@%s\\s+(%s\\s*)?(&\\s*)?(\\.{3}\\s*)?(?<variable>\\$%s)(?:.*|$)/', $this->tag->getName(), $type, \PhpCsFixer\DocBlock\TypeExpression::REGEX_IDENTIFIER);
+        $regex = "/@{$this->tag->getName()}\\s+({$type}\\s*)?(&\\s*)?(\\.{3}\\s*)?(?<variable>\\\$.+?)(?:[\\s*]|\$)/";
         if (Preg::match($regex, $this->lines[0]->getContent(), $matches)) {
             return $matches['variable'];
         }
@@ -154,7 +154,7 @@ final class Annotation
     /**
      * Get the types associated with this annotation.
      *
-     * @return list<string>
+     * @return string[]
      */
     public function getTypes() : array
     {
@@ -167,7 +167,7 @@ final class Annotation
     /**
      * Set the types associated with this annotation.
      *
-     * @param list<string> $types
+     * @param string[] $types
      */
     public function setTypes(array $types) : void
     {
@@ -178,7 +178,7 @@ final class Annotation
     /**
      * Get the normalized types associated with this annotation, so they can easily be compared.
      *
-     * @return list<string>
+     * @return string[]
      */
     public function getNormalizedTypes() : array
     {
@@ -235,7 +235,7 @@ final class Annotation
             if (!$this->supportTypes()) {
                 throw new \RuntimeException('This tag does not support types.');
             }
-            $matchingResult = Preg::match('{^(?:\\h*\\*|/\\*\\*)[\\h*]*@' . $name . '\\h+' . \PhpCsFixer\DocBlock\TypeExpression::REGEX_TYPES . '(?:(?:[*\\h\\v]|\\&?[\\.\\$]).*)?\\r?$}is', $this->lines[0]->getContent(), $matches);
+            $matchingResult = Preg::match('{^(?:\\s*\\*|/\\*\\*)[\\s\\*]*@' . $name . '\\s+' . \PhpCsFixer\DocBlock\TypeExpression::REGEX_TYPES . '(?:(?:[*\\h\\v]|\\&?[\\.\\$]).*)?\\r?$}is', $this->lines[0]->getContent(), $matches);
             $this->typesContent = $matchingResult ? $matches['types'] : null;
         }
         return $this->typesContent;

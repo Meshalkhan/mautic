@@ -1,11 +1,11 @@
 <?php
 
-namespace ECSPrefix202408\React\Dns\Query;
+namespace ECSPrefix202312\React\Dns\Query;
 
-use ECSPrefix202408\React\Dns\Config\HostsFile;
-use ECSPrefix202408\React\Dns\Model\Message;
-use ECSPrefix202408\React\Dns\Model\Record;
-use ECSPrefix202408\React\Promise;
+use ECSPrefix202312\React\Dns\Config\HostsFile;
+use ECSPrefix202312\React\Dns\Model\Message;
+use ECSPrefix202312\React\Dns\Model\Record;
+use ECSPrefix202312\React\Promise;
 /**
  * Resolves hosts from the given HostsFile or falls back to another executor
  *

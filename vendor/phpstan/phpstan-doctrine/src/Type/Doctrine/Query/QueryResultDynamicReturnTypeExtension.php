@@ -8,11 +8,16 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\MethodReflection;
 use PHPStan\Reflection\ParametersAcceptorSelector;
 use PHPStan\ShouldNotHappenException;
-use PHPStan\Type\Doctrine\HydrationModeReturnTypeResolver;
-use PHPStan\Type\Doctrine\ObjectMetadataResolver;
+use PHPStan\Type\Accessory\AccessoryArrayListType;
+use PHPStan\Type\ArrayType;
+use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\DynamicMethodReturnTypeExtension;
+use PHPStan\Type\IntegerType;
+use PHPStan\Type\IterableType;
 use PHPStan\Type\NullType;
 use PHPStan\Type\Type;
+use PHPStan\Type\TypeCombinator;
+use PHPStan\Type\VoidType;
 
 final class QueryResultDynamicReturnTypeExtension implements DynamicMethodReturnTypeExtension
 {
@@ -26,21 +31,6 @@ final class QueryResultDynamicReturnTypeExtension implements DynamicMethodReturn
 		'getOneOrNullResult' => 0,
 		'getSingleResult' => 0,
 	];
-
-	/** @var ObjectMetadataResolver */
-	private $objectMetadataResolver;
-
-	/** @var HydrationModeReturnTypeResolver */
-	private $hydrationModeReturnTypeResolver;
-
-	public function __construct(
-		ObjectMetadataResolver $objectMetadataResolver,
-		HydrationModeReturnTypeResolver $hydrationModeReturnTypeResolver
-	)
-	{
-		$this->objectMetadataResolver = $objectMetadataResolver;
-		$this->hydrationModeReturnTypeResolver = $hydrationModeReturnTypeResolver;
-	}
 
 	public function getClass(): string
 	{
@@ -56,7 +46,7 @@ final class QueryResultDynamicReturnTypeExtension implements DynamicMethodReturn
 		MethodReflection $methodReflection,
 		MethodCall $methodCall,
 		Scope $scope
-	): ?Type
+	): Type
 	{
 		$methodName = $methodReflection->getName();
 
@@ -79,13 +69,81 @@ final class QueryResultDynamicReturnTypeExtension implements DynamicMethodReturn
 
 		$queryType = $scope->getType($methodCall->var);
 
-		return $this->hydrationModeReturnTypeResolver->getMethodReturnTypeForHydrationMode(
-			$methodReflection->getName(),
+		return $this->getMethodReturnTypeForHydrationMode(
+			$methodReflection,
 			$hydrationMode,
 			$queryType->getTemplateType(AbstractQuery::class, 'TKey'),
-			$queryType->getTemplateType(AbstractQuery::class, 'TResult'),
-			$this->objectMetadataResolver->getObjectManager()
+			$queryType->getTemplateType(AbstractQuery::class, 'TResult')
 		);
+	}
+
+	private function getMethodReturnTypeForHydrationMode(
+		MethodReflection $methodReflection,
+		Type $hydrationMode,
+		Type $queryKeyType,
+		Type $queryResultType
+	): Type
+	{
+		$isVoidType = (new VoidType())->isSuperTypeOf($queryResultType);
+
+		if ($isVoidType->yes()) {
+			// A void query result type indicates an UPDATE or DELETE query.
+			// In this case all methods return the number of affected rows.
+			return new IntegerType();
+		}
+
+		if ($isVoidType->maybe()) {
+			// We can't be sure what the query type is, so we return the
+			// declared return type of the method.
+			return $this->originalReturnType($methodReflection);
+		}
+
+		if (!$this->isObjectHydrationMode($hydrationMode)) {
+			// We support only HYDRATE_OBJECT. For other hydration modes, we
+			// return the declared return type of the method.
+			return $this->originalReturnType($methodReflection);
+		}
+
+		switch ($methodReflection->getName()) {
+			case 'getSingleResult':
+				return $queryResultType;
+			case 'getOneOrNullResult':
+				return TypeCombinator::addNull($queryResultType);
+			case 'toIterable':
+				return new IterableType(
+					$queryKeyType->isNull()->yes() ? new IntegerType() : $queryKeyType,
+					$queryResultType
+				);
+			default:
+				if ($queryKeyType->isNull()->yes()) {
+					return AccessoryArrayListType::intersectWith(new ArrayType(
+						new IntegerType(),
+						$queryResultType
+					));
+				}
+				return new ArrayType(
+					$queryKeyType,
+					$queryResultType
+				);
+		}
+	}
+
+	private function isObjectHydrationMode(Type $type): bool
+	{
+		if (!$type instanceof ConstantIntegerType) {
+			return false;
+		}
+
+		return $type->getValue() === AbstractQuery::HYDRATE_OBJECT;
+	}
+
+	private function originalReturnType(MethodReflection $methodReflection): Type
+	{
+		$parametersAcceptor = ParametersAcceptorSelector::selectSingle(
+			$methodReflection->getVariants()
+		);
+
+		return $parametersAcceptor->getReturnType();
 	}
 
 }

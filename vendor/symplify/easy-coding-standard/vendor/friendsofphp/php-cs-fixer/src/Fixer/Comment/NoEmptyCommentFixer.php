@@ -47,10 +47,7 @@ final class NoEmptyCommentFixer extends AbstractFixer
             if (!$tokens[$index]->isGivenKind(\T_COMMENT)) {
                 continue;
             }
-            $blockInfo = $this->getCommentBlock($tokens, $index);
-            $blockStart = $blockInfo['blockStart'];
-            $index = $blockInfo['blockEnd'];
-            $isEmpty = $blockInfo['isEmpty'];
+            [$blockStart, $index, $isEmpty] = $this->getCommentBlock($tokens, $index);
             if (\false === $isEmpty) {
                 continue;
             }
@@ -63,15 +60,13 @@ final class NoEmptyCommentFixer extends AbstractFixer
      * Return the start index, end index and a flag stating if the comment block is empty.
      *
      * @param int $index T_COMMENT index
-     *
-     * @return array{blockStart: int, blockEnd: int, isEmpty: bool}
      */
     private function getCommentBlock(Tokens $tokens, int $index) : array
     {
         $commentType = $this->getCommentType($tokens[$index]->getContent());
         $empty = $this->isEmptyComment($tokens[$index]->getContent());
         if (self::TYPE_SLASH_ASTERISK === $commentType) {
-            return ['blockStart' => $index, 'blockEnd' => $index, 'isEmpty' => $empty];
+            return [$index, $index, $empty];
         }
         $start = $index;
         $count = \count($tokens);
@@ -91,7 +86,7 @@ final class NoEmptyCommentFixer extends AbstractFixer
                 break;
             }
         }
-        return ['blockStart' => $start, 'blockEnd' => $index - 1, 'isEmpty' => $empty];
+        return [$start, $index - 1, $empty];
     }
     private function getCommentType(string $content) : int
     {

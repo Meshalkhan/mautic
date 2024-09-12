@@ -77,7 +77,7 @@ class SendFailedMessageForRetryListener implements EventSubscriberInterface
             $retryEnvelope = $this->withLimitedHistory($envelope, new DelayStamp($delay), new RedeliveryStamp($retryCount));
 
             // re-send the message for retry
-            $retryEnvelope = $this->getSenderForTransport($event->getReceiverName())->send($retryEnvelope);
+            $this->getSenderForTransport($event->getReceiverName())->send($retryEnvelope);
 
             if (null !== $this->eventDispatcher) {
                 $this->eventDispatcher->dispatch(new WorkerMessageRetriedEvent($retryEnvelope, $event->getReceiverName()));

@@ -82,7 +82,6 @@ CODE_SAMPLE
         }
         $changes = \false;
         foreach ($consts as $const) {
-            $valueType = null;
             // If a type is set, skip
             if ($const->type !== null) {
                 continue;

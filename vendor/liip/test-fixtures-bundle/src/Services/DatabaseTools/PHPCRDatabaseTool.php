@@ -119,9 +119,4 @@ class PHPCRDatabaseTool extends AbstractDatabaseTool
 
         return $this->container->has($serviceName) ? $this->container->get($serviceName) : null;
     }
-
-    protected function getPlatformName(): string
-    {
-        return 'phpcr';
-    }
 }

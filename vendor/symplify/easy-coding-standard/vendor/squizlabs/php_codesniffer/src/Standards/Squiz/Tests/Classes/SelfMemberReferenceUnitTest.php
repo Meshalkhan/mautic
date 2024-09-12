@@ -5,17 +5,12 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Squiz\Tests\Classes;
 
 use PHP_CodeSniffer\Tests\Standards\AbstractSniffUnitTest;
-/**
- * Unit test class for the SelfMemberReference sniff.
- *
- * @covers \PHP_CodeSniffer\Standards\Squiz\Sniffs\Classes\SelfMemberReferenceSniff
- */
-final class SelfMemberReferenceUnitTest extends AbstractSniffUnitTest
+class SelfMemberReferenceUnitTest extends AbstractSniffUnitTest
 {
     /**
      * Returns the lines where errors should occur.
@@ -27,7 +22,7 @@ final class SelfMemberReferenceUnitTest extends AbstractSniffUnitTest
      */
     public function getErrorList()
     {
-        return [24 => 1, 25 => 1, 26 => 1, 30 => 1, 31 => 1, 32 => 2, 40 => 2, 92 => 1, 121 => 1, 132 => 1, 139 => 3, 140 => 1, 143 => 2, 162 => 1, 171 => 1, 183 => 1];
+        return [24 => 1, 25 => 1, 26 => 1, 30 => 1, 31 => 1, 32 => 2, 40 => 2, 92 => 1, 121 => 1, 132 => 1, 139 => 3, 140 => 1, 143 => 2, 162 => 1, 171 => 1];
     }
     //end getErrorList()
     /**

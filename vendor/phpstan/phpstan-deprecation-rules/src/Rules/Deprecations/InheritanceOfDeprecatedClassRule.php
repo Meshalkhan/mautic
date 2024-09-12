@@ -8,7 +8,6 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Broker\ClassNotFoundException;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
 use function sprintf;
 
 /**
@@ -20,13 +19,9 @@ class InheritanceOfDeprecatedClassRule implements Rule
 	/** @var ReflectionProvider */
 	private $reflectionProvider;
 
-	/** @var DeprecatedScopeHelper */
-	private $deprecatedScopeHelper;
-
-	public function __construct(ReflectionProvider $reflectionProvider, DeprecatedScopeHelper $deprecatedScopeHelper)
+	public function __construct(ReflectionProvider $reflectionProvider)
 	{
 		$this->reflectionProvider = $reflectionProvider;
-		$this->deprecatedScopeHelper = $deprecatedScopeHelper;
 	}
 
 	public function getNodeType(): string
@@ -36,7 +31,7 @@ class InheritanceOfDeprecatedClassRule implements Rule
 
 	public function processNode(Node $node, Scope $scope): array
 	{
-		if ($this->deprecatedScopeHelper->isScopeDeprecated($scope)) {
+		if (DeprecatedScopeHelper::isScopeDeprecated($scope)) {
 			return [];
 		}
 
@@ -64,31 +59,31 @@ class InheritanceOfDeprecatedClassRule implements Rule
 			if ($parentClass->isDeprecated()) {
 				if (!$class->isAnonymous()) {
 					if ($description === null) {
-						$errors[] = RuleErrorBuilder::message(sprintf(
+						$errors[] = sprintf(
 							'Class %s extends deprecated class %s.',
 							$className,
 							$parentClassName
-						))->identifier('class.extendsDeprecatedClass')->build();
+						);
 					} else {
-						$errors[] = RuleErrorBuilder::message(sprintf(
+						$errors[] = sprintf(
 							"Class %s extends deprecated class %s:\n%s",
 							$className,
 							$parentClassName,
 							$description
-						))->identifier('class.extendsDeprecatedClass')->build();
+						);
 					}
 				} else {
 					if ($description === null) {
-						$errors[] = RuleErrorBuilder::message(sprintf(
+						$errors[] = sprintf(
 							'Anonymous class extends deprecated class %s.',
 							$parentClassName
-						))->identifier('class.extendsDeprecatedClass')->build();
+						);
 					} else {
-						$errors[] = RuleErrorBuilder::message(sprintf(
+						$errors[] = sprintf(
 							"Anonymous class extends deprecated class %s:\n%s",
 							$parentClassName,
 							$description
-						))->identifier('class.extendsDeprecatedClass')->build();
+						);
 					}
 				}
 			}

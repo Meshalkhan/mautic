@@ -67,7 +67,7 @@ class Producer extends BaseAmqp implements ProducerInterface
         $this->logger->debug('AMQP message published', [
             'amqp' => [
                 'body' => $msgBody,
-                'routingkey' => $real_routingKey,
+                'routingkeys' => $routingKey,
                 'properties' => $additionalProperties,
                 'headers' => $headers,
             ],

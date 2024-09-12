@@ -56,15 +56,21 @@ class ApplyChecksumMiddleware
         $body = $request->getBody();
 
         //Checks if AddContentMD5 has been specified for PutObject or UploadPart
-        $addContentMD5 = $command['AddContentMD5'] ?? null;
+        $addContentMD5 = isset($command['AddContentMD5'])
+            ?  $command['AddContentMD5']
+            : null;
 
         $op = $this->api->getOperation($command->getName());
 
-        $checksumInfo = $op['httpChecksum'] ?? [];
+        $checksumInfo = isset($op['httpChecksum'])
+            ? $op['httpChecksum']
+            : [];
         $checksumMemberName = array_key_exists('requestAlgorithmMember', $checksumInfo)
             ? $checksumInfo['requestAlgorithmMember']
             : "";
-        $requestedAlgorithm = $command[$checksumMemberName] ?? null;
+        $requestedAlgorithm = isset($command[$checksumMemberName])
+            ? $command[$checksumMemberName]
+            : null;
         if (!empty($checksumMemberName) && !empty($requestedAlgorithm)) {
             $requestedAlgorithm = strtolower($requestedAlgorithm);
             $checksumMember = $op->getInput()->getMember($checksumMemberName);
@@ -87,7 +93,9 @@ class ApplyChecksumMiddleware
 
         if (!empty($checksumInfo)) {
         //if the checksum member is absent, check if it's required
-        $checksumRequired = $checksumInfo['requestChecksumRequired'] ?? null;
+        $checksumRequired = isset($checksumInfo['requestChecksumRequired'])
+            ? $checksumInfo['requestChecksumRequired']
+            : null;
             if ((!empty($checksumRequired))
                 || (in_array($name, self::$sha256AndMd5) && $addContentMD5)
             ) {
@@ -139,9 +147,9 @@ class ApplyChecksumMiddleware
      * @param CommandInterface $command
      * @return bool
      */
-    private function isS3Express(CommandInterface $command): bool
+    private function isS3Express($command): bool
     {
-        return isset($command['@context']['signing_service'])
-            && $command['@context']['signing_service'] === 's3express';
+        $authSchemes = $command->getAuthSchemes();
+        return isset($authSchemes['name']) && $authSchemes['name'] == 's3express';
     }
 }

@@ -50,7 +50,7 @@ final class NoUnusedImportsFixer extends AbstractFixer
     }
     protected function applyFix(\SplFileInfo $file, Tokens $tokens) : void
     {
-        $useDeclarations = (new NamespaceUsesAnalyzer())->getDeclarationsFromTokens($tokens, \true);
+        $useDeclarations = (new NamespaceUsesAnalyzer())->getDeclarationsFromTokens($tokens);
         if (0 === \count($useDeclarations)) {
             return;
         }
@@ -138,16 +138,14 @@ final class NoUnusedImportsFixer extends AbstractFixer
         }
         return \false;
     }
-    private function removeUseDeclaration(Tokens $tokens, NamespaceUseAnalysis $useDeclaration, bool $forceCompleteRemoval = \false) : void
+    private function removeUseDeclaration(Tokens $tokens, NamespaceUseAnalysis $useDeclaration) : void
     {
-        [$start, $end] = $useDeclaration->isInMulti() && !$forceCompleteRemoval ? [$useDeclaration->getChunkStartIndex(), $useDeclaration->getChunkEndIndex()] : [$useDeclaration->getStartIndex(), $useDeclaration->getEndIndex()];
-        $loopStartIndex = $useDeclaration->isInMulti() || $forceCompleteRemoval ? $end : $end - 1;
-        for ($index = $loopStartIndex; $index >= $start; --$index) {
+        for ($index = $useDeclaration->getEndIndex() - 1; $index >= $useDeclaration->getStartIndex(); --$index) {
             if ($tokens[$index]->isComment()) {
                 continue;
             }
             if (!$tokens[$index]->isWhitespace() || \strpos($tokens[$index]->getContent(), "\n") === \false) {
-                $tokens->clearAt($index);
+                $tokens->clearTokenAndMergeSurroundingWhitespace($index);
                 continue;
             }
             // when multi line white space keep the line feed if the previous token is a comment
@@ -160,81 +158,11 @@ final class NoUnusedImportsFixer extends AbstractFixer
                 $tokens->clearTokenAndMergeSurroundingWhitespace($index);
             }
         }
-        // For multi-use import statements the tokens containing FQN were already removed in the loop above.
-        // We need to clean up tokens around the ex-chunk to keep the correct syntax and achieve proper formatting.
-        if (!$forceCompleteRemoval && $useDeclaration->isInMulti()) {
-            $this->cleanUpAfterImportChunkRemoval($tokens, $useDeclaration);
-            return;
-        }
         if ($tokens[$useDeclaration->getEndIndex()]->equals(';')) {
             // do not remove `? >`
             $tokens->clearAt($useDeclaration->getEndIndex());
         }
-        $this->cleanUpSurroundingNewLines($tokens, $useDeclaration);
-    }
-    /**
-     * @param list<NamespaceUseAnalysis> $useDeclarations
-     */
-    private function removeUsesInSameNamespace(Tokens $tokens, array $useDeclarations, NamespaceAnalysis $namespaceDeclaration) : void
-    {
-        $namespace = $namespaceDeclaration->getFullName();
-        $nsLength = \strlen($namespace . '\\');
-        foreach ($useDeclarations as $useDeclaration) {
-            if ($useDeclaration->isAliased()) {
-                continue;
-            }
-            $useDeclarationFullName = \ltrim($useDeclaration->getFullName(), '\\');
-            if (\strncmp($useDeclarationFullName, $namespace . '\\', \strlen($namespace . '\\')) !== 0) {
-                continue;
-            }
-            $partName = \substr($useDeclarationFullName, $nsLength);
-            if (\strpos($partName, '\\') === \false) {
-                $this->removeUseDeclaration($tokens, $useDeclaration);
-            }
-        }
-    }
-    private function cleanUpAfterImportChunkRemoval(Tokens $tokens, NamespaceUseAnalysis $useDeclaration) : void
-    {
-        $beforeChunkIndex = $tokens->getPrevMeaningfulToken($useDeclaration->getChunkStartIndex());
-        $afterChunkIndex = $tokens->getNextMeaningfulToken($useDeclaration->getChunkEndIndex());
-        $hasNonEmptyTokenBefore = $this->scanForNonEmptyTokensUntilNewLineFound($tokens, $afterChunkIndex, -1);
-        $hasNonEmptyTokenAfter = $this->scanForNonEmptyTokensUntilNewLineFound($tokens, $afterChunkIndex, 1);
-        // We don't want to merge consequent new lines with indentation (leading to e.g. `\n    \n    `),
-        // so it's safe to merge whitespace only if there is any non-empty token before or after the chunk.
-        $mergingSurroundingWhitespaceIsSafe = $hasNonEmptyTokenBefore[1] || $hasNonEmptyTokenAfter[1];
-        $clearToken = static function (int $index) use($tokens, $mergingSurroundingWhitespaceIsSafe) : void {
-            if ($mergingSurroundingWhitespaceIsSafe) {
-                $tokens->clearTokenAndMergeSurroundingWhitespace($index);
-            } else {
-                $tokens->clearAt($index);
-            }
-        };
-        if ($tokens[$afterChunkIndex]->equals(',')) {
-            $clearToken($afterChunkIndex);
-        } elseif ($tokens[$beforeChunkIndex]->equals(',')) {
-            $clearToken($beforeChunkIndex);
-        }
-        // Ensure there's a single space where applicable, otherwise no space (before comma, before closing brace)
-        for ($index = $beforeChunkIndex; $index <= $afterChunkIndex; ++$index) {
-            if (null === $tokens[$index]->getId() || !$tokens[$index]->isWhitespace(' ')) {
-                continue;
-            }
-            $nextTokenIndex = $tokens->getNextMeaningfulToken($index);
-            if ($tokens[$nextTokenIndex]->equals(',') || $tokens[$nextTokenIndex]->equals(';') || $tokens[$nextTokenIndex]->isGivenKind([CT::T_GROUP_IMPORT_BRACE_CLOSE])) {
-                $tokens->clearAt($index);
-            } else {
-                $tokens[$index] = new Token([\T_WHITESPACE, ' ']);
-            }
-            $prevTokenIndex = $tokens->getPrevMeaningfulToken($index);
-            if ($tokens[$prevTokenIndex]->isGivenKind([CT::T_GROUP_IMPORT_BRACE_OPEN])) {
-                $tokens->clearAt($index);
-            }
-        }
-        $this->removeLineIfEmpty($tokens, $useDeclaration);
-        $this->removeImportStatementIfEmpty($tokens, $useDeclaration);
-    }
-    private function cleanUpSurroundingNewLines(Tokens $tokens, NamespaceUseAnalysis $useDeclaration) : void
-    {
+        // remove white space above and below where the `use` statement was
         $prevIndex = $useDeclaration->getStartIndex() - 1;
         $prevToken = $tokens[$prevIndex];
         if ($prevToken->isWhitespace()) {
@@ -261,59 +189,25 @@ final class NoUnusedImportsFixer extends AbstractFixer
             $tokens->clearAt($prevIndex);
         }
     }
-    private function removeImportStatementIfEmpty(Tokens $tokens, NamespaceUseAnalysis $useDeclaration) : void
-    {
-        // First we look for empty groups where all chunks were removed (`use Foo\{};`).
-        // We're only interested in ending brace if its index is between start and end of the import statement.
-        $endingBraceIndex = $tokens->getPrevTokenOfKind($useDeclaration->getEndIndex(), [[CT::T_GROUP_IMPORT_BRACE_CLOSE]]);
-        if ($endingBraceIndex > $useDeclaration->getStartIndex()) {
-            $openingBraceIndex = $tokens->getPrevMeaningfulToken($endingBraceIndex);
-            if ($tokens[$openingBraceIndex]->isGivenKind(CT::T_GROUP_IMPORT_BRACE_OPEN)) {
-                $this->removeUseDeclaration($tokens, $useDeclaration, \true);
-            }
-        }
-        // Second we look for empty groups where all comma-separated chunks were removed (`use;`).
-        $beforeSemicolonIndex = $tokens->getPrevMeaningfulToken($useDeclaration->getEndIndex());
-        if ($tokens[$beforeSemicolonIndex]->isGivenKind([\T_USE]) || \in_array($tokens[$beforeSemicolonIndex]->getContent(), ['function', 'const'], \true)) {
-            $this->removeUseDeclaration($tokens, $useDeclaration, \true);
-        }
-    }
-    private function removeLineIfEmpty(Tokens $tokens, NamespaceUseAnalysis $useAnalysis) : void
-    {
-        if (!$useAnalysis->isInMulti()) {
-            return;
-        }
-        $hasNonEmptyTokenBefore = $this->scanForNonEmptyTokensUntilNewLineFound($tokens, $useAnalysis->getChunkStartIndex(), -1);
-        $hasNonEmptyTokenAfter = $this->scanForNonEmptyTokensUntilNewLineFound($tokens, $useAnalysis->getChunkEndIndex(), 1);
-        if (\is_int($hasNonEmptyTokenBefore[0]) && !$hasNonEmptyTokenBefore[1] && \is_int($hasNonEmptyTokenAfter[0]) && !$hasNonEmptyTokenAfter[1]) {
-            $tokens->clearRange($hasNonEmptyTokenBefore[0], $hasNonEmptyTokenAfter[0] - 1);
-        }
-    }
     /**
-     * Returns tuple with the index of first token with whitespace containing new line char
-     * and a flag if any non-empty token was found along the way.
-     *
-     * @param -1|1 $direction
-     *
-     * @return array{0: null|int, 1: bool}
+     * @param list<NamespaceUseAnalysis> $useDeclarations
      */
-    private function scanForNonEmptyTokensUntilNewLineFound(Tokens $tokens, int $index, int $direction) : array
+    private function removeUsesInSameNamespace(Tokens $tokens, array $useDeclarations, NamespaceAnalysis $namespaceDeclaration) : void
     {
-        $hasNonEmptyToken = \false;
-        $newLineTokenIndex = null;
-        // Iterate until we find new line OR we get out of $tokens bounds (next sibling index is `null`).
-        while (\is_int($index)) {
-            $index = $tokens->getNonEmptySibling($index, $direction);
-            if (null === $index || null === $tokens[$index]->getId()) {
+        $namespace = $namespaceDeclaration->getFullName();
+        $nsLength = \strlen($namespace . '\\');
+        foreach ($useDeclarations as $useDeclaration) {
+            if ($useDeclaration->isAliased()) {
                 continue;
             }
-            if (!$tokens[$index]->isWhitespace()) {
-                $hasNonEmptyToken = \true;
-            } elseif (\strncmp($tokens[$index]->getContent(), "\n", \strlen("\n")) === 0) {
-                $newLineTokenIndex = $index;
-                break;
+            $useDeclarationFullName = \ltrim($useDeclaration->getFullName(), '\\');
+            if (\strncmp($useDeclarationFullName, $namespace . '\\', \strlen($namespace . '\\')) !== 0) {
+                continue;
+            }
+            $partName = \substr($useDeclarationFullName, $nsLength);
+            if (\strpos($partName, '\\') === \false) {
+                $this->removeUseDeclaration($tokens, $useDeclaration);
             }
         }
-        return [$newLineTokenIndex, $hasNonEmptyToken];
     }
 }

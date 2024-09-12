@@ -60,7 +60,7 @@ abstract class AbstractNoUselessElseFixer extends \PhpCsFixer\AbstractFixer
      *
      * @param int $index T_IF, T_ELSE, T_ELSEIF
      *
-     * @return array{int, int}
+     * @return int[]
      */
     private function getPreviousBlock(Tokens $tokens, int $index) : array
     {

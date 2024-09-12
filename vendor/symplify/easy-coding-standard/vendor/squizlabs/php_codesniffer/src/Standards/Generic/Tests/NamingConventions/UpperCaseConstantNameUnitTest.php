@@ -5,17 +5,12 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\Generic\Tests\NamingConventions;
 
 use PHP_CodeSniffer\Tests\Standards\AbstractSniffUnitTest;
-/**
- * Unit test class for the ValidConstantName sniff.
- *
- * @covers \PHP_CodeSniffer\Standards\Generic\Sniffs\NamingConventions\UpperCaseConstantNameSniff
- */
-final class UpperCaseConstantNameUnitTest extends AbstractSniffUnitTest
+class UpperCaseConstantNameUnitTest extends AbstractSniffUnitTest
 {
     /**
      * Returns the lines where errors should occur.
@@ -27,7 +22,7 @@ final class UpperCaseConstantNameUnitTest extends AbstractSniffUnitTest
      */
     public function getErrorList()
     {
-        return [8 => 1, 10 => 1, 12 => 1, 14 => 1, 19 => 1, 28 => 1, 30 => 1, 40 => 1, 41 => 1];
+        return [8 => 1, 10 => 1, 12 => 1, 14 => 1, 19 => 1, 28 => 1, 30 => 1];
     }
     //end getErrorList()
     /**

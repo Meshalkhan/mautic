@@ -12,9 +12,9 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Console\SelfUpdate;
 
-use ECSPrefix202408\Composer\Semver\Comparator;
-use ECSPrefix202408\Composer\Semver\Semver;
-use ECSPrefix202408\Composer\Semver\VersionParser;
+use ECSPrefix202312\Composer\Semver\Comparator;
+use ECSPrefix202312\Composer\Semver\Semver;
+use ECSPrefix202312\Composer\Semver\VersionParser;
 /**
  * @internal
  */
@@ -29,7 +29,7 @@ final class NewVersionChecker implements \PhpCsFixer\Console\SelfUpdate\NewVersi
      */
     private $versionParser;
     /**
-     * @var null|list<string>
+     * @var null|string[]
      */
     private $availableVersions;
     public function __construct(\PhpCsFixer\Console\SelfUpdate\GithubClientInterface $githubClient)
@@ -70,7 +70,8 @@ final class NewVersionChecker implements \PhpCsFixer\Console\SelfUpdate\NewVersi
         if (null !== $this->availableVersions) {
             return;
         }
-        foreach ($this->githubClient->getTags() as $version) {
+        foreach ($this->githubClient->getTags() as $tag) {
+            $version = $tag['name'];
             try {
                 $this->versionParser->normalize($version);
                 if ('stable' === VersionParser::parseStability($version)) {
@@ -80,25 +81,6 @@ final class NewVersionChecker implements \PhpCsFixer\Console\SelfUpdate\NewVersi
                 // not a valid version tag
             }
         }
-        $versions = Semver::rsort($this->availableVersions);
-        $arrayIsListFunction = function (array $array) : bool {
-            if (\function_exists('array_is_list')) {
-                return \array_is_list($array);
-            }
-            if ($array === []) {
-                return \true;
-            }
-            $current_key = 0;
-            foreach ($array as $key => $noop) {
-                if ($key !== $current_key) {
-                    return \false;
-                }
-                ++$current_key;
-            }
-            return \true;
-        };
-        \assert($arrayIsListFunction($versions));
-        // Semver::rsort provides soft `array` type, let's validate and ensure proper type for SCA
-        $this->availableVersions = $versions;
+        $this->availableVersions = Semver::rsort($this->availableVersions);
     }
 }

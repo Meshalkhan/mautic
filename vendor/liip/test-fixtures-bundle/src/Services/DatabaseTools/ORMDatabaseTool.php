@@ -31,7 +31,7 @@ use Liip\TestFixturesBundle\LiipTestFixturesEvents;
 /**
  * @author Aleksey Tupichenkov <alekseytupichenkov@gmail.com>
  */
-class ORMDatabaseTool extends AbstractDbalDatabaseTool
+class ORMDatabaseTool extends AbstractDatabaseTool
 {
     /**
      * @var EntityManager
@@ -177,19 +177,10 @@ class ORMDatabaseTool extends AbstractDbalDatabaseTool
         // “An exception occurred in driver: SQLSTATE[HY000] [1049] Unknown database 'test'”
 
         $tmpConnection = DriverManager::getConnection($params);
+        $tmpConnection->connect();
 
-        if (method_exists($tmpConnection, 'createSchemaManager')) {
-            $schemaManager = $tmpConnection->createSchemaManager();
-        } else {
-            $schemaManager = $tmpConnection->getSchemaManager();
-        }
-
-        // DBAL 4.x does not support creating databases for SQLite anymore; for now we silently ignore this error
-        try {
-            if (!\in_array($dbName, $schemaManager->listDatabases(), true)) {
-                $schemaManager->createDatabase($dbName);
-            }
-        } catch (\Doctrine\DBAL\Platforms\Exception\NotSupported $e) {
+        if (!\in_array($dbName, $tmpConnection->getSchemaManager()->listDatabases(), true)) {
+            $tmpConnection->getSchemaManager()->createDatabase($dbName);
         }
 
         $tmpConnection->close();

@@ -36,9 +36,7 @@ final class ConsoleOutputFormatter implements OutputFormatterInterface
      */
     public function report(ErrorAndDiffResult $errorAndDiffResult, Configuration $configuration) : int
     {
-        if ($configuration->shouldShowDiffs()) {
-            $this->reportFileDiffs($errorAndDiffResult->getFileDiffs(), $configuration->isReportingWithRealPath());
-        }
+        $this->reportFileDiffs($errorAndDiffResult->getFileDiffs());
         $this->easyCodingStandardStyle->newLine(1);
         if ($errorAndDiffResult->getErrorCount() === 0 && $errorAndDiffResult->getFileDiffsCount() === 0) {
             $this->easyCodingStandardStyle->success('No errors found. Great job - your code is shiny in style!');
@@ -52,18 +50,14 @@ final class ConsoleOutputFormatter implements OutputFormatterInterface
         }
         return $this->exitCodeResolver->resolve($errorAndDiffResult, $configuration);
     }
-    public static function getName() : string
+    public function getName() : string
     {
         return self::NAME;
-    }
-    public static function hasSupportForProgressBars() : bool
-    {
-        return \true;
     }
     /**
      * @param FileDiff[] $fileDiffs
      */
-    private function reportFileDiffs(array $fileDiffs, bool $absoluteFilePath = \false) : void
+    private function reportFileDiffs(array $fileDiffs) : void
     {
         if ($fileDiffs === []) {
             return;
@@ -72,8 +66,7 @@ final class ConsoleOutputFormatter implements OutputFormatterInterface
         $i = 1;
         foreach ($fileDiffs as $fileDiff) {
             $this->easyCodingStandardStyle->newLine(2);
-            $filePath = $absoluteFilePath ? $fileDiff->getAbsoluteFilePath() : $fileDiff->getRelativeFilePath();
-            $boldNumberedMessage = \sprintf('<options=bold>%d) %s</>', $i, $filePath);
+            $boldNumberedMessage = \sprintf('<options=bold>%d) %s</>', $i, $fileDiff->getRelativeFilePath());
             $this->easyCodingStandardStyle->writeln($boldNumberedMessage);
             ++$i;
             $this->easyCodingStandardStyle->newLine();

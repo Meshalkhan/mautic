@@ -13,9 +13,6 @@ declare (strict_types=1);
 namespace PhpCsFixer\Tokenizer\Analyzer\Analysis;
 
 /**
- * @author VeeWee <toonverwerft@gmail.com>
- * @author Greg Korba <greg@codito.dev>
- *
  * @internal
  */
 final class NamespaceUseAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analysis\StartEndTokenAwareAnalysis
@@ -35,11 +32,6 @@ final class NamespaceUseAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analy
      */
     private $shortName;
     /**
-     * Is the use statement part of multi-use (`use A, B, C;`, `use A\{B, C};`)?
-     * @var bool
-     */
-    private $isInMulti;
-    /**
      * Is the use statement being aliased?
      * @var bool
      */
@@ -55,38 +47,18 @@ final class NamespaceUseAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analy
      */
     private $endIndex;
     /**
-     * The start index of the single import in the multi-use statement.
-     * @var int|null
-     */
-    private $chunkStartIndex;
-    /**
-     * The end index of the single import in the multi-use statement.
-     * @var int|null
-     */
-    private $chunkEndIndex;
-    /**
      * The type of import: class, function or constant.
-     *
-     * @var self::TYPE_*
+     * @var int
      */
     private $type;
-    /**
-     * @param self::TYPE_* $type
-     */
-    public function __construct(int $type, string $fullName, string $shortName, bool $isAliased, bool $isInMulti, int $startIndex, int $endIndex, ?int $chunkStartIndex = null, ?int $chunkEndIndex = null)
+    public function __construct(string $fullName, string $shortName, bool $isAliased, int $startIndex, int $endIndex, int $type)
     {
-        if (\true === $isInMulti && (null === $chunkStartIndex || null === $chunkEndIndex)) {
-            throw new \LogicException('Chunk start and end index must be set when the import is part of a multi-use statement.');
-        }
-        $this->type = $type;
         $this->fullName = $fullName;
         $this->shortName = $shortName;
         $this->isAliased = $isAliased;
-        $this->isInMulti = $isInMulti;
         $this->startIndex = $startIndex;
         $this->endIndex = $endIndex;
-        $this->chunkStartIndex = $chunkStartIndex;
-        $this->chunkEndIndex = $chunkEndIndex;
+        $this->type = $type;
     }
     public function getFullName() : string
     {
@@ -100,10 +72,6 @@ final class NamespaceUseAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analy
     {
         return $this->isAliased;
     }
-    public function isInMulti() : bool
-    {
-        return $this->isInMulti;
-    }
     public function getStartIndex() : int
     {
         return $this->startIndex;
@@ -112,17 +80,6 @@ final class NamespaceUseAnalysis implements \PhpCsFixer\Tokenizer\Analyzer\Analy
     {
         return $this->endIndex;
     }
-    public function getChunkStartIndex() : ?int
-    {
-        return $this->chunkStartIndex;
-    }
-    public function getChunkEndIndex() : ?int
-    {
-        return $this->chunkEndIndex;
-    }
-    /**
-     * @return self::TYPE_*
-     */
     public function getType() : int
     {
         return $this->type;

@@ -2,9 +2,6 @@
 
 namespace PhpAmqpLib\Connection;
 
-/**
- * @deprecated Use AMQPConnectionFactory with AMQPConnectionConfig::setIsSecure(true) and AMQPConnectionConfig::setSsl* methods.
- */
 class AMQPSSLConnection extends AMQPStreamConnection
 {
     /**
@@ -28,9 +25,10 @@ class AMQPSSLConnection extends AMQPStreamConnection
         $options = array(),
         ?AMQPConnectionConfig $config = null
     ) {
-        trigger_error('AMQPSSLConnection is deprecated and will be removed in version 4 of php-amqplib', E_USER_DEPRECATED);
-        $ssl_context = null;
-        if (!empty($ssl_options)) {
+        if (empty($ssl_options)) {
+            trigger_error('Using non-TLS instances of AMQPSSLConnection is deprecated and will be removed in version 4 of php-amqplib', E_USER_DEPRECATED);
+            $ssl_context = null;
+        } else {
             $ssl_context = $this->createSslContext($ssl_options);
         }
 

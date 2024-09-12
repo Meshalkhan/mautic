@@ -3,8 +3,8 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\DependencyInjection;
 
-use ECSPrefix202408\Illuminate\Container\Container;
-use ECSPrefix202408\Symfony\Component\Console\Input\ArgvInput;
+use ECSPrefix202312\Illuminate\Container\Container;
+use ECSPrefix202312\Symfony\Component\Console\Input\ArgvInput;
 use Symplify\EasyCodingStandard\Caching\ChangedFilesDetector;
 /**
  * @api
@@ -26,14 +26,14 @@ final class EasyCodingStandardContainerFactory
         } elseif (\file_exists($rootECSConfig)) {
             $inputConfigFiles[] = $rootECSConfig;
         }
-        $ecsConfig = $lazyContainerFactory->create($inputConfigFiles);
-        $ecsConfig->boot();
+        $container = $lazyContainerFactory->create($inputConfigFiles);
+        $container->boot();
         if ($inputConfigFiles !== []) {
             // for cache invalidation on config change
             /** @var ChangedFilesDetector $changedFilesDetector */
-            $changedFilesDetector = $ecsConfig->make(ChangedFilesDetector::class);
+            $changedFilesDetector = $container->make(ChangedFilesDetector::class);
             $changedFilesDetector->setUsedConfigs($inputConfigFiles);
         }
-        return $ecsConfig;
+        return $container;
     }
 }

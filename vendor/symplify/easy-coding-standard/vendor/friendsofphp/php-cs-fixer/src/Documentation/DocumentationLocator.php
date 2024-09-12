@@ -58,6 +58,10 @@ final class DocumentationLocator
     {
         return $this->getRuleSetsDocumentationDirectoryPath() . '/' . \str_replace(':risky', 'Risky', \ucfirst(\substr($name, 1))) . '.rst';
     }
+    public function getListingFilePath() : string
+    {
+        return $this->path . '/list.rst';
+    }
     public function getUsageFilePath() : string
     {
         return $this->path . '/usage.rst';

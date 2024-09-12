@@ -7,7 +7,6 @@ use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\NodeAbstract;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
 use function count;
 
 /**
@@ -41,13 +40,13 @@ class AssertSameBooleanExpectedRule implements Rule
 
 		if ($expectedArgumentValue->name->toLowerString() === 'true') {
 			return [
-				RuleErrorBuilder::message('You should use assertTrue() instead of assertSame() when expecting "true"')->identifier('phpunit.assertTrue')->build(),
+				'You should use assertTrue() instead of assertSame() when expecting "true"',
 			];
 		}
 
 		if ($expectedArgumentValue->name->toLowerString() === 'false') {
 			return [
-				RuleErrorBuilder::message('You should use assertFalse() instead of assertSame() when expecting "false"')->identifier('phpunit.assertFalse')->build(),
+				'You should use assertFalse() instead of assertSame() when expecting "false"',
 			];
 		}
 

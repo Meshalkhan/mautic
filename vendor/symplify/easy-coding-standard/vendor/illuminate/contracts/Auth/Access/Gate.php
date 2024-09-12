@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202408\Illuminate\Contracts\Auth\Access;
+namespace ECSPrefix202312\Illuminate\Contracts\Auth\Access;
 
 interface Gate
 {
@@ -51,17 +51,17 @@ interface Gate
      */
     public function after(callable $callback);
     /**
-     * Determine if all of the given abilities should be granted for the current user.
+     * Determine if the given ability should be granted for the current user.
      *
-     * @param  iterable|string  $ability
+     * @param  string  $ability
      * @param  array|mixed  $arguments
      * @return bool
      */
     public function allows($ability, $arguments = []);
     /**
-     * Determine if any of the given abilities should be denied for the current user.
+     * Determine if the given ability should be denied for the current user.
      *
-     * @param  iterable|string  $ability
+     * @param  string  $ability
      * @param  array|mixed  $arguments
      * @return bool
      */

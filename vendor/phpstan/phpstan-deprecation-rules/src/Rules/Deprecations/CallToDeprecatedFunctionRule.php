@@ -9,7 +9,6 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Broker\FunctionNotFoundException;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
 use function sprintf;
 
 /**
@@ -21,13 +20,9 @@ class CallToDeprecatedFunctionRule implements Rule
 	/** @var ReflectionProvider */
 	private $reflectionProvider;
 
-	/** @var DeprecatedScopeHelper */
-	private $deprecatedScopeHelper;
-
-	public function __construct(ReflectionProvider $reflectionProvider, DeprecatedScopeHelper $deprecatedScopeHelper)
+	public function __construct(ReflectionProvider $reflectionProvider)
 	{
 		$this->reflectionProvider = $reflectionProvider;
-		$this->deprecatedScopeHelper = $deprecatedScopeHelper;
 	}
 
 	public function getNodeType(): string
@@ -37,7 +32,7 @@ class CallToDeprecatedFunctionRule implements Rule
 
 	public function processNode(Node $node, Scope $scope): array
 	{
-		if ($this->deprecatedScopeHelper->isScopeDeprecated($scope)) {
+		if (DeprecatedScopeHelper::isScopeDeprecated($scope)) {
 			return [];
 		}
 
@@ -55,21 +50,17 @@ class CallToDeprecatedFunctionRule implements Rule
 		if ($function->isDeprecated()->yes()) {
 			$description = $function->getDeprecatedDescription();
 			if ($description === null) {
-				return [
-					RuleErrorBuilder::message(sprintf(
-						'Call to deprecated function %s().',
-						$function->getName()
-					))->identifier('function.deprecated')->build(),
-				];
+				return [sprintf(
+					'Call to deprecated function %s().',
+					$function->getName()
+				)];
 			}
 
-			return [
-				RuleErrorBuilder::message(sprintf(
-					"Call to deprecated function %s():\n%s",
-					$function->getName(),
-					$description
-				))->identifier('function.deprecated')->build(),
-			];
+			return [sprintf(
+				"Call to deprecated function %s():\n%s",
+				$function->getName(),
+				$description
+			)];
 		}
 
 		return [];

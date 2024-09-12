@@ -10,13 +10,11 @@ use PHPStan\Symfony\ConsoleApplicationResolver;
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\DynamicMethodReturnTypeExtension;
 use PHPStan\Type\IntegerType;
-use PHPStan\Type\NullType;
 use PHPStan\Type\StringType;
 use PHPStan\Type\Type;
 use PHPStan\Type\TypeCombinator;
 use PHPStan\Type\TypeUtils;
 use function count;
-use function in_array;
 
 final class InputInterfaceGetArgumentDynamicReturnTypeExtension implements DynamicMethodReturnTypeExtension
 {
@@ -57,7 +55,6 @@ final class InputInterfaceGetArgumentDynamicReturnTypeExtension implements Dynam
 		$argName = $argStrings[0]->getValue();
 
 		$argTypes = [];
-		$canBeNullInInteract = false;
 		foreach ($this->consoleApplicationResolver->findCommands($classReflection) as $command) {
 			try {
 				$command->mergeApplicationDefinition();
@@ -71,8 +68,6 @@ final class InputInterfaceGetArgumentDynamicReturnTypeExtension implements Dynam
 					$argType = new StringType();
 					if (!$argument->isRequired()) {
 						$argType = TypeCombinator::union($argType, $scope->getTypeFromValue($argument->getDefault()));
-					} else {
-						$canBeNullInInteract = true;
 					}
 				}
 				$argTypes[] = $argType;
@@ -81,21 +76,7 @@ final class InputInterfaceGetArgumentDynamicReturnTypeExtension implements Dynam
 			}
 		}
 
-		if (count($argTypes) === 0) {
-			return null;
-		}
-
-		$method = $scope->getFunction();
-		if (
-			$canBeNullInInteract
-			&& $method instanceof MethodReflection
-			&& ($method->getName() === 'interact' || $method->getName() === 'initialize')
-			&& in_array('Symfony\Component\Console\Command\Command', $method->getDeclaringClass()->getParentClassesNames(), true)
-		) {
-			$argTypes[] = new NullType();
-		}
-
-		return TypeCombinator::union(...$argTypes);
+		return count($argTypes) > 0 ? TypeCombinator::union(...$argTypes) : null;
 	}
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202408\Illuminate\Contracts\Bus;
+namespace ECSPrefix202312\Illuminate\Contracts\Bus;
 
 interface Dispatcher
 {

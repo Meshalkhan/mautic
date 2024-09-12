@@ -3,8 +3,8 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Configuration;
 
-use ECSPrefix202408\Symfony\Component\Finder\Finder;
-use ECSPrefix202408\Symfony\Component\Finder\SplFileInfo;
+use ECSPrefix202312\Symfony\Component\Finder\Finder;
+use ECSPrefix202312\Symfony\Component\Finder\SplFileInfo;
 final class InitPathsResolver
 {
     /**

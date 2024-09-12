@@ -1,2 +1,0 @@
-parameters:
-    smtp_configs: '%smtp_configs%'

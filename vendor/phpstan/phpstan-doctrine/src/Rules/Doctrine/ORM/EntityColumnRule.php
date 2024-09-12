@@ -7,7 +7,6 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Node\ClassPropertyNode;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\Doctrine\DescriptorNotRegisteredException;
 use PHPStan\Type\Doctrine\DescriptorRegistry;
@@ -21,7 +20,6 @@ use PHPStan\Type\Type;
 use PHPStan\Type\TypeCombinator;
 use PHPStan\Type\TypehintHelper;
 use PHPStan\Type\TypeTraverser;
-use PHPStan\Type\TypeUtils;
 use PHPStan\Type\VerbosityLevel;
 use Throwable;
 use function get_class;
@@ -95,20 +93,19 @@ class EntityColumnRule implements Rule
 			return [];
 		}
 
+		/** @var array{type: string, fieldName: string, columnName?: string, inherited?: class-string, nullable?: bool, enumType?: ?string} $fieldMapping */
 		$fieldMapping = $metadata->fieldMappings[$propertyName];
 
 		$errors = [];
 		try {
 			$descriptor = $this->descriptorRegistry->get($fieldMapping['type']);
 		} catch (DescriptorNotRegisteredException $e) {
-			return $this->reportUnknownTypes ? [
-				RuleErrorBuilder::message(sprintf(
-					'Property %s::$%s: Doctrine type "%s" does not have any registered descriptor.',
-					$className,
-					$propertyName,
-					$fieldMapping['type']
-				))->identifier('doctrine.descriptorNotFound')->build(),
-			] : [];
+			return $this->reportUnknownTypes ? [sprintf(
+				'Property %s::$%s: Doctrine type "%s" does not have any registered descriptor.',
+				$className,
+				$propertyName,
+				$fieldMapping['type']
+			)] : [];
 		}
 
 		$writableToPropertyType = $descriptor->getWritableToPropertyType();
@@ -116,62 +113,29 @@ class EntityColumnRule implements Rule
 
 		$enumTypeString = $fieldMapping['enumType'] ?? null;
 		if ($enumTypeString !== null) {
-			if ($writableToDatabaseType->isArray()->no() && $writableToPropertyType->isArray()->no()) {
-				if ($this->reflectionProvider->hasClass($enumTypeString)) {
-					$enumReflection = $this->reflectionProvider->getClass($enumTypeString);
-					$backedEnumType = $enumReflection->getBackedEnumType();
-					if ($backedEnumType !== null) {
-						if (!$backedEnumType->equals($writableToDatabaseType) || !$backedEnumType->equals($writableToPropertyType)) {
-							$errors[] = RuleErrorBuilder::message(sprintf(
-								'Property %s::$%s type mapping mismatch: backing type %s of enum %s does not match database type %s.',
-								$className,
-								$propertyName,
-								$backedEnumType->describe(VerbosityLevel::typeOnly()),
-								$enumReflection->getDisplayName(),
-								$writableToDatabaseType->describe(VerbosityLevel::typeOnly())
-							))->identifier('doctrine.enumType')->build();
-						}
+			if ($this->reflectionProvider->hasClass($enumTypeString)) {
+				$enumReflection = $this->reflectionProvider->getClass($enumTypeString);
+				$backedEnumType = $enumReflection->getBackedEnumType();
+				if ($backedEnumType !== null) {
+					if (!$backedEnumType->equals($writableToDatabaseType) || !$backedEnumType->equals($writableToPropertyType)) {
+						$errors[] = sprintf(
+							'Property %s::$%s type mapping mismatch: backing type %s of enum %s does not match database type %s.',
+							$className,
+							$propertyName,
+							$backedEnumType->describe(VerbosityLevel::typeOnly()),
+							$enumReflection->getDisplayName(),
+							$writableToDatabaseType->describe(VerbosityLevel::typeOnly())
+						);
 					}
 				}
-				$enumType = new ObjectType($enumTypeString);
-				$writableToPropertyType = $enumType;
-				$writableToDatabaseType = $enumType;
-			} else {
-				$enumType = new ObjectType($enumTypeString);
-				if ($this->reflectionProvider->hasClass($enumTypeString)) {
-					$enumReflection = $this->reflectionProvider->getClass($enumTypeString);
-					$backedEnumType = $enumReflection->getBackedEnumType();
-					if ($backedEnumType !== null) {
-						if (!$backedEnumType->equals($writableToDatabaseType->getIterableValueType()) || !$backedEnumType->equals($writableToPropertyType->getIterableValueType())) {
-							$errors[] = RuleErrorBuilder::message(
-								sprintf(
-									'Property %s::$%s type mapping mismatch: backing type %s of enum %s does not match value type %s of the database type %s.',
-									$className,
-									$propertyName,
-									$backedEnumType->describe(VerbosityLevel::typeOnly()),
-									$enumReflection->getDisplayName(),
-									$writableToDatabaseType->getIterableValueType()->describe(VerbosityLevel::typeOnly()),
-									$writableToDatabaseType->describe(VerbosityLevel::typeOnly())
-								)
-							)->identifier('doctrine.enumType')->build();
-						}
-					}
-				}
-
-				$writableToPropertyType = TypeCombinator::intersect(new ArrayType(
-					$writableToPropertyType->getIterableKeyType(),
-					$enumType
-				), ...TypeUtils::getAccessoryTypes($writableToPropertyType));
-				$writableToDatabaseType = TypeCombinator::intersect(new ArrayType(
-					$writableToDatabaseType->getIterableKeyType(),
-					$enumType
-				), ...TypeUtils::getAccessoryTypes($writableToDatabaseType));
-
 			}
+			$enumType = new ObjectType($enumTypeString);
+			$writableToPropertyType = $enumType;
+			$writableToDatabaseType = $enumType;
 		}
 
 		$identifiers = [];
-		if ($metadata->generatorType !== 5) { // ClassMetadata::GENERATOR_TYPE_NONE
+		if ($metadata->generatorType !== 5) { // ClassMetadataInfo::GENERATOR_TYPE_NONE
 			try {
 				$identifiers = $metadata->getIdentifierFieldNames();
 			} catch (Throwable $e) {
@@ -206,13 +170,13 @@ class EntityColumnRule implements Rule
 		}) : $propertyType;
 
 		if (!$propertyTransformedType->isSuperTypeOf($writableToPropertyType)->yes()) {
-			$errors[] = RuleErrorBuilder::message(sprintf(
+			$errors[] = sprintf(
 				'Property %s::$%s type mapping mismatch: database can contain %s but property expects %s.',
 				$className,
 				$propertyName,
 				$writableToPropertyType->describe(VerbosityLevel::getRecommendedLevelByType($propertyTransformedType, $writableToPropertyType)),
 				$propertyType->describe(VerbosityLevel::getRecommendedLevelByType($propertyTransformedType, $writableToPropertyType))
-			))->identifier('doctrine.columnType')->build();
+			);
 		}
 
 		if (
@@ -222,13 +186,13 @@ class EntityColumnRule implements Rule
 					: $propertyType
 			)->yes()
 		) {
-			$errors[] = RuleErrorBuilder::message(sprintf(
+			$errors[] = sprintf(
 				'Property %s::$%s type mapping mismatch: property can contain %s but database expects %s.',
 				$className,
 				$propertyName,
 				$propertyTransformedType->describe(VerbosityLevel::getRecommendedLevelByType($writableToDatabaseType, $propertyType)),
 				$writableToDatabaseType->describe(VerbosityLevel::getRecommendedLevelByType($writableToDatabaseType, $propertyType))
-			))->identifier('doctrine.columnType')->build();
+			);
 		}
 		return $errors;
 	}

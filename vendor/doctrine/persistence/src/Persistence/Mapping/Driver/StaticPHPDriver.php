@@ -56,7 +56,7 @@ class StaticPHPDriver implements MappingDriver
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function loadMetadataForClass(string $className, ClassMetadata $metadata)
     {
@@ -123,7 +123,7 @@ class StaticPHPDriver implements MappingDriver
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function isTransient(string $className)
     {

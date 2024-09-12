@@ -79,7 +79,7 @@ final class PowToExponentiationFixer extends AbstractFunctionReferenceFixer
         }
     }
     /**
-     * @return list<array{int, int, int}>
+     * @return array<int[]>
      */
     private function findPowCalls(Tokens $tokens) : array
     {
@@ -163,7 +163,7 @@ final class PowToExponentiationFixer extends AbstractFunctionReferenceFixer
         return \false;
     }
     /**
-     * @return list<int>
+     * @return int[]
      */
     private function getAllowedKinds() : array
     {

@@ -3,13 +3,13 @@
 declare (strict_types=1);
 namespace Symplify\EasyCodingStandard\Console\Command;
 
-use ECSPrefix202408\Nette\Utils\Json;
+use ECSPrefix202312\Nette\Utils\Json;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PhpCsFixer\Fixer\FixerInterface;
-use ECSPrefix202408\Symfony\Component\Console\Command\Command;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputOption;
-use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Command\Command;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
 use Symplify\EasyCodingStandard\Console\Output\ConsoleOutputFormatter;
 use Symplify\EasyCodingStandard\Console\Reporter\CheckerListReporter;
 use Symplify\EasyCodingStandard\FixerRunner\Application\FixerFileProcessor;
@@ -50,7 +50,7 @@ final class ListCheckersCommand extends Command
     {
         $this->setName('list-checkers');
         $this->setDescription('Shows loaded checkers');
-        $this->addOption(Option::OUTPUT_FORMAT, null, InputOption::VALUE_REQUIRED, 'Select output format', ConsoleOutputFormatter::getName());
+        $this->addOption(Option::OUTPUT_FORMAT, null, InputOption::VALUE_REQUIRED, 'Select output format', ConsoleOutputFormatter::NAME);
         $this->addOption(Option::CONFIG, 'c', InputOption::VALUE_REQUIRED, 'Path to config file');
     }
     protected function execute(InputInterface $input, OutputInterface $output) : int
@@ -63,9 +63,9 @@ final class ListCheckersCommand extends Command
             echo Json::encode($data, Json::PRETTY) . \PHP_EOL;
             return Command::SUCCESS;
         }
-        $this->checkerListReporter->report($this->getSniffClasses(), 'from PHP_CodeSniffer');
-        $this->checkerListReporter->report($this->getFixerClasses(), 'from PHP-CS-Fixer');
-        $this->checkerListReporter->report($skippedCheckers, 'are skipped');
+        $this->checkerListReporter->report($this->getSniffClasses(), 'PHP_CodeSniffer');
+        $this->checkerListReporter->report($this->getFixerClasses(), 'PHP-CS-Fixer');
+        $this->checkerListReporter->report($skippedCheckers, 'Skipped Checkers');
         return self::SUCCESS;
     }
     /**

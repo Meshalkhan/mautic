@@ -12,6 +12,7 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Doctrine\Annotation;
 
+use PhpCsFixer\Doctrine\Annotation\Token as AnnotationToken;
 use PhpCsFixer\Preg;
 use PhpCsFixer\Tokenizer\Token as PhpToken;
 /**
@@ -24,7 +25,7 @@ use PhpCsFixer\Tokenizer\Token as PhpToken;
 final class Tokens extends \SplFixedArray
 {
     /**
-     * @param list<string> $ignoredTags
+     * @param string[] $ignoredTags
      *
      * @throws \InvalidArgumentException
      */
@@ -82,8 +83,10 @@ final class Tokens extends \SplFixedArray
                     $tokens[] = new \PhpCsFixer\Doctrine\Annotation\Token(\PhpCsFixer\Doctrine\Annotation\DocLexer::T_NONE, \substr($content, $ignoredTextPosition, $ignoredTextLength));
                 }
                 $lastTokenEndIndex = 0;
-                foreach (\array_slice($scannedTokens, 0, $nbScannedTokensToUse) as $scannedToken) {
-                    $token = $scannedToken->isType(\PhpCsFixer\Doctrine\Annotation\DocLexer::T_STRING) ? new \PhpCsFixer\Doctrine\Annotation\Token($scannedToken->getType(), '"' . \str_replace('"', '""', $scannedToken->getContent()) . '"', $scannedToken->getPosition()) : $scannedToken;
+                foreach (\array_slice($scannedTokens, 0, $nbScannedTokensToUse) as $token) {
+                    if ($token->isType(\PhpCsFixer\Doctrine\Annotation\DocLexer::T_STRING)) {
+                        $token = new AnnotationToken($token->getType(), '"' . \str_replace('"', '""', $token->getContent()) . '"', $token->getPosition());
+                    }
                     $missingTextLength = $token->getPosition() - $lastTokenEndIndex;
                     if ($missingTextLength > 0) {
                         $tokens[] = new \PhpCsFixer\Doctrine\Annotation\Token(\PhpCsFixer\Doctrine\Annotation\DocLexer::T_NONE, \substr($content, $nextAtPosition + $lastTokenEndIndex, $missingTextLength));
@@ -104,8 +107,8 @@ final class Tokens extends \SplFixedArray
     /**
      * Create token collection from array.
      *
-     * @param array<int, Token> $array       the array to import
-     * @param ?bool             $saveIndices save the numeric indices used in the original array, default is yes
+     * @param Token[] $array       the array to import
+     * @param ?bool   $saveIndices save the numeric indices used in the original array, default is yes
      */
     public static function fromArray($array, $saveIndices = null) : self
     {

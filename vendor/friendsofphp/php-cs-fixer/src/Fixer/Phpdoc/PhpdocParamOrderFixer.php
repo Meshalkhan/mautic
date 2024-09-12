@@ -103,7 +103,7 @@ function m($a, array $b, Foo $c) {}
     }
 
     /**
-     * @return list<Token>
+     * @return Token[]
      */
     private function getFunctionParamNames(Tokens $tokens, int $paramBlockStart): array
     {
@@ -124,8 +124,8 @@ function m($a, array $b, Foo $c) {}
     /**
      * Overwrite the param annotations in order.
      *
-     * @param list<Token>      $paramNames
-     * @param list<Annotation> $paramAnnotations
+     * @param Token[]      $paramNames
+     * @param Annotation[] $paramAnnotations
      */
     private function rewriteDocBlock(DocBlock $doc, array $paramNames, array $paramAnnotations): DocBlock
     {
@@ -161,8 +161,8 @@ function m($a, array $b, Foo $c) {}
     /**
      * Sort the param annotations according to the function parameters.
      *
-     * @param list<Token>      $funcParamNames
-     * @param list<Annotation> $paramAnnotations
+     * @param Token[]      $funcParamNames
+     * @param Annotation[] $paramAnnotations
      *
      * @return list<string>
      */
@@ -181,10 +181,9 @@ function m($a, array $b, Foo $c) {}
         }
 
         // Detect superfluous annotations
-        /** @var list<Annotation> $invalidParams */
-        $invalidParams = array_values(
-            array_diff_key($paramAnnotations, $validParams)
-        );
+        /** @var Annotation[] $invalidParams */
+        $invalidParams = array_diff_key($paramAnnotations, $validParams);
+        $invalidParams = array_values($invalidParams);
 
         // Append invalid parameters to the (ordered) valid ones
         $orderedParams = array_values($validParams);
@@ -198,7 +197,7 @@ function m($a, array $b, Foo $c) {}
     /**
      * Fetch all annotations except the param ones.
      *
-     * @param list<Annotation> $paramAnnotations
+     * @param Annotation[] $paramAnnotations
      *
      * @return list<string>
      */
@@ -228,7 +227,7 @@ function m($a, array $b, Foo $c) {}
     /**
      * Return the indices of the lines of a specific parameter annotation.
      *
-     * @param list<Annotation> $paramAnnotations
+     * @param Annotation[] $paramAnnotations
      *
      * @return ?list<int>
      */

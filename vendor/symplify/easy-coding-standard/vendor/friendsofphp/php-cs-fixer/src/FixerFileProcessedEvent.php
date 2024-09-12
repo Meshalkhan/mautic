@@ -12,7 +12,7 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer;
 
-use ECSPrefix202408\Symfony\Contracts\EventDispatcher\Event;
+use ECSPrefix202312\Symfony\Contracts\EventDispatcher\Event;
 /**
  * Event that is fired when file was processed by Fixer.
  *
@@ -36,30 +36,12 @@ final class FixerFileProcessedEvent extends Event
      * @var int
      */
     private $status;
-    /**
-     * @var string|null
-     */
-    private $fileRelativePath;
-    /**
-     * @var string|null
-     */
-    private $fileHash;
-    public function __construct(int $status, ?string $fileRelativePath = null, ?string $fileHash = null)
+    public function __construct(int $status)
     {
         $this->status = $status;
-        $this->fileRelativePath = $fileRelativePath;
-        $this->fileHash = $fileHash;
     }
     public function getStatus() : int
     {
         return $this->status;
-    }
-    public function getFileRelativePath() : ?string
-    {
-        return $this->fileRelativePath;
-    }
-    public function getFileHash() : ?string
-    {
-        return $this->fileHash;
     }
 }

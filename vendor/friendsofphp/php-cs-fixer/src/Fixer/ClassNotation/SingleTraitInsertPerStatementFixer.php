@@ -70,7 +70,7 @@ final class Example
     }
 
     /**
-     * @param list<int> $candidates ',' indices to fix
+     * @param int[] $candidates ',' indices to fix
      */
     private function fixTraitUse(Tokens $tokens, int $useTraitIndex, array $candidates): void
     {

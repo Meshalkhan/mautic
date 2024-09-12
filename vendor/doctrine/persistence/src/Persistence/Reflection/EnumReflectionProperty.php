@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace Doctrine\Persistence\Reflection;
 
 use BackedEnum;
-use ReflectionClass;
 use ReflectionProperty;
-use ReflectionType;
 use ReturnTypeWillChange;
 
 use function array_map;
 use function is_array;
-use function reset;
 
 /**
  * PHP Enum Reflection Property - special override for backed enums.
@@ -30,44 +27,6 @@ class EnumReflectionProperty extends ReflectionProperty
     {
         $this->originalReflectionProperty = $originalReflectionProperty;
         $this->enumType                   = $enumType;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @psalm-external-mutation-free
-     */
-    public function getDeclaringClass(): ReflectionClass
-    {
-        return $this->originalReflectionProperty->getDeclaringClass();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @psalm-external-mutation-free
-     */
-    public function getName(): string
-    {
-        return $this->originalReflectionProperty->getName();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @psalm-external-mutation-free
-     */
-    public function getType(): ?ReflectionType
-    {
-        return $this->originalReflectionProperty->getType();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getAttributes(?string $name = null, int $flags = 0): array
-    {
-        return $this->originalReflectionProperty->getAttributes($name, $flags);
     }
 
     /**
@@ -127,55 +86,16 @@ class EnumReflectionProperty extends ReflectionProperty
     }
 
     /**
-     * @param int|string|int[]|string[]|BackedEnum|BackedEnum[] $value
+     * @param int|string|int[]|string[] $value
      *
-     * @return ($value is int|string|BackedEnum ? BackedEnum : BackedEnum[])
+     * @return ($value is int|string ? BackedEnum : BackedEnum[])
      */
     private function toEnum($value)
     {
-        if ($value instanceof BackedEnum) {
-            return $value;
-        }
-
         if (is_array($value)) {
-            $v = reset($value);
-            if ($v instanceof BackedEnum) {
-                return $value;
-            }
-
             return array_map([$this->enumType, 'from'], $value);
         }
 
         return $this->enumType::from($value);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @psalm-external-mutation-free
-     */
-    public function getModifiers(): int
-    {
-        return $this->originalReflectionProperty->getModifiers();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @psalm-external-mutation-free
-     */
-    public function getDocComment(): string|false
-    {
-        return $this->originalReflectionProperty->getDocComment();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @psalm-external-mutation-free
-     */
-    public function isPrivate(): bool
-    {
-        return $this->originalReflectionProperty->isPrivate();
     }
 }

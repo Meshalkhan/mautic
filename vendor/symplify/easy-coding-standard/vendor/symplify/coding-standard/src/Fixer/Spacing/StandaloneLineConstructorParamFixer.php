@@ -3,6 +3,7 @@
 declare (strict_types=1);
 namespace Symplify\CodingStandard\Fixer\Spacing;
 
+use PhpCsFixer\Fixer\Basic\BracesFixer;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
@@ -11,9 +12,9 @@ use SplFileInfo;
 use Symplify\CodingStandard\Fixer\AbstractSymplifyFixer;
 use Symplify\CodingStandard\TokenAnalyzer\Naming\MethodNameResolver;
 use Symplify\CodingStandard\TokenAnalyzer\ParamNewliner;
-use ECSPrefix202408\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
-use ECSPrefix202408\Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
-use ECSPrefix202408\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
+use ECSPrefix202312\Symplify\RuleDocGenerator\Contract\DocumentedRuleInterface;
+use ECSPrefix202312\Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
+use ECSPrefix202312\Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 /**
  * @see \Symplify\CodingStandard\Tests\Fixer\Spacing\StandaloneLineConstructorParamFixer\StandaloneLineConstructorParamFixerTest
  */
@@ -41,7 +42,7 @@ final class StandaloneLineConstructorParamFixer extends AbstractSymplifyFixer im
     /**
      * Must run before
      *
-     * @see \PhpCsFixer\Fixer\Basic\BracesFixer::getPriority()
+     * @see BracesFixer::getPriority()
      */
     public function getPriority() : int
     {

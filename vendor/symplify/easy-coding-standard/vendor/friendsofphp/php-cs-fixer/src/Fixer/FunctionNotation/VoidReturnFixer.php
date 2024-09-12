@@ -162,7 +162,7 @@ final class VoidReturnFixer extends AbstractFixer
      *
      * @param int $index The index of the function token
      *
-     * @return list<Annotation>
+     * @return Annotation[]
      */
     private function findReturnAnnotations(Tokens $tokens, int $index) : array
     {

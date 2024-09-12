@@ -3,32 +3,30 @@
 namespace DoctrineExtensions\Query\Sqlite;
 
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
-use Doctrine\ORM\Query\Parser;
-use Doctrine\ORM\Query\SqlWalker;
-use Doctrine\ORM\Query\TokenType;
+use Doctrine\ORM\Query\Lexer;
 
-use function sprintf;
-
-/** @author Mikhail Bubnov <bubnov.mihail@gmail.com> */
+/**
+ * @author Mikhail Bubnov <bubnov.mihail@gmail.com>
+ */
 class IfElse extends FunctionNode
 {
     private $expr = [];
 
-    public function parse(Parser $parser): void
+    public function parse(\Doctrine\ORM\Query\Parser $parser)
     {
-        $parser->match(TokenType::T_IDENTIFIER);
-        $parser->match(TokenType::T_OPEN_PARENTHESIS);
+        $parser->match(Lexer::T_IDENTIFIER);
+        $parser->match(Lexer::T_OPEN_PARENTHESIS);
         $this->expr[] = $parser->ConditionalExpression();
 
         for ($i = 0; $i < 2; $i++) {
-            $parser->match(TokenType::T_COMMA);
+            $parser->match(Lexer::T_COMMA);
             $this->expr[] = $parser->ArithmeticExpression();
         }
 
-        $parser->match(TokenType::T_CLOSE_PARENTHESIS);
+        $parser->match(Lexer::T_CLOSE_PARENTHESIS);
     }
 
-    public function getSql(SqlWalker $sqlWalker): string
+    public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
     {
         return sprintf(
             'CASE WHEN %s THEN %s ELSE %s END',

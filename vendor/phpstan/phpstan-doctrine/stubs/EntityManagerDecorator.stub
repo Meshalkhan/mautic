@@ -4,7 +4,6 @@ namespace Doctrine\ORM\Decorator;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Exception\ORMException;
 
 class EntityManagerDecorator implements EntityManagerInterface
 {
@@ -38,8 +37,6 @@ class EntityManagerDecorator implements EntityManagerInterface
 	 * @phpstan-param class-string<T> $entityName
 	 * @phpstan-param mixed $id
 	 * @phpstan-return T|null
-	 *
-	 * @throws ORMException
 	 */
 	public function getReference($entityName, $id);
 

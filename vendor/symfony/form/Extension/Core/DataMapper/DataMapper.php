@@ -88,12 +88,4 @@ class DataMapper implements DataMapperInterface
             }
         }
     }
-
-    /**
-     * @internal
-     */
-    public function getDataAccessor(): DataAccessorInterface
-    {
-        return $this->dataAccessor;
-    }
 }

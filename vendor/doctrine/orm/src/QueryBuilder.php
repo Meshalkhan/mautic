@@ -7,7 +7,6 @@ namespace Doctrine\ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Deprecations\Deprecation;
-use Doctrine\ORM\Internal\CriteriaOrderings;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Query\QueryExpressionVisitor;
@@ -40,8 +39,6 @@ use function substr;
  */
 class QueryBuilder
 {
-    use CriteriaOrderings;
-
     /** @deprecated */
     public const SELECT = 0;
 
@@ -1378,20 +1375,22 @@ class QueryBuilder
             }
         }
 
-        foreach (self::getCriteriaOrderings($criteria) as $sort => $order) {
-            $hasValidAlias = false;
-            foreach ($allAliases as $alias) {
-                if (str_starts_with($sort . '.', $alias . '.')) {
-                    $hasValidAlias = true;
-                    break;
+        if ($criteria->getOrderings()) {
+            foreach ($criteria->getOrderings() as $sort => $order) {
+                $hasValidAlias = false;
+                foreach ($allAliases as $alias) {
+                    if (str_starts_with($sort . '.', $alias . '.')) {
+                        $hasValidAlias = true;
+                        break;
+                    }
                 }
-            }
 
-            if (! $hasValidAlias) {
-                $sort = $allAliases[0] . '.' . $sort;
-            }
+                if (! $hasValidAlias) {
+                    $sort = $allAliases[0] . '.' . $sort;
+                }
 
-            $this->addOrderBy($sort, $order);
+                $this->addOrderBy($sort, $order);
+            }
         }
 
         // Overwrite limits only if they was set in criteria

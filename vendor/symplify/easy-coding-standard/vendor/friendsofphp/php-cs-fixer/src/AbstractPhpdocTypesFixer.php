@@ -14,7 +14,6 @@ namespace PhpCsFixer;
 
 use PhpCsFixer\DocBlock\Annotation;
 use PhpCsFixer\DocBlock\DocBlock;
-use PhpCsFixer\DocBlock\TypeExpression;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 /**
@@ -29,7 +28,7 @@ abstract class AbstractPhpdocTypesFixer extends \PhpCsFixer\AbstractFixer
     /**
      * The annotation tags search inside.
      *
-     * @var list<string>
+     * @var string[]
      */
     protected $tags;
     public function __construct()
@@ -78,24 +77,22 @@ abstract class AbstractPhpdocTypesFixer extends \PhpCsFixer\AbstractFixer
         }
     }
     /**
-     * @param list<string> $types
+     * @param string[] $types
      *
-     * @return list<string>
+     * @return string[]
      */
     private function normalizeTypes(array $types) : array
     {
-        return \array_map(function (string $type) : string {
-            $typeExpression = new TypeExpression($type, null, []);
-            $typeExpression->walkTypes(function (TypeExpression $type) : void {
-                if (!$type->isUnionType()) {
-                    $value = $this->normalize($type->toString());
-                    // TODO TypeExpression should be immutable and walkTypes method should be changed to mapTypes method
-                    \Closure::bind(static function () use($type, $value) : void {
-                        $type->value = $value;
-                    }, null, TypeExpression::class)();
-                }
-            });
-            return $typeExpression->toString();
-        }, $types);
+        foreach ($types as $index => $type) {
+            $types[$index] = $this->normalizeType($type);
+        }
+        return $types;
+    }
+    /**
+     * Prepare the type and normalize it.
+     */
+    private function normalizeType(string $type) : string
+    {
+        return \substr_compare($type, '[]', -\strlen('[]')) === 0 ? $this->normalizeType(\substr($type, 0, -2)) . '[]' : $this->normalize($type);
     }
 }

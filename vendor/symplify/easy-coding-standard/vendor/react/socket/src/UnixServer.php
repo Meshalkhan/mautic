@@ -1,10 +1,10 @@
 <?php
 
-namespace ECSPrefix202408\React\Socket;
+namespace ECSPrefix202312\React\Socket;
 
-use ECSPrefix202408\Evenement\EventEmitter;
-use ECSPrefix202408\React\EventLoop\Loop;
-use ECSPrefix202408\React\EventLoop\LoopInterface;
+use ECSPrefix202312\Evenement\EventEmitter;
+use ECSPrefix202312\React\EventLoop\Loop;
+use ECSPrefix202312\React\EventLoop\LoopInterface;
 use InvalidArgumentException;
 use RuntimeException;
 /**
@@ -48,12 +48,8 @@ final class UnixServer extends EventEmitter implements ServerInterface
      * @throws InvalidArgumentException if the listening address is invalid
      * @throws RuntimeException if listening on this address fails (already in use etc.)
      */
-    public function __construct($path, $loop = null, array $context = array())
+    public function __construct($path, LoopInterface $loop = null, array $context = array())
     {
-        if ($loop !== null && !$loop instanceof LoopInterface) {
-            // manual type check to support legacy PHP < 7.1
-            throw new \InvalidArgumentException('Argument #2 ($loop) expected null|React\\EventLoop\\LoopInterface');
-        }
         $this->loop = $loop ?: Loop::get();
         if (\strpos($path, '://') === \false) {
             $path = 'unix://' . $path;

@@ -1,9 +1,6 @@
 Basic usage
 ===========
 
-> [!TIP]
-> Some methods provided by this bundle have been implemented in Symfony. Alternative ways will be shown below.
-
 Use `$this->makeClient` to create a Client object. Client is a Symfony class
 that can simulate HTTP requests to your controllers and then inspect the
 results. It is covered by the [functional tests](http://symfony.com/doc/current/book/testing.html#functional-tests)
@@ -42,31 +39,13 @@ class MyControllerTest extends WebTestCase
 }
 ```
 
-> [!TIP]
-> Instead of calling `$this->makeClient`, consider calling `createClient()` from Symfony's `WebTestCase`:
-
-```php
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-
-class MyControllerTest extends WebTestCase
-{
-    public function testContact()
-    {
-        $client = static::createClient();
-        $client->request('GET', '/contact');
-
-        // …
-    }
-}
-```
-
 ### Methods
 
 #### Check HTTP status codes
 
 ##### isSuccessful()
 
-Check that the request succeeded:
+Check that the request succedded:
 
 ```php
 $client = $this->makeClient();
@@ -74,24 +53,6 @@ $client->request('GET', '/contact');
 
 // Successful HTTP request
 $this->isSuccessful($client->getResponse());
-```
-
-> [!TIP]
-> Call `assertResponseIsSuccessful()` from Symfony's `WebTestCase`:
-
-```php
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-
-class MyControllerTest extends WebTestCase
-{
-    public function testContact()
-    {
-        $client = static::createClient();
-        $client->request('GET', '/contact');
-
-        self::assertResponseIsSuccessful();
-    }
-}
 ```
 
 Add `false` as the second argument in order to check that the request failed:
@@ -118,24 +79,6 @@ $client->request('GET', '/contact');
 $this->assertStatusCode(302, $client);
 ```
 
-> [!TIP]
-> Call `assertResponseStatusCodeSame()` from Symfony's `WebTestCase`:
-
-```php
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-
-class MyControllerTest extends WebTestCase
-{
-    public function testContact()
-    {
-        $client = static::createClient();
-        $client->request('GET', '/contact');
-
-        self::assertResponseStatusCodeSame(302);
-    }
-}
-```
-
 #### Get Crawler or content
 
 ##### fetchCrawler()
@@ -152,28 +95,6 @@ $this->assertSame(
 );
 ```
 
-> [!TIP]
-> Use the crawler returned by `request()` from Symfony's `WebTestCase`:
-
-```php
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-
-class MyControllerTest extends WebTestCase
-{
-    public function testContact()
-    {
-        $client = static::createClient();
-        $crawler = $client->request('GET', '/contact');
-
-        // There is one <body> tag
-        $this->assertSame(
-            1,
-            $crawler->filter('html > body')->count()
-        );
-    }
-}
-```
-
 ##### fetchContent()
 
 Get the content of an URL:
@@ -186,27 +107,6 @@ $this->assertStringContainsString(
     '<h1>LiipFunctionalTestBundle</h1>',
     $content
 );
-```
-
-> [!TIP]
-> Call `getResponse()->getContent()` from Symfony's `WebTestCase`:
-
-```php
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-
-class MyControllerTest extends WebTestCase
-{
-    public function testContact()
-    {
-        $client = static::createClient();
-        $client->request('GET', '/contact');
-
-        $this->assertStringContainsString(
-            '<h1>LiipFunctionalTestBundle</h1>',
-            $client->getResponse()->getContent()
-        );
-    }
-}
 ```
 
 #### Routing
@@ -229,9 +129,3 @@ $client->request('GET', $path);
 
 $this->isSuccessful($client->getResponse());
 ```
-
-> [!TIP]
-> Consider hard-coding the URLs in the test: it will ensure that if a route is changed,
-> the test will fail, so you'll know that there is a Breaking Change.
-
-← [Installation](./installation.md) • [Command test](./command.md) →

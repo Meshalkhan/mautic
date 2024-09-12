@@ -57,8 +57,7 @@
         "psr-4": {
             "Aws\\": "src/"
         },
-        "files": ["src/functions.php"],
-        "exclude-from-classmap": ["src/data/"]
+        "files": ["src/functions.php"]
     },
     "autoload-dev": {
         "psr-4": {

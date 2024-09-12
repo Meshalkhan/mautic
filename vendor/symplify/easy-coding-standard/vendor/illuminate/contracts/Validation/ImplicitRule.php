@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202408\Illuminate\Contracts\Validation;
+namespace ECSPrefix202312\Illuminate\Contracts\Validation;
 
 /**
  * @deprecated see ValidationRule

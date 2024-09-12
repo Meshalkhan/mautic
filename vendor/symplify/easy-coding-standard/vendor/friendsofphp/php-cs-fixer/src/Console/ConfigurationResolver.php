@@ -33,18 +33,16 @@ use PhpCsFixer\Fixer\FixerInterface;
 use PhpCsFixer\FixerFactory;
 use PhpCsFixer\Linter\Linter;
 use PhpCsFixer\Linter\LinterInterface;
-use PhpCsFixer\ParallelAwareConfigInterface;
 use PhpCsFixer\RuleSet\RuleSet;
 use PhpCsFixer\RuleSet\RuleSetInterface;
-use PhpCsFixer\Runner\Parallel\ParallelConfig;
-use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
 use PhpCsFixer\StdinFileInfo;
 use PhpCsFixer\ToolInfoInterface;
 use PhpCsFixer\Utils;
 use PhpCsFixer\WhitespacesFixerConfig;
 use PhpCsFixer\WordMatcher;
-use ECSPrefix202408\Symfony\Component\Filesystem\Filesystem;
-use ECSPrefix202408\Symfony\Component\Finder\Finder as SymfonyFinder;
+use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202312\Symfony\Component\Filesystem\Filesystem;
+use ECSPrefix202312\Symfony\Component\Finder\Finder as SymfonyFinder;
 /**
  * The resolver that resolves configuration to use by command line options and config.
  *
@@ -91,7 +89,7 @@ final class ConfigurationResolver
      */
     private $isDryRun;
     /**
-     * @var null|list<FixerInterface>
+     * @var null|FixerInterface[]
      */
     private $fixers;
     /**
@@ -105,7 +103,7 @@ final class ConfigurationResolver
     /**
      * @var array<string, mixed>
      */
-    private $options = ['allow-risky' => null, 'cache-file' => null, 'config' => null, 'diff' => null, 'dry-run' => null, 'format' => null, 'path' => [], 'path-mode' => self::PATH_MODE_OVERRIDE, 'rules' => null, 'sequential' => null, 'show-progress' => null, 'stop-on-violation' => null, 'using-cache' => null, 'verbosity' => null];
+    private $options = ['allow-risky' => null, 'cache-file' => null, 'config' => null, 'diff' => null, 'dry-run' => null, 'format' => null, 'path' => [], 'path-mode' => self::PATH_MODE_OVERRIDE, 'rules' => null, 'show-progress' => null, 'stop-on-violation' => null, 'using-cache' => null, 'verbosity' => null];
     /**
      * @var null|string
      */
@@ -214,11 +212,6 @@ final class ConfigurationResolver
         }
         return $this->config;
     }
-    public function getParallelConfig() : ParallelConfig
-    {
-        $config = $this->getConfig();
-        return \true !== $this->options['sequential'] && $config instanceof ParallelAwareConfigInterface ? $config->getParallelConfig() : ParallelConfigFactory::sequential();
-    }
     public function getConfigFile() : ?string
     {
         if (null === $this->configFile) {
@@ -249,7 +242,7 @@ final class ConfigurationResolver
         return $this->directory;
     }
     /**
-     * @return list<FixerInterface>
+     * @return FixerInterface[] An array of FixerInterface
      */
     public function getFixers() : array
     {
@@ -278,7 +271,7 @@ final class ConfigurationResolver
     /**
      * Returns path.
      *
-     * @return list<string>
+     * @return string[]
      */
     public function getPath() : array
     {
@@ -309,12 +302,12 @@ final class ConfigurationResolver
     public function getProgressType() : string
     {
         if (null === $this->progress) {
-            if ('txt' === $this->getFormat()) {
+            if (OutputInterface::VERBOSITY_VERBOSE <= $this->options['verbosity'] && 'txt' === $this->getFormat()) {
                 $progressType = $this->options['show-progress'];
                 if (null === $progressType) {
-                    $progressType = $this->getConfig()->getHideProgress() ? ProgressOutputType::NONE : ProgressOutputType::BAR;
-                } elseif (!\in_array($progressType, ProgressOutputType::all(), \true)) {
-                    throw new InvalidConfigurationException(\sprintf('The progress type "%s" is not defined, supported are %s.', $progressType, Utils::naturalLanguageJoin(ProgressOutputType::all())));
+                    $progressType = $this->getConfig()->getHideProgress() ? ProgressOutputType::NONE : ProgressOutputType::DOTS;
+                } elseif (!\in_array($progressType, ProgressOutputType::AVAILABLE, \true)) {
+                    throw new InvalidConfigurationException(\sprintf('The progress type "%s" is not defined, supported are %s.', $progressType, Utils::naturalLanguageJoin(ProgressOutputType::AVAILABLE)));
                 }
                 $this->progress = $progressType;
             } else {
@@ -368,7 +361,7 @@ final class ConfigurationResolver
                 $this->usingCache = $this->resolveOptionBooleanValue('using-cache');
             }
         }
-        $this->usingCache = $this->usingCache && $this->isCachingAllowedForRuntime();
+        $this->usingCache = $this->usingCache && ($this->toolInfo->isInstalledAsPhar() || $this->toolInfo->isInstalledByComposer());
         return $this->usingCache;
     }
     /**
@@ -410,7 +403,7 @@ final class ConfigurationResolver
     /**
      * Compute file candidates for config file.
      *
-     * @return list<string>
+     * @return string[]
      */
     private function computeConfigFiles() : array
     {
@@ -430,7 +423,7 @@ final class ConfigurationResolver
             $configDir = $path[0];
         } else {
             $dirName = \pathinfo($path[0], \PATHINFO_DIRNAME);
-            $configDir = \is_dir($dirName) ? $dirName : $path[0];
+            $configDir = $dirName ?: $path[0];
         }
         $candidates = [
             $configDir . \DIRECTORY_SEPARATOR . '.php-cs-fixer.php',
@@ -494,7 +487,7 @@ final class ConfigurationResolver
         return \is_array($iterable) ? new \ArrayIterator($iterable) : $iterable;
     }
     /**
-     * @return array<string, mixed>
+     * @return array<mixed>
      */
     private function parseRules() : array
     {
@@ -527,7 +520,7 @@ final class ConfigurationResolver
         return $rules;
     }
     /**
-     * @param array<string, mixed> $rules
+     * @param array<mixed> $rules
      *
      * @throws InvalidConfigurationException
      */
@@ -599,9 +592,9 @@ final class ConfigurationResolver
             throw new InvalidConfigurationException(\sprintf('The path-mode "%s" is not defined, supported are %s.', $this->options['path-mode'], Utils::naturalLanguageJoin($modes)));
         }
         $isIntersectionPathMode = self::PATH_MODE_INTERSECTION === $this->options['path-mode'];
-        $paths = \array_map(static function (string $path) {
+        $paths = \array_filter(\array_map(static function (string $path) {
             return \realpath($path);
-        }, $this->getPath());
+        }, $this->getPath()));
         if (0 === \count($paths)) {
             if ($isIntersectionPathMode) {
                 return new \ArrayIterator([]);
@@ -682,9 +675,5 @@ final class ConfigurationResolver
             throw new InvalidConfigurationException(\sprintf('The config file: "%s" does not return a "PhpCsFixer\\ConfigInterface" instance. Got: "%s".', $path, \is_object($config) ? \get_class($config) : \gettype($config)));
         }
         return $config;
-    }
-    private function isCachingAllowedForRuntime() : bool
-    {
-        return $this->toolInfo->isInstalledAsPhar() || $this->toolInfo->isInstalledByComposer() || $this->toolInfo->isRunInsideDocker() || \filter_var(\getenv('PHP_CS_FIXER_ENFORCE_CACHE'), \FILTER_VALIDATE_BOOL);
     }
 }

@@ -3,7 +3,6 @@
 namespace Doctrine\ORM;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\NonUniqueResultException;
 
 /**
  * @template-covariant TKey The type of column used in indexBy
@@ -20,13 +19,4 @@ abstract class AbstractQuery
 	{
 
 	}
-
-	/**
-	* @return bool|float|int|string|null
-	*
-	* @throws NoResultException
-	* @throws NonUniqueResultException
-	*/
-	public function getSingleScalarResult();
-
 }

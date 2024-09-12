@@ -5,7 +5,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2019 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Standards\PSR12\Sniffs\Files;
 
@@ -17,7 +17,7 @@ class FileHeaderSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
@@ -31,7 +31,7 @@ class FileHeaderSniff implements Sniff
      * @param int                         $stackPtr  The position of the current
      *                                               token in the stack.
      *
-     * @return int|void
+     * @return int|null
      */
     public function process(File $phpcsFile, $stackPtr)
     {
@@ -154,7 +154,7 @@ class FileHeaderSniff implements Sniff
                     if ($docToken === $phpcsFile->numTokens) {
                         $docToken--;
                     }
-                    if (isset($commentOpeners[$tokens[$docToken]['code']]) === \false && isset(Tokens::$methodPrefixes[$tokens[$docToken]['code']]) === \false && $tokens[$docToken]['code'] !== \T_READONLY) {
+                    if (isset($commentOpeners[$tokens[$docToken]['code']]) === \false && isset(Tokens::$methodPrefixes[$tokens[$docToken]['code']]) === \false) {
                         // Check for an @var annotation.
                         $annotation = \false;
                         for ($i = $next; $i < $end; $i++) {
@@ -223,7 +223,7 @@ class FileHeaderSniff implements Sniff
      * @param array                       $headerLines Header information, as sourced
      *                                                 from getHeaderLines().
      *
-     * @return void
+     * @return int|null
      */
     public function processHeaderLines(File $phpcsFile, $headerLines)
     {

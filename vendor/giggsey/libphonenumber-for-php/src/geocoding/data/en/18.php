@@ -751,7 +751,6 @@ return array (
   1807854 => 'Geraldton, ON',
   1807876 => 'Longlac, ON',
   1807887 => 'Nipigon, ON',
-  1807933 => 'Kaministiquia, ON',
   1807934 => 'Ignace, ON',
   1807937 => 'Oxdrift, ON',
   1807939 => 'Thunder Bay, ON',
@@ -3941,5 +3940,4 @@ return array (
   1873 => 'Quebec',
   1876957 => 'Negril',
   1878 => 'Pennsylvania',
-  1879 => 'Newfoundland and Labrador',
 );

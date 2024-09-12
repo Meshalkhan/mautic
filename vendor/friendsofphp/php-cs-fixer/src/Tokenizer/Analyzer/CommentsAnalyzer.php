@@ -125,7 +125,7 @@ final class CommentsAnalyzer
      *
      * @param int $index T_COMMENT index
      *
-     * @return non-empty-list<int>
+     * @return list<int>
      */
     public function getCommentBlockIndices(Tokens $tokens, int $index): array
     {

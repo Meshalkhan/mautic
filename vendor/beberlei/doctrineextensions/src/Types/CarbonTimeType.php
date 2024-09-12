@@ -2,19 +2,32 @@
 
 namespace DoctrineExtensions\Types;
 
+use Carbon\Carbon;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\TimeType;
 
 class CarbonTimeType extends TimeType
 {
-    use CarbonTypeImplementation;
+    const CARBONTIME = 'carbontime';
 
-    public const CARBONTIME = 'carbontime';
-
-    /**
-     * {@inheritDoc}
-     */
     public function getName()
     {
-        return self::CARBONTIME;
+        return static::CARBONTIME;
+    }
+
+    public function convertToPHPValue($value, AbstractPlatform $platform)
+    {
+        $result = parent::convertToPHPValue($value, $platform);
+
+        if ($result instanceof \DateTime) {
+            return Carbon::instance($result);
+        }
+
+        return $result;
+    }
+
+    public function requiresSQLCommentHint(AbstractPlatform $platform)
+    {
+        return true;
     }
 }

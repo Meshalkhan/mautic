@@ -318,7 +318,9 @@ final class XmlSerializationVisitor extends AbstractVisitor implements Serializa
         }
 
         if ($addEnclosingElement = !$this->isInLineCollection($metadata) && !$metadata->inline) {
-            $namespace = $metadata->xmlNamespace ?? $this->getClassDefaultNamespace($this->objectMetadataStack->top());
+            $namespace = null !== $metadata->xmlNamespace
+                ? $metadata->xmlNamespace
+                : $this->getClassDefaultNamespace($this->objectMetadataStack->top());
 
             $element = $this->createElement($metadata->serializedName, $namespace);
             $this->currentNode->appendChild($element);
@@ -399,7 +401,7 @@ final class XmlSerializationVisitor extends AbstractVisitor implements Serializa
             $this->document->documentElement->setAttributeNS(
                 'http://www.w3.org/2000/xmlns/',
                 'xmlns:xsi',
-                'http://www.w3.org/2001/XMLSchema-instance',
+                'http://www.w3.org/2001/XMLSchema-instance'
             );
         }
 

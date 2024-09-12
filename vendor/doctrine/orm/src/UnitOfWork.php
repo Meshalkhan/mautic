@@ -1292,8 +1292,6 @@ class UnitOfWork implements PropertyChangedListener
         $eventsToDispatch = [];
 
         foreach ($entities as $entity) {
-            $this->removeFromIdentityMap($entity);
-
             $oid       = spl_object_id($entity);
             $class     = $this->em->getClassMetadata(get_class($entity));
             $persister = $this->getEntityPersister($class->name);
@@ -1669,6 +1667,8 @@ class UnitOfWork implements PropertyChangedListener
             return;
         }
 
+        $this->removeFromIdentityMap($entity);
+
         unset($this->entityUpdates[$oid]);
 
         if (! isset($this->entityDeletions[$oid])) {
@@ -1781,15 +1781,18 @@ EXCEPTION
      */
     final public static function getIdHashByIdentifier(array $identifier): string
     {
-        foreach ($identifier as $k => $value) {
-            if ($value instanceof BackedEnum) {
-                $identifier[$k] = $value->value;
-            }
-        }
-
         return implode(
             ' ',
-            $identifier
+            array_map(
+                static function ($value) {
+                    if ($value instanceof BackedEnum) {
+                        return $value->value;
+                    }
+
+                    return $value;
+                },
+                $identifier
+            )
         );
     }
 
@@ -3053,7 +3056,10 @@ EXCEPTION
                             } else {
                                 $associatedId[$targetClass->fieldNames[$targetColumn]] = $joinColumnValue;
                             }
-                        } elseif (in_array($targetClass->getFieldForColumn($targetColumn), $targetClass->identifier, true)) {
+                        } elseif (
+                            $targetClass->containsForeignIdentifier
+                            && in_array($targetClass->getFieldForColumn($targetColumn), $targetClass->identifier, true)
+                        ) {
                             // the missing key is part of target's entity primary key
                             $associatedId = [];
                             break;
@@ -3163,9 +3169,9 @@ EXCEPTION
 
                     if ($hints['fetchMode'][$class->name][$field] === ClassMetadata::FETCH_EAGER) {
                         $isIteration = isset($hints[Query::HINT_INTERNAL_ITERATION]) && $hints[Query::HINT_INTERNAL_ITERATION];
-                        if ($assoc['type'] === ClassMetadata::ONE_TO_MANY && ! $isIteration && ! $targetClass->isIdentifierComposite && ! isset($assoc['indexBy'])) {
+                        if (! $isIteration && $assoc['type'] === ClassMetadata::ONE_TO_MANY) {
                             $this->scheduleCollectionForBatchLoading($pColl, $class);
-                        } else {
+                        } elseif (($isIteration && $assoc['type'] === ClassMetadata::ONE_TO_MANY) || $assoc['type'] === ClassMetadata::MANY_TO_MANY) {
                             $this->loadCollection($pColl);
                             $pColl->takeSnapshot();
                         }
@@ -3221,13 +3227,7 @@ EXCEPTION
      *
      * @param PersistentCollection[] $collections
      * @param array<string, mixed>   $mapping
-     * @psalm-param array{
-     *     targetEntity: class-string,
-     *     sourceEntity: class-string,
-     *     mappedBy: string,
-     *     indexBy: string|null,
-     *     orderBy: array<string, string>|null
-     * } $mapping
+     * @psalm-param array{targetEntity: class-string, sourceEntity: class-string, mappedBy: string, indexBy: string|null} $mapping
      */
     private function eagerLoadCollections(array $collections, array $mapping): void
     {
@@ -3244,7 +3244,7 @@ EXCEPTION
                 $entities[] = $collection->getOwner();
             }
 
-            $found = $this->getEntityPersister($targetEntity)->loadAll([$mappedBy => $entities], $mapping['orderBy'] ?? null);
+            $found = $this->getEntityPersister($targetEntity)->loadAll([$mappedBy => $entities]);
 
             $targetClass    = $this->em->getClassMetadata($targetEntity);
             $targetProperty = $targetClass->getReflectionProperty($mappedBy);
@@ -3252,19 +3252,7 @@ EXCEPTION
             foreach ($found as $targetValue) {
                 $sourceEntity = $targetProperty->getValue($targetValue);
 
-                if ($sourceEntity === null && isset($targetClass->associationMappings[$mappedBy]['joinColumns'])) {
-                    // case where the hydration $targetValue itself has not yet fully completed, for example
-                    // in case a bi-directional association is being hydrated and deferring eager loading is
-                    // not possible due to subclassing.
-                    $data = $this->getOriginalEntityData($targetValue);
-                    $id   = [];
-                    foreach ($targetClass->associationMappings[$mappedBy]['joinColumns'] as $joinColumn) {
-                        $id[] = $data[$joinColumn['name']];
-                    }
-                } else {
-                    $id = $this->identifierFlattener->flattenIdentifier($class, $class->getIdentifierValues($sourceEntity));
-                }
-
+                $id     = $this->identifierFlattener->flattenIdentifier($class, $class->getIdentifierValues($sourceEntity));
                 $idHash = implode(' ', $id);
 
                 if (isset($mapping['indexBy'])) {

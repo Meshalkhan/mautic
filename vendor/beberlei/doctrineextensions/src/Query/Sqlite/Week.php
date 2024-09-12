@@ -2,36 +2,35 @@
 
 namespace DoctrineExtensions\Query\Sqlite;
 
-use Doctrine\ORM\Query\AST\Literal;
-use Doctrine\ORM\Query\Parser;
-use Doctrine\ORM\Query\TokenType;
+use Doctrine\ORM\Query\Lexer;
 
-/** @author Aleksandr Klimenkov <alx.devel@gmail.com> */
+/**
+ * @author Aleksandr Klimenkov <alx.devel@gmail.com>
+ */
 class Week extends NumberFromStrfTime
 {
     /**
      * Currently not in use
-     *
-     * @var Literal
+     * @var int
      */
     public $mode;
 
-    public function parse(Parser $parser): void
+    public function parse(\Doctrine\ORM\Query\Parser $parser)
     {
-        $parser->match(TokenType::T_IDENTIFIER);
-        $parser->match(TokenType::T_OPEN_PARENTHESIS);
+        $parser->match(Lexer::T_IDENTIFIER);
+        $parser->match(Lexer::T_OPEN_PARENTHESIS);
 
         $this->date = $parser->ArithmeticPrimary();
 
-        if ($parser->getLexer()->lookahead->type === TokenType::T_COMMA) {
-            $parser->match(TokenType::T_COMMA);
+        if (Lexer::T_COMMA === $parser->getLexer()->lookahead['type']) {
+            $parser->match(Lexer::T_COMMA);
             $this->mode = $parser->Literal();
         }
 
-        $parser->match(TokenType::T_CLOSE_PARENTHESIS);
+        $parser->match(Lexer::T_CLOSE_PARENTHESIS);
     }
 
-    protected function getFormat(): string
+    protected function getFormat()
     {
         return '%W';
     }

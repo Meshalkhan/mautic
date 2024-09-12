@@ -63,6 +63,4 @@ return array (
   59069133 => 'Orange',
   59069134 => 'Orange',
   59069135 => 'Orange',
-  590694 => 'Digicel',
-  590696 => 'Digicel',
 );

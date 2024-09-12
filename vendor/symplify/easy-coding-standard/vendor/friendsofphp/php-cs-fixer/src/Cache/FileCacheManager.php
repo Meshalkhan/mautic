@@ -12,7 +12,6 @@ declare (strict_types=1);
  */
 namespace PhpCsFixer\Cache;
 
-use PhpCsFixer\Tokenizer\CodeHasher;
 /**
  * Class supports caching information about state of fixing files.
  *
@@ -99,11 +98,8 @@ final class FileCacheManager implements \PhpCsFixer\Cache\CacheManagerInterface
     }
     public function setFile(string $file, string $fileContent) : void
     {
-        $this->setFileHash($file, $this->calcHash($fileContent));
-    }
-    public function setFileHash(string $file, string $hash) : void
-    {
         $file = $this->cacheDirectory->getRelativePathTo($file);
+        $hash = $this->calcHash($fileContent);
         if ($this->isDryRun && $this->cache->has($file) && $this->cache->get($file) !== $hash) {
             $this->cache->clear($file);
         } else {
@@ -129,6 +125,6 @@ final class FileCacheManager implements \PhpCsFixer\Cache\CacheManagerInterface
     }
     private function calcHash(string $content) : string
     {
-        return CodeHasher::calculateCodeHash($content);
+        return \md5($content);
     }
 }

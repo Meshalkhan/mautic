@@ -30,18 +30,21 @@ final class LinebreakAfterOpeningTagFixer extends AbstractFixer implements White
     }
     public function isCandidate(Tokens $tokens) : bool
     {
-        return $tokens->isMonolithicPhp() && !$tokens->isTokenKindFound(\T_OPEN_TAG_WITH_ECHO);
+        return $tokens->isTokenKindFound(\T_OPEN_TAG);
     }
     protected function applyFix(\SplFileInfo $file, Tokens $tokens) : void
     {
-        $openTagIndex = $tokens[0]->isGivenKind(\T_INLINE_HTML) ? 1 : 0;
+        // ignore files with short open tag and ignore non-monolithic files
+        if (!$tokens[0]->isGivenKind(\T_OPEN_TAG) || !$tokens->isMonolithicPhp()) {
+            return;
+        }
         // ignore if linebreak already present
-        if (\strpos($tokens[$openTagIndex]->getContent(), "\n") !== \false) {
+        if (\strpos($tokens[0]->getContent(), "\n") !== \false) {
             return;
         }
         $newlineFound = \false;
         foreach ($tokens as $token) {
-            if (($token->isWhitespace() || $token->isGivenKind(\T_OPEN_TAG)) && \strpos($token->getContent(), "\n") !== \false) {
+            if ($token->isWhitespace() && \strpos($token->getContent(), "\n") !== \false) {
                 $newlineFound = \true;
                 break;
             }
@@ -50,6 +53,6 @@ final class LinebreakAfterOpeningTagFixer extends AbstractFixer implements White
         if (!$newlineFound) {
             return;
         }
-        $tokens[$openTagIndex] = new Token([\T_OPEN_TAG, \rtrim($tokens[$openTagIndex]->getContent()) . $this->whitespacesConfig->getLineEnding()]);
+        $tokens[0] = new Token([\T_OPEN_TAG, \rtrim($tokens[0]->getContent()) . $this->whitespacesConfig->getLineEnding()]);
     }
 }

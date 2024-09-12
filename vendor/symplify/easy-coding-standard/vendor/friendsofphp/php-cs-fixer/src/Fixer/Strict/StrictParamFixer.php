@@ -66,9 +66,6 @@ final class StrictParamFixer extends AbstractFixer
             }
         }
     }
-    /**
-     * @param list<?Token> $functionParams
-     */
     private function fixFunction(Tokens $tokens, int $functionIndex, array $functionParams) : void
     {
         $startBraceIndex = $tokens->getNextTokenOfKind($functionIndex, ['(']);
@@ -101,7 +98,7 @@ final class StrictParamFixer extends AbstractFixer
         $tokensToInsert = [];
         for ($i = $paramsQuantity; $i < $functionParamsQuantity; ++$i) {
             // function call do not have all params that are required to set useStrict flag, exit from method!
-            if (null === $functionParams[$i]) {
+            if (!$functionParams[$i]) {
                 return;
             }
             $tokensToInsert[] = new Token(',');

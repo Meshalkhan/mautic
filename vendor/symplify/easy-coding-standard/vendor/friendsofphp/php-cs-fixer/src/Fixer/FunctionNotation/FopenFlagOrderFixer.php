@@ -69,9 +69,9 @@ final class FopenFlagOrderFixer extends AbstractFopenFlagFixer
         }
     }
     /**
-     * @param list<string> $flags
+     * @param string[] $flags
      *
-     * @return list<string>
+     * @return string[]
      */
     private function sortFlags(array $flags) : array
     {

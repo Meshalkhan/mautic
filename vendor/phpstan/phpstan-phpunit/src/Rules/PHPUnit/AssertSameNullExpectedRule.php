@@ -7,7 +7,6 @@ use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\NodeAbstract;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
 use function count;
 
 /**
@@ -41,7 +40,7 @@ class AssertSameNullExpectedRule implements Rule
 
 		if ($expectedArgumentValue->name->toLowerString() === 'null') {
 			return [
-				RuleErrorBuilder::message('You should use assertNull() instead of assertSame(null, $actual).')->identifier('phpunit.assertNull')->build(),
+				'You should use assertNull() instead of assertSame(null, $actual).',
 			];
 		}
 

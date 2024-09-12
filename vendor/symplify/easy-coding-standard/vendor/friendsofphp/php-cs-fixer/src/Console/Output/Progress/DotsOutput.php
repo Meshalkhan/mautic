@@ -14,7 +14,7 @@ namespace PhpCsFixer\Console\Output\Progress;
 
 use PhpCsFixer\Console\Output\OutputContext;
 use PhpCsFixer\FixerFileProcessedEvent;
-use ECSPrefix202408\Symfony\Component\Console\Output\OutputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Output\OutputInterface;
 /**
  * Output writer to show the progress of a FixCommand using dots and meaningful letters.
  *
@@ -53,7 +53,7 @@ final class DotsOutput implements \PhpCsFixer\Console\Output\Progress\ProgressOu
      */
     public function __sleep() : array
     {
-        throw new \BadMethodCallException('Cannot serialize ' . self::class);
+        throw new \BadMethodCallException('Cannot serialize ' . __CLASS__);
     }
     /**
      * Disable the deserialization of the class to prevent attacker executing
@@ -63,7 +63,7 @@ final class DotsOutput implements \PhpCsFixer\Console\Output\Progress\ProgressOu
      */
     public function __wakeup() : void
     {
-        throw new \BadMethodCallException('Cannot unserialize ' . self::class);
+        throw new \BadMethodCallException('Cannot unserialize ' . __CLASS__);
     }
     public function onFixerFileProcessed(FixerFileProcessedEvent $event) : void
     {

@@ -27,11 +27,6 @@ final class ConsoleApplicationResolver
 		$this->consoleApplicationLoader = $configuration->getConsoleApplicationLoader();
 	}
 
-	public function hasConsoleApplicationLoader(): bool
-	{
-		return $this->consoleApplicationLoader !== null;
-	}
-
 	private function getConsoleApplication(): ?Application
 	{
 		if ($this->consoleApplicationLoader === null) {

@@ -7,13 +7,11 @@ use Doctrine\Common\CommonException;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMException;
-use Doctrine\Persistence\Mapping\MappingException;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Identifier;
 use PHPStan\Analyser\Scope;
-use PHPStan\Doctrine\Driver\DriverDetector;
-use PHPStan\Php\PhpVersion;
 use PHPStan\Reflection\MethodReflection;
+use PHPStan\Reflection\ParametersAcceptorSelector;
 use PHPStan\Rules\Doctrine\ORM\DynamicQueryBuilderArgumentException;
 use PHPStan\Type\Doctrine\ArgumentsProcessor;
 use PHPStan\Type\Doctrine\DescriptorRegistry;
@@ -25,8 +23,6 @@ use PHPStan\Type\Doctrine\Query\QueryType;
 use PHPStan\Type\DynamicMethodReturnTypeExtension;
 use PHPStan\Type\Type;
 use PHPStan\Type\TypeCombinator;
-use Throwable;
-use function array_slice;
 use function count;
 use function in_array;
 use function method_exists;
@@ -34,26 +30,6 @@ use function strtolower;
 
 class QueryBuilderGetQueryDynamicReturnTypeExtension implements DynamicMethodReturnTypeExtension
 {
-
-	/**
-	 * Those are critical methods where we need to understand arguments passed to them, the rest is allowed to be more dynamic
-	 * - this list reflects what is implemented in QueryResultTypeWalker
-	 */
-	private const METHODS_NOT_AFFECTING_RESULT_TYPE = [
-		'where',
-		'andwhere',
-		'orwhere',
-		'setparameter',
-		'setparameters',
-		'addcriteria',
-		'addorderby',
-		'orderby',
-		'addgroupby',
-		'groupby',
-		'having',
-		'andhaving',
-		'orhaving',
-	];
 
 	/** @var ObjectMetadataResolver */
 	private $objectMetadataResolver;
@@ -67,27 +43,22 @@ class QueryBuilderGetQueryDynamicReturnTypeExtension implements DynamicMethodRet
 	/** @var DescriptorRegistry */
 	private $descriptorRegistry;
 
-	/** @var PhpVersion */
-	private $phpVersion;
-
-	/** @var DriverDetector */
-	private $driverDetector;
+	/** @var OtherMethodQueryBuilderParser */
+	private $otherMethodQueryBuilderParser;
 
 	public function __construct(
 		ObjectMetadataResolver $objectMetadataResolver,
 		ArgumentsProcessor $argumentsProcessor,
 		?string $queryBuilderClass,
 		DescriptorRegistry $descriptorRegistry,
-		PhpVersion $phpVersion,
-		DriverDetector $driverDetector
+		OtherMethodQueryBuilderParser $otherMethodQueryBuilderParser
 	)
 	{
 		$this->objectMetadataResolver = $objectMetadataResolver;
 		$this->argumentsProcessor = $argumentsProcessor;
 		$this->queryBuilderClass = $queryBuilderClass;
 		$this->descriptorRegistry = $descriptorRegistry;
-		$this->phpVersion = $phpVersion;
-		$this->driverDetector = $driverDetector;
+		$this->otherMethodQueryBuilderParser = $otherMethodQueryBuilderParser;
 	}
 
 	public function getClass(): string
@@ -104,22 +75,29 @@ class QueryBuilderGetQueryDynamicReturnTypeExtension implements DynamicMethodRet
 		MethodReflection $methodReflection,
 		MethodCall $methodCall,
 		Scope $scope
-	): ?Type
+	): Type
 	{
 		$calledOnType = $scope->getType($methodCall->var);
-
+		$defaultReturnType = ParametersAcceptorSelector::selectFromArgs(
+			$scope,
+			$methodCall->getArgs(),
+			$methodReflection->getVariants()
+		)->getReturnType();
 		$queryBuilderTypes = DoctrineTypeUtils::getQueryBuilderTypes($calledOnType);
 		if (count($queryBuilderTypes) === 0) {
-			return null;
+			$queryBuilderTypes = $this->otherMethodQueryBuilderParser->getQueryBuilderTypes($scope, $methodCall);
+			if (count($queryBuilderTypes) === 0) {
+				return $defaultReturnType;
+			}
 		}
 
 		$objectManager = $this->objectMetadataResolver->getObjectManager();
 		if ($objectManager === null) {
-			return null;
+			return $defaultReturnType;
 		}
 		$entityManagerInterface = 'Doctrine\ORM\EntityManagerInterface';
 		if (!$objectManager instanceof $entityManagerInterface) {
-			return null;
+			return $defaultReturnType;
 		}
 
 		/** @var EntityManagerInterface $objectManager */
@@ -153,18 +131,6 @@ class QueryBuilderGetQueryDynamicReturnTypeExtension implements DynamicMethodRet
 					continue;
 				}
 
-				if ($lowerMethodName === 'set') {
-					try {
-						$args = $this->argumentsProcessor->processArgs($scope, $methodName, array_slice($calledMethodCall->getArgs(), 0, 1));
-					} catch (DynamicQueryBuilderArgumentException $e) {
-						return null;
-					}
-					if (count($args) === 1) {
-						$queryBuilder->set($args[0], $args[0]);
-						continue;
-					}
-				}
-
 				if (!method_exists($queryBuilder, $methodName)) {
 					continue;
 				}
@@ -172,17 +138,10 @@ class QueryBuilderGetQueryDynamicReturnTypeExtension implements DynamicMethodRet
 				try {
 					$args = $this->argumentsProcessor->processArgs($scope, $methodName, $calledMethodCall->getArgs());
 				} catch (DynamicQueryBuilderArgumentException $e) {
-					if (in_array($lowerMethodName, self::METHODS_NOT_AFFECTING_RESULT_TYPE, true)) {
-						continue;
-					}
-					return null;
+					return $defaultReturnType;
 				}
 
-				try {
-					$queryBuilder->{$methodName}(...$args);
-				} catch (Throwable $e) {
-					return null;
-				}
+				$queryBuilder->{$methodName}(...$args);
 			}
 
 			$resultTypes[] = $this->getQueryType($queryBuilder->getDQL());
@@ -202,8 +161,8 @@ class QueryBuilderGetQueryDynamicReturnTypeExtension implements DynamicMethodRet
 
 		try {
 			$query = $em->createQuery($dql);
-			QueryResultTypeWalker::walk($query, $typeBuilder, $this->descriptorRegistry, $this->phpVersion, $this->driverDetector);
-		} catch (ORMException | DBALException | CommonException | MappingException | \Doctrine\ORM\Exception\ORMException $e) {
+			QueryResultTypeWalker::walk($query, $typeBuilder, $this->descriptorRegistry);
+		} catch (ORMException | DBALException | CommonException $e) {
 			return new QueryType($dql, null);
 		} catch (AssertionError $e) {
 			return new QueryType($dql, null);

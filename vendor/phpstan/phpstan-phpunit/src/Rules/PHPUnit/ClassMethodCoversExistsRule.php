@@ -62,6 +62,7 @@ class ClassMethodCoversExistsRule implements Rule
 			return [];
 		}
 
+		$errors = [];
 		$classPhpDoc = $classReflection->getResolvedPhpDoc();
 		[$classCovers, $classCoversDefaultClasses] = $this->coversHelper->getCoverAnnotations($classPhpDoc);
 
@@ -94,7 +95,7 @@ class ClassMethodCoversExistsRule implements Rule
 			$errors[] = RuleErrorBuilder::message(sprintf(
 				'@coversDefaultClass defined on class method %s.',
 				$node->name
-			))->identifier('phpunit.covers')->build();
+			))->build();
 		}
 
 		foreach ($methodCovers as $covers) {
@@ -102,7 +103,7 @@ class ClassMethodCoversExistsRule implements Rule
 				$errors[] = RuleErrorBuilder::message(sprintf(
 					'Class already @covers %s so the method @covers is redundant.',
 					$covers->value
-				))->identifier('phpunit.coversDuplicate')->build();
+				))->build();
 			}
 
 			$errors = array_merge(

@@ -15,28 +15,16 @@ class AMQPMessage
     const DELIVERY_MODE_NON_PERSISTENT = 1;
     const DELIVERY_MODE_PERSISTENT = 2;
 
-    /**
-     * @var string
-     * @deprecated Will be removed in version 4.0, use getBody() instead.
-     */
+    /** @var string */
     public $body;
 
-    /**
-     * @var int
-     * @deprecated Will be removed in version 4.0, use getBodySize() instead.
-     */
+    /** @var int */
     public $body_size;
 
-    /**
-     * @var bool
-     * @deprecated Will be removed in version 4.0, use isTruncated() instead.
-     */
+    /** @var bool */
     public $is_truncated = false;
 
-    /**
-     * @var string
-     * @deprecated Will be removed in version 4.0, use getContentEncoding() instead.
-     */
+    /** @var string */
     public $content_encoding;
 
     /** @var int */
@@ -66,7 +54,7 @@ class AMQPMessage
     /**
      * @var array
      * @internal
-     * @deprecated Will be removed in version 4.0, use one of getters to get delivery info.
+     * @deprecated
      */
     public $delivery_info = array();
 

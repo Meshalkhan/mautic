@@ -3,11 +3,7 @@
 namespace DoctrineExtensions\Query\Mysql;
 
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
-use Doctrine\ORM\Query\Parser;
-use Doctrine\ORM\Query\SqlWalker;
-use Doctrine\ORM\Query\TokenType;
-
-use function sprintf;
+use Doctrine\ORM\Query\Lexer;
 
 class TimeDiff extends FunctionNode
 {
@@ -15,17 +11,17 @@ class TimeDiff extends FunctionNode
 
     public $secondDateExpression = null;
 
-    public function parse(Parser $parser): void
+    public function parse(\Doctrine\ORM\Query\Parser $parser)
     {
-        $parser->match(TokenType::T_IDENTIFIER);
-        $parser->match(TokenType::T_OPEN_PARENTHESIS);
+        $parser->match(Lexer::T_IDENTIFIER);
+        $parser->match(Lexer::T_OPEN_PARENTHESIS);
         $this->firstDateExpression = $parser->ArithmeticPrimary();
-        $parser->match(TokenType::T_COMMA);
+        $parser->match(Lexer::T_COMMA);
         $this->secondDateExpression = $parser->ArithmeticPrimary();
-        $parser->match(TokenType::T_CLOSE_PARENTHESIS);
+        $parser->match(Lexer::T_CLOSE_PARENTHESIS);
     }
 
-    public function getSql(SqlWalker $sqlWalker): string
+    public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
     {
         return sprintf(
             'TIMEDIFF(%s, %s)',

@@ -11,9 +11,8 @@
  */
 
 return array (
-  4060 => 'Telekom',
   4062 => 'Vodafone',
-  4063 => 'Digi Mobil',
+  4064 => 'Orange',
   407000 => 'Enigma-System',
   407013 => 'Lycamobile',
   407014 => 'Lycamobile',
@@ -24,7 +23,7 @@ return array (
   407019 => 'Lycamobile',
   40702 => 'Lycamobile',
   40705 => 'Iristel',
-  40711 => 'Orange',
+  40711 => 'Telekom',
   40712 => 'Orange',
   40713 => 'Orange',
   4072 => 'Vodafone',
@@ -40,12 +39,6 @@ return array (
   40775 => 'Digi Mobil',
   40776 => 'Digi Mobil',
   40777 => 'Digi Mobil',
-  40780 => 'Telekom',
-  40783 => 'Orange',
-  40784 => 'Telekom',
-  40785 => 'Telekom',
-  40786 => 'Telekom',
-  40787 => 'Orange',
-  40788 => 'Telekom',
+  4078 => 'Telekom',
   4079 => 'Vodafone',
 );

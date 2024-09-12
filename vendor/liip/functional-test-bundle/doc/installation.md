@@ -81,4 +81,3 @@ Installation
 
         liip_functional_test: ~
         ```
-[Basic usage](./basic.md) →

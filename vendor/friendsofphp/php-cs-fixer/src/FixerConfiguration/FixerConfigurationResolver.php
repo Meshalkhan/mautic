@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace PhpCsFixer\FixerConfiguration;
 
-use PhpCsFixer\Preg;
 use PhpCsFixer\Utils;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -64,10 +63,10 @@ final class FixerConfigurationResolver implements FixerConfigurationResolverInte
 
                 if (\array_key_exists($alias, $configuration)) {
                     if (\array_key_exists($name, $configuration)) {
-                        throw new InvalidOptionsException(\sprintf('Aliased option "%s"/"%s" is passed multiple times.', $name, $alias));
+                        throw new InvalidOptionsException(sprintf('Aliased option "%s"/"%s" is passed multiple times.', $name, $alias));
                     }
 
-                    Utils::triggerDeprecation(new \RuntimeException(\sprintf(
+                    Utils::triggerDeprecation(new \RuntimeException(sprintf(
                         'Option "%s" is deprecated, use "%s" instead.',
                         $alias,
                         $name
@@ -97,28 +96,7 @@ final class FixerConfigurationResolver implements FixerConfigurationResolverInte
 
             $allowedTypes = $option->getAllowedTypes();
             if (null !== $allowedTypes) {
-                // Symfony OptionsResolver doesn't support `array<foo, bar>` natively, let's simplify the type
-                $allowedTypesNormalised = array_map(
-                    static function (string $type): string {
-                        $matches = [];
-                        if (true === Preg::match('/array<\w+,\s*(\??[\w\'|]+)>/', $type, $matches)) {
-                            if ('?' === $matches[1][0]) {
-                                return 'array';
-                            }
-
-                            if ("'" === $matches[1][0]) {
-                                return 'string[]';
-                            }
-
-                            return $matches[1].'[]';
-                        }
-
-                        return $type;
-                    },
-                    $allowedTypes,
-                );
-
-                $resolver->setAllowedTypes($name, $allowedTypesNormalised);
+                $resolver->setAllowedTypes($name, $allowedTypes);
             }
 
             $normalizer = $option->getNormalizer();
@@ -138,7 +116,7 @@ final class FixerConfigurationResolver implements FixerConfigurationResolverInte
         $name = $option->getName();
 
         if (\in_array($name, $this->registeredNames, true)) {
-            throw new \LogicException(\sprintf('The "%s" option is defined multiple times.', $name));
+            throw new \LogicException(sprintf('The "%s" option is defined multiple times.', $name));
         }
 
         $this->options[] = $option;

@@ -2,13 +2,15 @@
 
 namespace PHPStan\Type\Doctrine\Descriptors\Ramsey;
 
-use PHPStan\Rules\Doctrine\ORM\FakeTestingUuidType;
 use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\Doctrine\Descriptors\DoctrineTypeDescriptor;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\StringType;
 use PHPStan\Type\Type;
 use PHPStan\Type\TypeCombinator;
+use Ramsey\Uuid\Doctrine\UuidBinaryOrderedTimeType;
+use Ramsey\Uuid\Doctrine\UuidBinaryType;
+use Ramsey\Uuid\Doctrine\UuidType;
 use Ramsey\Uuid\UuidInterface;
 use function in_array;
 use function sprintf;
@@ -17,13 +19,15 @@ class UuidTypeDescriptor implements DoctrineTypeDescriptor
 {
 
 	private const SUPPORTED_UUID_TYPES = [
-		'Ramsey\Uuid\Doctrine\UuidType',
-		'Ramsey\Uuid\Doctrine\UuidBinaryType',
-		'Ramsey\Uuid\Doctrine\UuidBinaryOrderedTimeType',
-		FakeTestingUuidType::class,
+		UuidType::class,
+		UuidBinaryType::class,
+		UuidBinaryOrderedTimeType::class,
 	];
 
-	/** @var string */
+	/**
+	 * @phpstan-var class-string<\Doctrine\DBAL\Types\Type>
+	 * @var string
+	 */
 	private $uuidTypeName;
 
 	public function __construct(
@@ -42,7 +46,6 @@ class UuidTypeDescriptor implements DoctrineTypeDescriptor
 
 	public function getType(): string
 	{
-		/** @var class-string<\Doctrine\DBAL\Types\Type> */
 		return $this->uuidTypeName;
 	}
 

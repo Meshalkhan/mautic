@@ -1,6 +1,6 @@
 <?php
 
-namespace ECSPrefix202408\Illuminate\Contracts\Pagination;
+namespace ECSPrefix202312\Illuminate\Contracts\Pagination;
 
 interface LengthAwarePaginator extends Paginator
 {

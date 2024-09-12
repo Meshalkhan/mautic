@@ -13,9 +13,9 @@ declare (strict_types=1);
 namespace PhpCsFixer\Console\Command;
 
 use PhpCsFixer\ToolInfoInterface;
-use ECSPrefix202408\Symfony\Component\Console\Attribute\AsCommand;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputInterface;
-use ECSPrefix202408\Symfony\Component\Console\Input\InputOption;
+use ECSPrefix202312\Symfony\Component\Console\Attribute\AsCommand;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputInterface;
+use ECSPrefix202312\Symfony\Component\Console\Input\InputOption;
 /**
  * @author Greg Korba <greg@codito.dev>
  *
@@ -23,9 +23,7 @@ use ECSPrefix202408\Symfony\Component\Console\Input\InputOption;
  */
 final class CheckCommand extends \PhpCsFixer\Console\Command\FixCommand
 {
-    /** @var string */
     protected static $defaultName = 'check';
-    /** @var string */
     protected static $defaultDescription = 'Checks if configured files/directories comply with configured rules.';
     public function __construct(ToolInfoInterface $toolInfo)
     {

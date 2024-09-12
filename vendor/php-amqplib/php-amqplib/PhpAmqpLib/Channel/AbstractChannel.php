@@ -57,10 +57,7 @@ abstract class AbstractChannel
     /** @var null|AbstractConnection */
     protected $connection;
 
-    /**
-     * @var string
-     * @deprecated
-     */
+    /** @var string */
     protected $protocolVersion;
 
     /** @var int */
@@ -126,7 +123,6 @@ abstract class AbstractChannel
     /**
      * @return string
      * @throws AMQPOutOfRangeException
-     * @deprecated
      */
     public static function getProtocolVersion()
     {

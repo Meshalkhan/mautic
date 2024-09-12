@@ -13,14 +13,15 @@ declare(strict_types=1);
 
 namespace Liip\TestFixturesBundle\Services;
 
+use Doctrine\Bundle\FixturesBundle\Loader\SymfonyFixturesLoader;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\Loader;
 
 final class SymfonyFixturesLoaderWrapper extends Loader
 {
-    private Loader $symfonyFixturesLoader;
+    private SymfonyFixturesLoader $symfonyFixturesLoader;
 
-    public function __construct(Loader $symfonyFixturesLoader)
+    public function __construct(SymfonyFixturesLoader $symfonyFixturesLoader)
     {
         $this->symfonyFixturesLoader = $symfonyFixturesLoader;
     }

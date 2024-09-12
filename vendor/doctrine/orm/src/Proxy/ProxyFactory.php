@@ -354,16 +354,17 @@ EOPHP;
     /**
      * Creates a closure capable of initializing a proxy
      *
-     * @return Closure(InternalProxy, array):void
+     * @return Closure(InternalProxy, InternalProxy):void
      *
      * @throws EntityNotFoundException
      */
     private function createLazyInitializer(ClassMetadata $classMetadata, EntityPersister $entityPersister, IdentifierFlattener $identifierFlattener): Closure
     {
-        return static function (InternalProxy $proxy, array $identifier) use ($entityPersister, $classMetadata, $identifierFlattener): void {
-            $original = $entityPersister->loadById($identifier);
+        return static function (InternalProxy $proxy, InternalProxy $original) use ($entityPersister, $classMetadata, $identifierFlattener): void {
+            $identifier = $classMetadata->getIdentifierValues($original);
+            $entity     = $entityPersister->loadById($identifier, $original);
 
-            if ($original === null) {
+            if ($entity === null) {
                 throw EntityNotFoundException::fromClassNameAndIdentifier(
                     $classMetadata->getName(),
                     $identifierFlattener->flattenIdentifier($classMetadata, $identifier)
@@ -377,11 +378,11 @@ EOPHP;
             $class = $entityPersister->getClassMetadata();
 
             foreach ($class->getReflectionProperties() as $property) {
-                if (isset($identifier[$property->name]) || ! $class->hasField($property->name) && ! $class->hasAssociation($property->name)) {
+                if (! $class->hasField($property->name) && ! $class->hasAssociation($property->name)) {
                     continue;
                 }
 
-                $property->setValue($proxy, $property->getValue($original));
+                $property->setValue($proxy, $property->getValue($entity));
             }
         };
     }
@@ -467,8 +468,8 @@ EOPHP;
         $identifierFields = array_intersect_key($class->getReflectionProperties(), $identifiers);
 
         $proxyFactory = Closure::bind(static function (array $identifier) use ($initializer, $skippedProperties, $identifierFields, $className): InternalProxy {
-            $proxy = self::createLazyGhost(static function (InternalProxy $object) use ($initializer, $identifier): void {
-                $initializer($object, $identifier);
+            $proxy = self::createLazyGhost(static function (InternalProxy $object) use ($initializer, &$proxy): void {
+                $initializer($object, $proxy);
             }, $skippedProperties);
 
             foreach ($identifierFields as $idField => $reflector) {

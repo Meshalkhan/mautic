@@ -5,10 +5,10 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 declare (strict_types=1);
-namespace ECSPrefix202408\Nette\Utils;
+namespace ECSPrefix202312\Nette\Utils;
 
-use ECSPrefix202408\Nette;
-use ECSPrefix202408\Nette\MemberAccessException;
+use ECSPrefix202312\Nette;
+use ECSPrefix202312\Nette\MemberAccessException;
 /**
  * Nette\SmartObject helpers.
  * @internal
@@ -148,13 +148,12 @@ final class ObjectHelpers
                 $traits += $trait->getTraits();
             }
         } while ($rc = $rc->getParentClass());
-        return \preg_match_all($pattern, \implode('', $doc), $m) ? $m[1] : [];
+        return \preg_match_all($pattern, \implode($doc), $m) ? $m[1] : [];
     }
     /**
      * Checks if the public non-static property exists.
-     * Returns 'event' if the property exists and has event like name
+     * @return bool|string returns 'event' if the property exists and has event like name
      * @internal
-     * @return bool|string
      */
     public static function hasProperty(string $class, string $name)
     {

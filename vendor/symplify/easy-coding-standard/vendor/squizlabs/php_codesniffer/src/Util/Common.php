@@ -5,11 +5,10 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 namespace PHP_CodeSniffer\Util;
 
-use Phar;
 class Common
 {
     /**
@@ -23,7 +22,7 @@ class Common
      *
      * @param string $path The path to use.
      *
-     * @return bool
+     * @return mixed
      */
     public static function isPharFile($path)
     {
@@ -64,7 +63,7 @@ class Common
      *
      * @param string $path The path to use.
      *
-     * @return string|false
+     * @return mixed
      */
     public static function realpath($path)
     {
@@ -89,7 +88,7 @@ class Common
         if (\file_exists($path) === \true) {
             return $path;
         }
-        $phar = Phar::running(\false);
+        $phar = \Phar::running(\false);
         $extra = \str_replace('phar://' . $phar, '', $path);
         $path = \realpath($phar);
         if ($path === \false) {
@@ -251,18 +250,6 @@ class Common
         return $content;
     }
     //end prepareForOutput()
-    /**
-     * Strip colors from a text for output to screen.
-     *
-     * @param string $text The text to process.
-     *
-     * @return string
-     */
-    public static function stripColors($text)
-    {
-        return \preg_replace('`\\033\\[[0-9;]+m`', '', $text);
-    }
-    //end stripColors()
     /**
      * Returns true if the specified string is in the camel caps format.
      *
