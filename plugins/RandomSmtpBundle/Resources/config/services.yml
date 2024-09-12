@@ -1,0 +1,23 @@
+parameters:
+    smtp_configs: '%env(json:MAUTIC_SMTP_CONFIGS)%'
+
+services:
+    mautic.plugin.randomsmtp.model.random_smtp:
+        class: MauticPlugin\RandomSmtpBundle\Model\RandomSmtpModel
+        arguments:
+            - '@doctrine.orm.entity_manager'
+        tags:
+            - { name: 'doctrine.orm.entity_repository', repository: 'MauticPlugin\RandomSmtpBundle\Entity\RandomSmtp' }
+
+    mautic.plugin.randomsmtp.service.random_smtp:
+        class: MauticPlugin\RandomSmtpBundle\Service\RandomSmtpService
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - '%smtp_configs%'
+
+    mautic.plugin.randomsmtp.controller.smtp:
+        class: MauticPlugin\RandomSmtpBundle\Controller\SmtpController
+        arguments:
+            - '@mautic.plugin.randomsmtp.service.random_smtp'
+        tags:
+            - { name: 'controller.service_arguments' }

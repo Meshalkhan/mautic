@@ -1,0 +1,3 @@
+mautic_plugin:
+    bundles:
+        - MauticPlugin\RandomSmtpBundle\RandomSmtpBundle
