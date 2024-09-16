@@ -2,13 +2,13 @@
 
 namespace MauticPlugin\MauticRandomSmtpBundle\Controller;
 
-use Mautic\CoreBundle\Controller\FormController;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use MauticPlugin\MauticRandomSmtpBundle\Form\Type\SmtpPreviewType;
 use MauticPlugin\MauticRandomSmtpBundle\Randomizer\SmtpRandomizer;
-use Symfony\Component\HttpFoundation\Response;
 
-class RandomSmtpController extends FormController
+class RandomSmtpController extends AbstractController
 {
     private $smtpRandomizer;
 
@@ -19,8 +19,8 @@ class RandomSmtpController extends FormController
 
     public function previewAction(Request $request): Response
     {
-        // Create the form using the service container
-        $form = $this->createForm(SmtpPreviewType::class);
+        // Create the form using the form type
+        $form = $this->createForm('smtp_preview_type');
 
         // Handle form submission
         $form->handleRequest($request);
@@ -39,12 +39,9 @@ class RandomSmtpController extends FormController
             }
         }
 
-        // Delegate the view to the template
-        return $this->delegateView([
-            'viewParameters' => [
-                'form' => $form->createView(),
-            ],
-            'contentTemplate' => 'MauticRandomSmtpBundle:RandomSmtp:preview.html.twig',
+        // Render the template with the form
+        return $this->render('@MauticRandomSmtp/RandomSmtp/preview.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
 }
