@@ -43,7 +43,7 @@
                                 class="form-control"
                                 data-placeholder="{{ 'mautic.integration.filter.all'|trans }}">
                             <option value=""></option>
-                             {% for plugin in plugins %}
+                            {% for plugin in plugins %}
                               <option {% if filterValue is same as(plugin.id) %}selected{% endif %} value="{{ plugin.id|e }}">
                                   {{- plugin.name -}}
                               </option>

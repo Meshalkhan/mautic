@@ -8,7 +8,7 @@ return [
 
     'routes' => [
         'public' => [
-            'mautic_plugin_clearbit_index' => [
+            'mautic_plugin_clearbit_index' => [ 
                 'path'       => '/clearbit/callback',
                 'controller' => 'MauticPlugin\MauticClearbitBundle\Controller\PublicController::callbackAction',
             ],

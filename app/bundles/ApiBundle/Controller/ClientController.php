@@ -329,7 +329,7 @@ class ClientController extends AbstractStandardFormController
                 )
             );
         } elseif ($this->clientModel->isLocked($client)) {
-            // deny access if the entity is locked
+         
             return $this->isLocked($postActionVars, $client, 'api.client');
         }
 
@@ -427,7 +427,7 @@ class ClientController extends AbstractStandardFormController
                     'msgVars' => ['%id%' => $objectId],
                 ];
             } elseif ($this->clientModel->isLocked($entity)) {
-                // deny access if the entity is locked
+     
                 return $this->isLocked($postActionVars, $entity, 'api.client');
             } else {
                 $this->clientModel->deleteEntity($entity);

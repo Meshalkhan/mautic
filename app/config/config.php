@@ -132,7 +132,7 @@ $connectionSettings = [
         'point' => 'string',
         'bit'   => 'string',
     ],
-    'server_version' => '%env(mauticconst:MAUTIC_DB_SERVER_VERSION)%',
+    'server_version' => '5.7',
     'wrapper_class'  => Mautic\CoreBundle\Doctrine\Connection\ConnectionWrapper::class,
     'options'        => [PDO::ATTR_STRINGIFY_FETCHES => true], // @see https://www.php.net/manual/en/migration81.incompatible.php#migration81.incompatible.pdo.mysql
 ];
@@ -174,16 +174,7 @@ $container->loadFromExtension('doctrine', [
     'orm'  => [
         'auto_generate_proxy_classes' => '%kernel.debug%',
         'auto_mapping'                => true,
-        'mappings' => array_merge(
-            $bundleMetadataBuilder->getOrmConfig(),
-            [
-                'RandomSmtpBundle' => [
-                    'type' => 'annotation',
-                    'dir'  => '%kernel.project_dir%/plugins/RandomSmtpBundle/Entity',
-                    'prefix' => 'MauticPlugin\RandomSmtpBundle\Entity',
-                ],
-            ]
-        ),
+        'mappings'                    => $bundleMetadataBuilder->getOrmConfig(),
         'dql'                         => [
             'string_functions' => [
                 'match' => DoctrineExtensions\Query\Mysql\MatchAgainst::class,

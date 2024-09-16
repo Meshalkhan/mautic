@@ -9310,7 +9310,6 @@ elFinder.prototype = {
 		var res   = true, // default is allow
 			mimeChecker = this.option('uploadMime', target),
 			allow,
-			deny,
 			check = function(checker) {
 				var ret = false;
 				if (typeof checker === 'string' && checker.toLowerCase() === 'all') {

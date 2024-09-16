@@ -17,20 +17,12 @@ final class Version20221128145933 extends AbstractMauticMigration
      */
     public function preUp(Schema $schema): void
     {
-        try {
-            /** @var IntegrationHelper $integrationHelper */
-            $integrationHelper = $this->container->get('mautic.helper.integration');
-            $integration       = $integrationHelper->getIntegrationObject('Twilio');
-            $settings          = $integration->getIntegrationSettings()->getFeatureSettings();
-            if (empty($settings['disable_trackable_urls'])) {
-                throw new SkipMigration('Schema includes this migration');
-            }
-        } catch (TableNotFoundException $e) {
-            // Log the exception or handle it as needed.
-            $this->write("Table not found: " . $e->getMessage());
-        } catch (\Exception $e) {
-            // Handle other possible exceptions.
-            $this->write("An error occurred: " . $e->getMessage());
+        /** @var IntegrationHelper $integrationHelper */
+        $integrationHelper = $this->container->get('mautic.helper.integration');
+        $integration       = $integrationHelper->getIntegrationObject('Twilio');
+        $settings          = $integration->getIntegrationSettings()->getFeatureSettings();
+        if (empty($settings['disable_trackable_urls'])) {
+            throw new SkipMigration('Schema includes this migration');
         }
     }
 
