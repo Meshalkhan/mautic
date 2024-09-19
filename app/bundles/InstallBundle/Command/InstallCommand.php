@@ -205,8 +205,8 @@ class InstallCommand extends Command
             'firstname' => 'Admin',
             'lastname'  => 'Mautic',
             'username'  => 'admin',
-            'email'  => 'admin@admin.com',
-            'password'  => 'admin@127830',
+            'email'  => '',
+            'password'  => '',
         ];
         $allParams = $this->installer->localConfigParameters();
 
