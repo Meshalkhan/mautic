@@ -2,7 +2,7 @@
 
 Random SMTP server support for Mautic
 
-### Installation from command line
+### Installation
 1- Place this customized plugin folder within current mautic folder plugins folder.
 2- Add  "mautic/mautic-random-smtp-bundle": "self.version", within replace object in composer.json file.
 3- Go to /s/plugins/reload or click Install/reload for 
